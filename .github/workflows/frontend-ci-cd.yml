@@ -33,7 +33,9 @@ jobs:
 
       - name: Install Frontend Dependencies
         # 'npm ci' is recommended for CI environments for cleaner, reproducible installs
-        run: npm install
+        run: |
+          cd frontend
+          npm install
 
       # - name: Run Linter (Optional)
         # Uncomment when ready
@@ -60,6 +62,7 @@ jobs:
       - name: Build Angular Application
         # Build for production, optimizing for deployment
         run: |
+          cd frontend
           echo "Building for branch: ${{ github.ref_name }}"
           if [[ "${{ github.ref_name }}" == "dev" ]]; then
             npm run build --configuration=development
