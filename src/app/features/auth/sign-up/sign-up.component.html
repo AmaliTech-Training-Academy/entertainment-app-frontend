@@ -1,11 +1,20 @@
-<section aria-labelledby="register-heading" class="container">
-  <h2 id="register-heading">Sign Up</h2>
+<section aria-labelledby="register-heading" class="register__container">
+  
+  <div>
+    <img src="assets/images/cineverse_logo.svg" alt="cineverse logo">
+  </div>
 
-  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" aria-describedby="register-form-description">
-    
+  <div class="register">
+    <h2 id="register-heading" class="register__heading">Sign Up</h2>
+    <form
+    [formGroup]="registerForm"
+    (ngSubmit)="onSubmit()"
+    aria-describedby="register-form-description"
+    class="register__form"
+  >
 
     <!-- Username Field -->
-    <mat-form-field appearance="outline" class="full-width">
+    <mat-form-field class="register__field">
       <mat-label for="username">Username</mat-label>
       <input
         matInput
@@ -15,9 +24,10 @@
         required
         aria-required="true"
         aria-describedby="username-error"
+        class="register__input"
       />
       @if (username?.touched && username?.invalid) {
-        <mat-error id="username-error">
+        <mat-error id="username-error" class="register__error">
           @if (username?.errors?.['required']) {
             Username is required.
           }
@@ -29,8 +39,8 @@
     </mat-form-field>
 
     <!-- Email Field -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label for="email">Email</mat-label>
+    <mat-form-field class="register__field">
+      <mat-label for="email">Email Address</mat-label>
       <input
         matInput
         id="email"
@@ -40,9 +50,10 @@
         required
         aria-required="true"
         aria-describedby="email-error"
+        class="register__input"
       />
       @if (email?.touched && email?.invalid) {
-        <mat-error id="email-error">
+        <mat-error id="email-error" class="register__error">
           @if (email?.errors?.['required']) {
             Email is required.
           }
@@ -54,7 +65,7 @@
     </mat-form-field>
 
     <!-- Password Field -->
-    <mat-form-field appearance="outline" class="full-width">
+    <mat-form-field class="register__field">
       <mat-label for="password">Password</mat-label>
       <input
         matInput
@@ -65,9 +76,10 @@
         required
         aria-required="true"
         aria-describedby="password-error"
+        class="register__input"
       />
       @if (password?.touched && password?.invalid) {
-        <mat-error id="password-error">
+        <mat-error id="password-error" class="register__error">
           @if (password?.errors?.['required']) {
             Password is required.
           }
@@ -79,7 +91,7 @@
     </mat-form-field>
 
     <!-- Confirm Password Field -->
-    <mat-form-field appearance="outline" class="full-width">
+    <mat-form-field class="register__field">
       <mat-label for="confirmPassword">Confirm Password</mat-label>
       <input
         matInput
@@ -90,9 +102,10 @@
         required
         aria-required="true"
         aria-describedby="confirm-password-error"
+        class="register__input"
       />
       @if (confirmPassword?.touched && confirmPassword?.invalid || passwordMismatch) {
-        <mat-error id="confirm-password-error">
+        <mat-error id="confirm-password-error" class="register__error">
           @if (confirmPassword?.errors?.['required']) {
             Confirm Password is required.
           }
@@ -109,12 +122,14 @@
       color="primary"
       type="submit"
       aria-label="Submit registration form"
+      class="register__submit"
     >
       Create an Account
     </button>
 
-    <p aria-hidden="true">
-      Already have an account? <a routerLink="/sign-in">Log in</a>
+    <p aria-hidden="true" class="register__footer">
+      Already have an account? <a routerLink="/sign-in" class="register__link">Log in</a>
     </p>
-  </form>
+    </form>
+  </div>
 </section>

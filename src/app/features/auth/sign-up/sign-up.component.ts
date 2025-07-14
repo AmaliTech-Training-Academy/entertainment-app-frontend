@@ -18,7 +18,7 @@ import { RouterLink } from '@angular/router';
     RouterLink
   ],
   templateUrl: './sign-up.component.html',
-  styleUrls: ['./sign-up.component.scss']
+  styleUrl: './sign-up.component.scss'
 })
 export class SignUpComponent {
   registerForm: FormGroup;

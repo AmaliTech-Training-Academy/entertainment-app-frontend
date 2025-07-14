@@ -1,0 +1,17 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/spacing' as *;
+@use 'sass:map';
+
+// Helper to get values from color maps
+@function color($palette, $shade) {
+  @return map.get($palette, $shade);
+}
+
+@function space($size) {
+  @return map.get($spacing, $size);
+}
+
+
+.register__container {
+  
+}
