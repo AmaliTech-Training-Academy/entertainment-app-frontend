@@ -1,1 +1,40 @@
-<p>sign-up works!</p>
+<h2>Sign Up</h2>
+
+<form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+  <!-- Username -->
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Username</mat-label>
+    <input matInput formControlName="username" />
+    @if (username?.touched && username?.invalid) {
+      <mat-error *ngIf="username?.errors?.['required']">Username is required.</mat-error>
+      <mat-error *ngIf="username?.errors?.['minlength']">Minimum 3 characters required.</mat-error>
+    }
+  </mat-form-field>
+
+  <!-- Email -->
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Email</mat-label>
+    <input matInput formControlName="email" />
+    @if (email?.touched && email?.invalid) {
+      <mat-error *ngIf="email?.errors?.['required']">Email is required.</mat-error>
+      <mat-error *ngIf="email?.errors?.['email']">Invalid email format.</mat-error>
+    }
+  </mat-form-field>
+
+  <!-- Password -->
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Password</mat-label>
+    <input matInput type="password" formControlName="password" />
+    @if (password?.touched && password?.invalid) {
+      <mat-error *ngIf="password?.errors?.['required']">Password is required.</mat-error>
+      <mat-error *ngIf="password?.errors?.['minlength']">Minimum 6 characters required.</mat-error>
+    }
+  </mat-form-field>
+
+  <!-- Submit Button -->
+  <button mat-raised-button color="primary" type="submit">
+    Register
+  </button>
+
+</form>
