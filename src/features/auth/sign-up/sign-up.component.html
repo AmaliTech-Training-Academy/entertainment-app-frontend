@@ -1,40 +1,120 @@
-<h2>Sign Up</h2>
+<section aria-labelledby="register-heading" class="container">
+  <h2 id="register-heading">Sign Up</h2>
 
-<form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" aria-describedby="register-form-description">
+    
 
-  <!-- Username -->
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Username</mat-label>
-    <input matInput formControlName="username" />
-    @if (username?.touched && username?.invalid) {
-      <mat-error *ngIf="username?.errors?.['required']">Username is required.</mat-error>
-      <mat-error *ngIf="username?.errors?.['minlength']">Minimum 3 characters required.</mat-error>
-    }
-  </mat-form-field>
+    <!-- Username Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label for="username">Username</mat-label>
+      <input
+        matInput
+        id="username"
+        formControlName="username"
+        autocomplete="username"
+        required
+        aria-required="true"
+        aria-describedby="username-error"
+      />
+      @if (username?.touched && username?.invalid) {
+        <mat-error id="username-error">
+          @if (username?.errors?.['required']) {
+            Username is required.
+          }
+          @if (username?.errors?.['minlength']) {
+            Minimum 3 characters required.
+          }
+        </mat-error>
+      }
+    </mat-form-field>
 
-  <!-- Email -->
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Email</mat-label>
-    <input matInput formControlName="email" />
-    @if (email?.touched && email?.invalid) {
-      <mat-error *ngIf="email?.errors?.['required']">Email is required.</mat-error>
-      <mat-error *ngIf="email?.errors?.['email']">Invalid email format.</mat-error>
-    }
-  </mat-form-field>
+    <!-- Email Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label for="email">Email</mat-label>
+      <input
+        matInput
+        id="email"
+        formControlName="email"
+        type="email"
+        autocomplete="email"
+        required
+        aria-required="true"
+        aria-describedby="email-error"
+      />
+      @if (email?.touched && email?.invalid) {
+        <mat-error id="email-error">
+          @if (email?.errors?.['required']) {
+            Email is required.
+          }
+          @if (email?.errors?.['email']) {
+            Invalid email format.
+          }
+        </mat-error>
+      }
+    </mat-form-field>
 
-  <!-- Password -->
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Password</mat-label>
-    <input matInput type="password" formControlName="password" />
-    @if (password?.touched && password?.invalid) {
-      <mat-error *ngIf="password?.errors?.['required']">Password is required.</mat-error>
-      <mat-error *ngIf="password?.errors?.['minlength']">Minimum 6 characters required.</mat-error>
-    }
-  </mat-form-field>
+    <!-- Password Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label for="password">Password</mat-label>
+      <input
+        matInput
+        id="password"
+        formControlName="password"
+        type="password"
+        autocomplete="new-password"
+        required
+        aria-required="true"
+        aria-describedby="password-error"
+      />
+      @if (password?.touched && password?.invalid) {
+        <mat-error id="password-error">
+          @if (password?.errors?.['required']) {
+            Password is required.
+          }
+          @if (password?.errors?.['minlength']) {
+            Minimum 6 characters required.
+          }
+        </mat-error>
+      }
+    </mat-form-field>
 
-  <!-- Submit Button -->
-  <button mat-raised-button color="primary" type="submit">
-    Register
-  </button>
+    <!-- Confirm Password Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label for="confirmPassword">Confirm Password</mat-label>
+      <input
+        matInput
+        id="confirmPassword"
+        formControlName="confirmPassword"
+        type="password"
+        autocomplete="new-password"
+        required
+        aria-required="true"
+        aria-describedby="confirm-password-error"
+      />
+      @if (confirmPassword?.touched && confirmPassword?.invalid || passwordMismatch) {
+        <mat-error id="confirm-password-error">
+          @if (confirmPassword?.errors?.['required']) {
+            Confirm Password is required.
+          }
+          @if (passwordMismatch) {
+            Passwords do not match.
+          }
+        </mat-error>
+      }
+    </mat-form-field>
 
-</form>
+    <!-- Submit Button -->
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      aria-label="Submit registration form"
+    >
+      Create an Account
+    </button>
+
+    <p aria-hidden="true">
+      Already have an account? <a routerLink="/sign-in">Log in</a>
+    </p>
+  </form>
+</section>
