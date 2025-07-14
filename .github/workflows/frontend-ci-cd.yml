@@ -3,7 +3,7 @@
 name: CineVerse Frontend CI/CD
 
 env:
-  ENABLE_CICD: 'false'
+  ENABLE_CICD: 'true'
   APP_NAME: 'entertainment-app-frontend'
 
 on:
