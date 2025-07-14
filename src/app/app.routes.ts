@@ -10,7 +10,11 @@ export const routes: Routes = [
   //   loadComponent: () => import('../features/about/about.component').then(m => m.AboutComponent)
   // },
   {
-    path: 'signup',
-    loadComponent: () => import('../features/auth/sign-up/sign-up.component').then(m => m.SignUpComponent)
+    path: '',
+    loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
+  },
+  {
+    path: 'about',
+    loadComponent: () => import('./features/about/about.component').then(m => m.AboutComponent)
   }
 ];
