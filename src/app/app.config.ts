@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { CORE_PROVIDERS } from '../core/core.module';
+import { CORE_PROVIDERS } from './core/core.module';
 // import { SHARED_IMPORTS } from './shared/shared.module';
 
 import { routes } from './app.routes';
