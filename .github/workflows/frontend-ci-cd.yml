@@ -21,7 +21,6 @@ on:
 jobs:
   # Job to build and test the Angular application
   build-and-test:
-    if: ${{ env.ENABLE_CICD == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
