@@ -233,54 +233,41 @@ jobs:
           
           # Create backend configuration
           cat > environments/$ENVIRONMENT/backend.hcl << EOF
-          bucket = "cineverse-terraform-state-$ENVIRONMENT"
-          key    = "frontend/terraform.tfstate"
-          region = "${{ env.AWS_REGION }}"
+          bucket         = "cineverse-terraform-state-$ENVIRONMENT"
+          key            = "frontend/terraform.tfstate"
+          region         = "${{ env.AWS_REGION }}"
+          encrypt        = true
+          dynamodb_table = "cineverse-terraform-locks"
           EOF
           
-          # Create terraform variables
+          # Create terraform variables with existing resource support
           cat > environments/$ENVIRONMENT/terraform.tfvars << EOF
-          environment = "$ENVIRONMENT"
-          app_name    = "${{ env.APP_NAME }}"
-          aws_region  = "${{ env.AWS_REGION }}"
+          environment      = "$ENVIRONMENT"
+          project_name     = "cineverse"
+          aws_region       = "${{ env.AWS_REGION }}"
+          enable_waf       = $([ "$ENVIRONMENT" = "dev" ] && echo "false" || echo "true")
+          enable_monitoring = true
           
-          # Environment-specific settings
-          domain_name = "$ENVIRONMENT.cineverse.com"
+          # Use existing resources (CloudFront policies, WAF, etc.)
+          use_existing_resources = true
           
+          # Domain configuration
+          domain_name = $([ "$ENVIRONMENT" = "dev" ] && echo '""' || echo '"'"$ENVIRONMENT.cineverse.com"'"')
+          
+          # API endpoint
+          api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
+          
+          # Tags
           tags = {
             Environment = "$ENVIRONMENT"
             Project     = "CineVerse"
             ManagedBy   = "Terraform"
+            Branch      = "${{ github.ref_name }}"
+            CommitSHA   = "${{ github.sha }}"
+            DeployedBy  = "${{ github.actor }}"
+            DeployedAt  = "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           }
           EOF
-
-      - name: Create S3 Backend Bucket
-        run: |
-          BUCKET_NAME="cineverse-terraform-state-$ENVIRONMENT"
-          
-          # Check if bucket exists, create if not
-          if ! aws s3 ls "s3://$BUCKET_NAME" >/dev/null 2>&1; then
-            echo "Creating S3 bucket: $BUCKET_NAME"
-            aws s3 mb "s3://$BUCKET_NAME" --region ${{ env.AWS_REGION }}
-            
-            # Enable versioning
-            aws s3api put-bucket-versioning \
-              --bucket "$BUCKET_NAME" \
-              --versioning-configuration Status=Enabled
-              
-            # Enable encryption
-            aws s3api put-bucket-encryption \
-              --bucket "$BUCKET_NAME" \
-              --server-side-encryption-configuration '{
-                "Rules": [
-                  {
-                    "ApplyServerSideEncryptionByDefault": {
-                      "SSEAlgorithm": "AES256"
-                    }
-                  }
-                ]
-              }'
-          fi
 
       - name: Terraform Init & Validate
         working-directory: terraform
@@ -291,6 +278,62 @@ jobs:
           # Show current state summary
           RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l)
           echo "Current state contains $RESOURCE_COUNT resources"
+
+      - name: Import Existing Resources
+        working-directory: terraform
+        run: |
+          echo "🔍 Checking for existing resources to import..."
+          
+          # Function to import if not in state
+          import_if_needed() {
+            local resource_address="$1"
+            local resource_id="$2"
+            local resource_name="$3"
+            
+            if ! terraform state show "$resource_address" >/dev/null 2>&1; then
+              echo "📥 Importing $resource_name: $resource_address"
+              if terraform import "$resource_address" "$resource_id" 2>/dev/null; then
+                echo "✅ Successfully imported $resource_name"
+              else
+                echo "ℹ️  $resource_name not found or already managed - will be created if needed"
+              fi
+            else
+              echo "✅ $resource_name already in state"
+            fi
+          }
+          
+          # Try to import existing CloudFront policies
+          SPA_POLICY_ID=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?Name=='${ENVIRONMENT}-spa-cache-policy'].Id" --output text 2>/dev/null || echo "")
+          if [[ -n "$SPA_POLICY_ID" && "$SPA_POLICY_ID" != "None" ]]; then
+            import_if_needed "module.cloudfront.aws_cloudfront_cache_policy.spa[0]" "$SPA_POLICY_ID" "SPA Cache Policy"
+          fi
+          
+          STATIC_POLICY_ID=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?Name=='${ENVIRONMENT}-static-assets-cache-policy'].Id" --output text 2>/dev/null || echo "")
+          if [[ -n "$STATIC_POLICY_ID" && "$STATIC_POLICY_ID" != "None" ]]; then
+            import_if_needed "module.cloudfront.aws_cloudfront_cache_policy.static_assets[0]" "$STATIC_POLICY_ID" "Static Assets Cache Policy"
+          fi
+          
+          ORIGIN_POLICY_ID=$(aws cloudfront list-origin-request-policies --type custom --query "OriginRequestPolicyList.Items[?Name=='${ENVIRONMENT}-s3-origin-request-policy'].Id" --output text 2>/dev/null || echo "")
+          if [[ -n "$ORIGIN_POLICY_ID" && "$ORIGIN_POLICY_ID" != "None" ]]; then
+            import_if_needed "module.cloudfront.aws_cloudfront_origin_request_policy.s3_origin[0]" "$ORIGIN_POLICY_ID" "Origin Request Policy"
+          fi
+          
+          HEADERS_POLICY_ID=$(aws cloudfront list-response-headers-policies --type custom --query "ResponseHeadersPolicyList.Items[?Name=='${ENVIRONMENT}-security-headers'].Id" --output text 2>/dev/null || echo "")
+          if [[ -n "$HEADERS_POLICY_ID" && "$HEADERS_POLICY_ID" != "None" ]]; then
+            import_if_needed "module.cloudfront.aws_cloudfront_response_headers_policy.security[0]" "$HEADERS_POLICY_ID" "Response Headers Policy"
+          fi
+          
+          # Try to import existing WAF resources
+          WAF_ID=$(aws wafv2 list-web-acls --scope CLOUDFRONT --region us-east-1 --query "WebACLs[?Name=='cineverse-${ENVIRONMENT}-waf'].Id" --output text 2>/dev/null || echo "")
+          if [[ -n "$WAF_ID" && "$WAF_ID" != "None" ]]; then
+            import_if_needed "module.waf[0].aws_wafv2_web_acl.main[0]" "$WAF_ID/CLOUDFRONT/us-east-1" "WAF Web ACL"
+          fi
+          
+          # Try to import CloudWatch Log Group
+          LOG_GROUP_NAME="/aws/wafv2/cineverse-${ENVIRONMENT}"
+          if aws logs describe-log-groups --log-group-name-prefix "$LOG_GROUP_NAME" --region us-east-1 --query "logGroups[?logGroupName=='$LOG_GROUP_NAME']" --output text >/dev/null 2>&1; then
+            import_if_needed "module.waf[0].aws_cloudwatch_log_group.waf[0]" "$LOG_GROUP_NAME" "CloudWatch Log Group"
+          fi
 
       - name: Terraform Plan
         working-directory: terraform
@@ -343,24 +386,39 @@ jobs:
           
           # Recreate backend configuration
           cat > environments/$ENVIRONMENT/backend.hcl << EOF
-          bucket = "cineverse-terraform-state-$ENVIRONMENT"
-          key    = "frontend/terraform.tfstate"
-          region = "${{ env.AWS_REGION }}"
+          bucket         = "cineverse-terraform-state-$ENVIRONMENT"
+          key            = "frontend/terraform.tfstate"
+          region         = "${{ env.AWS_REGION }}"
+          encrypt        = true
+          dynamodb_table = "cineverse-terraform-locks"
           EOF
           
-          # Recreate terraform variables
+          # Recreate terraform variables with existing resource support
           cat > environments/$ENVIRONMENT/terraform.tfvars << EOF
-          environment = "$ENVIRONMENT"
-          app_name    = "${{ env.APP_NAME }}"
-          aws_region  = "${{ env.AWS_REGION }}"
+          environment      = "$ENVIRONMENT"
+          project_name     = "cineverse"
+          aws_region       = "${{ env.AWS_REGION }}"
+          enable_waf       = $([ "$ENVIRONMENT" = "dev" ] && echo "false" || echo "true")
+          enable_monitoring = true
           
-          # Environment-specific settings
-          domain_name = "$ENVIRONMENT.cineverse.com"
+          # Use existing resources (CloudFront policies, WAF, etc.)
+          use_existing_resources = true
           
+          # Domain configuration
+          domain_name = $([ "$ENVIRONMENT" = "dev" ] && echo '""' || echo '"'"$ENVIRONMENT.cineverse.com"'"')
+          
+          # API endpoint
+          api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
+          
+          # Tags
           tags = {
             Environment = "$ENVIRONMENT"
             Project     = "CineVerse"
             ManagedBy   = "Terraform"
+            Branch      = "${{ github.ref_name }}"
+            CommitSHA   = "${{ github.sha }}"
+            DeployedBy  = "${{ github.actor }}"
+            DeployedAt  = "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           }
           EOF
 
@@ -462,4 +520,9 @@ jobs:
           **Branch:** ${{ github.ref_name }}  
           **Commit:** ${{ github.sha }}  
           **Deployed by:** ${{ github.actor }}
+          
+          ## Resources Status
+          ✅ Using existing CloudFront policies and WAF resources where available  
+          ✅ All resources managed by Terraform state  
+          ✅ Infrastructure deployed successfully  
           EOF

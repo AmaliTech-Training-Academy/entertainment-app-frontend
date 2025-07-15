@@ -1,3 +1,45 @@
+# Data sources to check for existing CloudFront policies
+data "aws_cloudfront_cache_policy" "existing_spa" {
+  count = var.use_existing_policies ? 1 : 0
+  name  = "${var.environment}-spa-cache-policy"
+}
+
+data "aws_cloudfront_cache_policy" "existing_static_assets" {
+  count = var.use_existing_policies ? 1 : 0
+  name  = "${var.environment}-static-assets-cache-policy"
+}
+
+data "aws_cloudfront_origin_request_policy" "existing_s3_origin" {
+  count = var.use_existing_policies ? 1 : 0
+  name  = "${var.environment}-s3-origin-request-policy"
+}
+
+data "aws_cloudfront_response_headers_policy" "existing_security" {
+  count = var.use_existing_policies ? 1 : 0
+  name  = "${var.environment}-security-headers"
+}
+
+# Random suffix for unique CloudFront policy names (only if creating new)
+resource "random_string" "policy_suffix" {
+  count   = var.use_existing_policies ? 0 : 1
+  length  = 8
+  special = false
+  upper   = false
+  lower   = true
+  numeric = true
+}
+
+locals {
+  # Use existing policies if available, otherwise use newly created ones
+  spa_cache_policy_id = var.use_existing_policies && length(data.aws_cloudfront_cache_policy.existing_spa) > 0 ? data.aws_cloudfront_cache_policy.existing_spa[0].id : (length(aws_cloudfront_cache_policy.spa) > 0 ? aws_cloudfront_cache_policy.spa[0].id : null)
+  
+  static_assets_cache_policy_id = var.use_existing_policies && length(data.aws_cloudfront_cache_policy.existing_static_assets) > 0 ? data.aws_cloudfront_cache_policy.existing_static_assets[0].id : (length(aws_cloudfront_cache_policy.static_assets) > 0 ? aws_cloudfront_cache_policy.static_assets[0].id : null)
+  
+  s3_origin_request_policy_id = var.use_existing_policies && length(data.aws_cloudfront_origin_request_policy.existing_s3_origin) > 0 ? data.aws_cloudfront_origin_request_policy.existing_s3_origin[0].id : (length(aws_cloudfront_origin_request_policy.s3_origin) > 0 ? aws_cloudfront_origin_request_policy.s3_origin[0].id : null)
+  
+  security_response_headers_policy_id = var.use_existing_policies && length(data.aws_cloudfront_response_headers_policy.existing_security) > 0 ? data.aws_cloudfront_response_headers_policy.existing_security[0].id : (length(aws_cloudfront_response_headers_policy.security) > 0 ? aws_cloudfront_response_headers_policy.security[0].id : null)
+}
+
 resource "aws_cloudfront_distribution" "website" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -20,9 +62,9 @@ resource "aws_cloudfront_distribution" "website" {
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
     viewer_protocol_policy     = "redirect-to-https"
-    cache_policy_id            = aws_cloudfront_cache_policy.spa.id
-    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+    cache_policy_id            = local.spa_cache_policy_id
+    origin_request_policy_id   = local.s3_origin_request_policy_id
+    response_headers_policy_id = local.security_response_headers_policy_id
   }
 
   # Cache behavior for static assets
@@ -33,9 +75,9 @@ resource "aws_cloudfront_distribution" "website" {
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
     viewer_protocol_policy     = "redirect-to-https"
-    cache_policy_id            = aws_cloudfront_cache_policy.static_assets.id
-    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+    cache_policy_id            = local.static_assets_cache_policy_id
+    origin_request_policy_id   = local.s3_origin_request_policy_id
+    response_headers_policy_id = local.security_response_headers_policy_id
   }
 
   restrictions {
@@ -64,12 +106,17 @@ resource "aws_cloudfront_distribution" "website" {
   }
 
   tags = var.tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-# Cache Policy for SPA
+# Cache Policy for SPA - Only create if not using existing
 resource "aws_cloudfront_cache_policy" "spa" {
-  name        = "${var.environment}-spa-cache-policy"
-  comment     = "Cache policy for SPA applications"
+  count   = var.use_existing_policies ? 0 : 1
+  name    = var.use_existing_policies ? null : "${var.environment}-spa-cache-policy-${random_string.policy_suffix[0].result}"
+  comment = "Cache policy for SPA applications - ${var.environment}"
   default_ttl = 86400
   max_ttl     = 31536000
   min_ttl     = 0
@@ -90,12 +137,17 @@ resource "aws_cloudfront_cache_policy" "spa" {
       cookie_behavior = "none"
     }
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-# Cache Policy for Static Assets
+# Cache Policy for Static Assets - Only create if not using existing
 resource "aws_cloudfront_cache_policy" "static_assets" {  
-  name        = "${var.environment}-static-assets-cache-policy"
-  comment     = "Cache policy for static assets (CSS, JS, images)"
+  count   = var.use_existing_policies ? 0 : 1
+  name    = var.use_existing_policies ? null : "${var.environment}-static-assets-cache-policy-${random_string.policy_suffix[0].result}"
+  comment = "Cache policy for static assets (CSS, JS, images) - ${var.environment}"
   default_ttl = 31536000  # 1 year
   max_ttl     = 31536000  # 1 year
   min_ttl     = 31536000  # 1 year
@@ -116,12 +168,17 @@ resource "aws_cloudfront_cache_policy" "static_assets" {
       cookie_behavior = "none"
     }
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-# Origin Request Policy for S3
+# Origin Request Policy for S3 - Only create if not using existing
 resource "aws_cloudfront_origin_request_policy" "s3_origin" {
-  name    = "${var.environment}-s3-origin-request-policy"
-  comment = "Origin request policy for S3 static website"
+  count   = var.use_existing_policies ? 0 : 1
+  name    = var.use_existing_policies ? null : "${var.environment}-s3-origin-request-policy-${random_string.policy_suffix[0].result}"
+  comment = "Origin request policy for S3 static website - ${var.environment}"
 
   cookies_config {
     cookie_behavior = "none"
@@ -141,12 +198,17 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
   query_strings_config {
     query_string_behavior = "none"
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-# FIXED: Response Headers Policy for Security
+# Response Headers Policy for Security - Only create if not using existing
 resource "aws_cloudfront_response_headers_policy" "security" {  
-  name    = "${var.environment}-security-headers"
-  comment = "Security headers for CineVerse frontend"
+  count   = var.use_existing_policies ? 0 : 1
+  name    = var.use_existing_policies ? null : "${var.environment}-security-headers-${random_string.policy_suffix[0].result}"
+  comment = "Security headers for CineVerse frontend - ${var.environment}"
 
   cors_config {
     access_control_allow_credentials = false
@@ -187,12 +249,13 @@ resource "aws_cloudfront_response_headers_policy" "security" {
       override        = true
     }
 
-    
     content_security_policy {
       content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ${var.api_endpoint}; media-src 'self';"
       override = true
     }
   }
 
-  
+  lifecycle {
+    prevent_destroy = true
+  }
 }

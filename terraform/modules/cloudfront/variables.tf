@@ -48,11 +48,17 @@ variable "waf_web_acl_id" {
   default     = ""
 }
 
-# api_endpoint variable
 variable "api_endpoint" {
   description = "Backend API endpoint for CSP headers"
   type        = string
   default     = "https://api.example.com"
+}
+
+# NEW: Variable to control whether to use existing policies
+variable "use_existing_policies" {
+  description = "Whether to use existing CloudFront policies instead of creating new ones"
+  type        = bool
+  default     = true
 }
 
 variable "tags" {
