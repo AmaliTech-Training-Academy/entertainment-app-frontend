@@ -42,9 +42,9 @@ jobs:
       #     cd frontend
       #     npm run lint
       
-      - name: Install Chromium for Headless Tests
-        # Install Chromium browser, which is necessary for Karma to run tests in a headless environment
-        run: sudo apt-get update && sudo apt-get install -y chromium-browser
+      # - name: Install Chromium for Headless Tests
+      #   # Install Chromium browser, which is necessary for Karma to run tests in a headless environment
+      #   run: sudo apt-get update && sudo apt-get install -y chromium-browser
 
       # - name: Run Frontend Tests
       #   # Run Angular tests with a headless Chrome browser
