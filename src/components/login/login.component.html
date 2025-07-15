@@ -1,0 +1,46 @@
+<div class="login-container">
+  <div class="logo-container">
+    <img src="Logo.png" alt="CineVerse Logo" />
+  </div>
+
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title class="login-title">Login</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Username / Email address</mat-label>
+          <input matInput formControlName="username" required />
+          <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
+            Can't be empty
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" required />
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+            Can't be empty
+          </mat-error>
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          type="submit"
+          class="login-button mat-mdc-raised-button"
+        >
+          Login to your account
+        </button>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions class="login-actions">
+      <p class="signup-text">
+        Don't have an account?
+        <a routerLink="/signup" class="signup-link">Sign Up</a>
+      </p>
+    </mat-card-actions>
+  </mat-card>
+</div>
