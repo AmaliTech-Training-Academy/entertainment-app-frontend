@@ -1,9 +1,6 @@
 <div class="login-container">
   <div class="logo-container">
-    <div class="logo-icon">
-      <span class="logo-letter">C</span>
-    </div>
-    <h1 class="logo-text">Cine<span class="logo-text-bold">Verse</span></h1>
+    <img src="Logo.png" alt="CineVerse Logo" />
   </div>
 
   <mat-card class="login-card">
@@ -13,23 +10,31 @@
 
     <mat-card-content>
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-        <mat-form-field appearance="standard" class="full-width">
+        <mat-form-field appearance="fill" class="full-width">
           <mat-label>Username / Email address</mat-label>
           <input matInput formControlName="username" required />
+          <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
+            Can't be empty
+          </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="standard" class="full-width">
+        <mat-form-field appearance="fill" class="full-width">
           <mat-label>Password</mat-label>
           <input matInput type="password" formControlName="password" required />
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+            Can't be empty
+          </mat-error>
         </mat-form-field>
 
-        <button mat-raised-button type="submit" class="login-button">
+        <button
+          mat-raised-button
+          type="submit"
+          class="login-button mat-mdc-raised-button"
+        >
           Login to your account
         </button>
       </form>
     </mat-card-content>
-
-    <mat-divider></mat-divider>
 
     <mat-card-actions class="login-actions">
       <p class="signup-text">
