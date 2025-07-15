@@ -106,7 +106,7 @@ jobs:
   build:
     name: Build & Test
     runs-on: self-hosted
-    needs: [setup, security]
+    needs: [setup]
     if: always() && (needs.security.result == 'success' || needs.security.result == 'skipped')
     steps:
       - uses: actions/checkout@v4
