@@ -68,8 +68,6 @@ resource "aws_cloudfront_distribution" "website" {
 
 # Cache Policy for SPA
 resource "aws_cloudfront_cache_policy" "spa" {
-  count = var.create_policies ? 1 : 0
-
   name        = "${var.environment}-spa-cache-policy"
   comment     = "Cache policy for SPA applications"
   default_ttl = 86400
@@ -95,9 +93,7 @@ resource "aws_cloudfront_cache_policy" "spa" {
 }
 
 # Cache Policy for Static Assets
-resource "aws_cloudfront_cache_policy" "static_assets" {
-  count = var.create_policies ? 1 : 0
-  
+resource "aws_cloudfront_cache_policy" "static_assets" {  
   name        = "${var.environment}-static-assets-cache-policy"
   comment     = "Cache policy for static assets (CSS, JS, images)"
   default_ttl = 31536000  # 1 year
@@ -124,8 +120,6 @@ resource "aws_cloudfront_cache_policy" "static_assets" {
 
 # Origin Request Policy for S3
 resource "aws_cloudfront_origin_request_policy" "s3_origin" {
-  count = var.create_policies ? 1 : 0
-
   name    = "${var.environment}-s3-origin-request-policy"
   comment = "Origin request policy for S3 static website"
 
@@ -150,9 +144,7 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
 }
 
 # FIXED: Response Headers Policy for Security
-resource "aws_cloudfront_response_headers_policy" "security" {
-  count = var.create_policies ? 1 : 0
-  
+resource "aws_cloudfront_response_headers_policy" "security" {  
   name    = "${var.environment}-security-headers"
   comment = "Security headers for CineVerse frontend"
 
