@@ -18,3 +18,29 @@
     align-items: flex-end;
   }
 }
+
+.app-nav {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem 2rem;
+  background: #181818;
+  align-items: center;
+}
+
+.app-nav__link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.app-nav__link:hover {
+  background: #232323;
+}
+
+.app-nav__link--active {
+  background: #fff;
+  color: #181818;
+}
