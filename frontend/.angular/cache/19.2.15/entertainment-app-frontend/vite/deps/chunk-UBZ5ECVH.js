@@ -8,7 +8,7 @@ import {
   isPlatformServer,
   parseCookieValue,
   setRootDomAdapter
-} from "./chunk-QIX4ADN2.js";
+} from "./chunk-4B4WLURK.js";
 import {
   APP_BOOTSTRAP_LISTENER,
   APP_ID,
@@ -95,9 +95,9 @@ import {
   ɵɵdefineInjector,
   ɵɵdefineNgModule,
   ɵɵinject
-} from "./chunk-O5DBSECI.js";
+} from "./chunk-BF3C3RBX.js";
 
-// ../node_modules/@angular/platform-browser/fesm2022/dom_renderer-DGKzginR.mjs
+// node_modules/@angular/platform-browser/fesm2022/dom_renderer-DGKzginR.mjs
 var EVENT_MANAGER_PLUGINS = new InjectionToken(ngDevMode ? "EventManagerPlugins" : "");
 var EventManager = class _EventManager {
   _zone;
@@ -807,7 +807,7 @@ var EmulatedEncapsulationDomRenderer2 = class extends NoneEncapsulationDomRender
   }
 };
 
-// ../node_modules/@angular/platform-browser/fesm2022/browser-D-u-fknz.mjs
+// node_modules/@angular/platform-browser/fesm2022/browser-D-u-fknz.mjs
 var BrowserDomAdapter = class _BrowserDomAdapter extends DomAdapter {
   supportsDOMEvents = true;
   static makeCurrent() {
@@ -1249,7 +1249,7 @@ var BrowserModule = class _BrowserModule {
   }], () => [], null);
 })();
 
-// ../node_modules/@angular/common/fesm2022/module-z3bvLlVg.mjs
+// node_modules/@angular/common/fesm2022/module-z3bvLlVg.mjs
 var HttpHandler = class {
 };
 var HttpBackend = class {
@@ -3392,7 +3392,7 @@ var HttpClientJsonpModule = class _HttpClientJsonpModule {
   }], null, null);
 })();
 
-// ../node_modules/@angular/common/fesm2022/http.mjs
+// node_modules/@angular/common/fesm2022/http.mjs
 var httpResource = (() => {
   const jsonFn = makeHttpResourceFn("json");
   jsonFn.arrayBuffer = makeHttpResourceFn("arraybuffer");
@@ -3671,7 +3671,7 @@ function appendMissingHeadersDetection(url, headers, headersToInclude) {
   });
 }
 
-// ../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs
+// node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs
 var Meta = class _Meta {
   _doc;
   _dom;
@@ -4409,6 +4409,7 @@ function provideClientHydration(...features) {
 var VERSION = new Version("19.2.14");
 
 export {
+  HttpClient,
   EVENT_MANAGER_PLUGINS,
   EventManager,
   EventManagerPlugin,
@@ -4458,4 +4459,4 @@ export {
    * License: MIT
    *)
 */
-//# sourceMappingURL=chunk-OHTTCUXG.js.map
+//# sourceMappingURL=chunk-UBZ5ECVH.js.map

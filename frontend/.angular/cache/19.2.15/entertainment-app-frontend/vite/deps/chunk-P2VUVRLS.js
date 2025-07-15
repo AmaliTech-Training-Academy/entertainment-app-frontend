@@ -3,9 +3,9 @@ import {
   setClassMetadata,
   ɵɵdefineInjector,
   ɵɵdefineNgModule
-} from "./chunk-O5DBSECI.js";
+} from "./chunk-BF3C3RBX.js";
 
-// ../node_modules/@angular/cdk/fesm2022/scrolling-BkvA05C8.mjs
+// node_modules/@angular/cdk/fesm2022/scrolling-BkvA05C8.mjs
 var RtlScrollAxisType;
 (function(RtlScrollAxisType2) {
   RtlScrollAxisType2[RtlScrollAxisType2["NORMAL"] = 0] = "NORMAL";
@@ -13,7 +13,7 @@ var RtlScrollAxisType;
   RtlScrollAxisType2[RtlScrollAxisType2["INVERTED"] = 2] = "INVERTED";
 })(RtlScrollAxisType || (RtlScrollAxisType = {}));
 
-// ../node_modules/@angular/cdk/fesm2022/platform.mjs
+// node_modules/@angular/cdk/fesm2022/platform.mjs
 var PlatformModule = class _PlatformModule {
   static ɵfac = function PlatformModule_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _PlatformModule)();
@@ -77,4 +77,4 @@ function getSupportedInputTypes() {
 export {
   getSupportedInputTypes
 };
-//# sourceMappingURL=chunk-IKWIYKT2.js.map
+//# sourceMappingURL=chunk-P2VUVRLS.js.map
