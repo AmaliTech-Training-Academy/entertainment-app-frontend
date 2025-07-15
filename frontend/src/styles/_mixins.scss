@@ -1,18 +1,19 @@
-@use './variables' as *;
-@use 'sass:map';
+@use "./variables" as *;
+@use "./typography" as *;
+@use "sass:map";
 
 @function color($palette, $shade) {
-  @if $palette == 'primary' {
+  @if $palette == "primary" {
     @return map.get($primary-colors, $shade);
-  } @else if $palette == 'secondary' {
+  } @else if $palette == "secondary" {
     @return map.get($secondary-colors, $shade);
-  } @else if $palette == 'neutral' {
+  } @else if $palette == "neutral" {
     @return map.get($neutral-colors, $shade);
-  } @else if $palette == 'red' {
+  } @else if $palette == "red" {
     @return map.get($red-colors, $shade);
-  } @else if $palette == 'yellow' {
+  } @else if $palette == "yellow" {
     @return map.get($yellow-colors, $shade);
-  } @else if $palette == 'green' {
+  } @else if $palette == "green" {
     @return map.get($green-colors, $shade);
   }
   @return null;
@@ -25,33 +26,54 @@
 
 // Typography mixins
 @mixin typography($type, $variant) {
-  @if $type == 'heading' {
-    @if $variant == 'h1' {
+  @if $type == "heading" {
+    @if $variant == "h1" {
       font-size: 32px;
       font-weight: 700;
       line-height: 1.2;
-    } @else if $variant == 'h2' {
+    } @else if $variant == "h2" {
       font-size: 24px;
       font-weight: 700;
       line-height: 1.3;
-    } @else if $variant == 'h3' {
+    } @else if $variant == "h3" {
       font-size: 20px;
       font-weight: 700;
       line-height: 1.4;
     }
-  } @else if $type == 'body' {
-    @if $variant == 'b1' {
+  } @else if $type == "body" {
+    @if $variant == "b1" {
       font-size: 16px;
       font-weight: 400;
       line-height: 1.5;
-    } @else if $variant == 'b2' {
+    } @else if $variant == "b2" {
       font-size: 14px;
       font-weight: 400;
       line-height: 1.5;
-    } @else if $variant == 'b3' {
+    } @else if $variant == "b3" {
       font-size: 12px;
       font-weight: 400;
       line-height: 1.5;
     }
   }
+}
+
+// movie card mixins
+@mixin apply-heading-style($level) {
+  $heading: map.get($headings, $level);
+
+  font-family: map.get($heading, font-family);
+  font-weight: map.get($heading, font-weight);
+  font-size: map.get($heading, font-size);
+  line-height: map.get($heading, line-height);
+  letter-spacing: map.get($heading, letter-spacing);
+}
+
+@mixin apply-body-style($level) {
+  $body: map.get($body, $level);
+
+  font-family: map.get($body, font-family);
+  font-weight: map.get($body, font-weight);
+  font-size: map.get($body, font-size);
+  line-height: map.get($body, line-height);
+  letter-spacing: map.get($body, letter-spacing);
 }
