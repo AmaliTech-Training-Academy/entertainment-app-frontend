@@ -3,7 +3,6 @@
 name: CineVerse Frontend CI/CD
 
 env:
-  ENABLE_CICD: 'true'
   APP_NAME: 'entertainment-app-frontend'
 
 on:
@@ -37,9 +36,10 @@ jobs:
           cd frontend
           npm install
 
-      # - name: Run Linter (Optional)
-        # Uncomment when ready
-        # run: npm run lint
+      # - name: Run Linter
+      #   run: |
+      #     cd frontend
+      #     npm run lint
       
       - name: Install Chromium for Headless Tests
         # Install Chromium browser, which is necessary for Karma to run tests in a headless environment
@@ -52,14 +52,16 @@ jobs:
       #   # '--browsers=ChromeHeadless' explicitly tells Karma to use the headless Chrome browser
       #   env:
       #     CHROME_BIN: /usr/bin/chromium-browser
-      #   run: npm test -- --no-watch --browsers=ChromeHeadless
+      #   run: |
+      #     cd frontend
+      #     npm test -- --no-watch --browsers=ChromeHeadless
 
       - name: Skip Tests Placeholder
         run: |
           echo "Skipping tests: No test files present"
 
 
-      - name: Build Angular Application
+      - name: Build Frontend Application based on branch
         # Build for production, optimizing for deployment
         run: |
           cd frontend
@@ -80,58 +82,89 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: dist/${{ env.APP_NAME }} 
+          path: frontend/dist/${{ env.APP_NAME }} 
 
 
   # Job to deploy to the Staging environment
-  deploy-staging:
+  deploy:
     # This job depends on the successful completion of the build-and-test job
     needs: build-and-test
     runs-on: ubuntu-latest
     # This job only runs when a push or PR merge occurs on the 'staging' branch
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
     # Protect the staging environment; requires manual approval or specific secrets setup in GitHub
     environment:
-      name: staging
+      name: ${{ github.ref_name }}
 
     steps:
+      # Checkout repo
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Set up Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ~> 1.0.0
+
+      # Configure AWS credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Init Terraform and select workspace (dev, staging, prod)
+      - name: Terraform Init
+        working-directory: terraform
+        run: |
+          terraform init -input=false
+          terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
+
+      # Retrieve outputs dynamically based on workspace
+      - name: Retrieve S3 Bucket and CloudFront Info
+        id: tf
+        working-directory: terraform
+        run: |
+          BUCKET_NAME=$(terraform output -raw bucket_domain_name)
+          CLOUDFRONT_ID=$(terraform output -raw distribution_id)
+          CLOUDFRONT_DOMAIN=$(terraform output -raw distribution_domain_name)
+          echo "S3_BUCKET=$BUCKET_NAME" >> $GITHUB_ENV
+          echo "CLOUDFRONT_DIST_ID=$CLOUDFRONT_ID" >> $GITHUB_ENV
+          echo "CLOUDFRONT_DOMAIN=$CLOUDFRONT_DOMAIN" >> $GITHUB_ENV
+
+       # Download the build artifact created by the 'build-and-test' job
       - name: Download Frontend Build Artifact
-        # Download the build artifact created by the 'build-and-test' job
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-          path: ./dist # The build will be downloaded to a 'dist' folder here
-
-      - name: Deploy to Staging (Placeholder)
-        # This is a placeholder step. Replace with your actual deployment commands later.
+          path: build
+      
+      # Sync files to S3
+      - name: Deploy to S3 Bucket
         run: |
-          echo "Placeholder: Deploying CineVerse Frontend to Staging environment."
-          echo "Build artifacts located at: ./dist/${{ env.APP_NAME }}"
-          echo "Staging deployment placeholder complete."
+          echo "Deploying to S3 bucket: $S3_BUCKET"
+          aws s3 sync build/ s3://$S3_BUCKET --delete
 
-
-  # Job to deploy to the Production environment
-  deploy-prod:
-    # This job depends on the successful completion of the build-and-test job
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    # This job only runs when a push or PR merge occurs on the 'prod' branch
-    if: github.ref == 'refs/heads/prod'
-    # Protect the production environment; typically requires manual approval and specific secrets
-    environment:
-      name: production
-
-    steps:
-      - name: Download Frontend Build Artifact
-        # Download the build artifact created by the 'build-and-test' job
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: ./dist # The build will be downloaded to a 'dist' folder here
-
-      - name: Deploy to Production (Placeholder)
-        # This is a placeholder step. Replace with your actual deployment commands later.
+       # Invalidate CloudFront cache
+      - name: Invalidate CloudFront Cache
         run: |
-          echo "Placeholder: Deploying CineVerse Frontend to Production environment."
-          echo "Build artifacts located at: ./dist/${{ env.APP_NAME }}"
-          echo "Production deployment placeholder complete."
+          echo "Invalidating CloudFront distribution: $CLOUDFRONT_DIST_ID"
+          aws cloudfront create-invalidation \
+            --distribution-id $CLOUDFRONT_DIST_ID \
+            --paths "/*"
+
+      # Output final application URLs
+      - name: Output Application URLs
+        run: |
+          echo "Application deployed successfully"
+          echo "S3 Static Hosting URL:"
+          echo "https://$S3_BUCKET.s3-website-${{ secrets.AWS_REGION }}.amazonaws.com"
+          echo "CloudFront URL:"
+          echo "https://$CLOUDFRONT_DOMAIN"
+         
+       # Manual approval (only for production)
+      - name: Wait for Approval (GitHub Environments handles this)
+        if: github.ref == 'refs/heads/prod'
+        run: echo "Waiting for manual approval in GitHub before deploying to production..."

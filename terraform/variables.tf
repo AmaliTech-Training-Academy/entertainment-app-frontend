@@ -36,3 +36,9 @@ variable "enable_monitoring" {
   type        = bool
   default     = true
 }
+
+variable "api_endpoint" {
+  description = "Backend API endpoint URL"
+  type        = string
+  default     = ""
+}

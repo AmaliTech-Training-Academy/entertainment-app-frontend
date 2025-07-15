@@ -1,4 +1,3 @@
-
 terraform {
   required_version = ">= 1.0"
   required_providers {
@@ -13,8 +12,24 @@ terraform {
   }
 }
 
+# Main provider (eu-west-1)
 provider "aws" {
   region = var.aws_region
+
+  default_tags {
+    tags = {
+      Project     = "CineVerse"
+      ManagedBy   = "Terraform"
+      Environment = var.environment
+      Owner       = "DevOps-Team"
+    }
+  }
+}
+
+# US East 1 provider for CloudFront WAF
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
 
   default_tags {
     tags = {
@@ -53,7 +68,7 @@ module "s3_website" {
   tags = local.common_tags
 }
 
-# WAF
+# WAF with us-east-1 provider
 module "waf" {
   count  = var.enable_waf ? 1 : 0
   source = "./modules/waf"
@@ -63,6 +78,11 @@ module "waf" {
   rate_limit   = local.env_config[var.environment].waf_rate_limit
 
   tags = local.common_tags
+
+  # ADDED: Provider for us-east-1
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
 }
 
 # Monitoring
