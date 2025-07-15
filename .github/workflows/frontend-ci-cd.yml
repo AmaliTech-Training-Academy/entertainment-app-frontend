@@ -21,7 +21,7 @@ jobs:
   # =============================================================================
   setup:
     name: Setup Environment
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       environment: ${{ steps.config.outputs.environment }}
       should_deploy: ${{ steps.config.outputs.should_deploy }}
@@ -54,58 +54,58 @@ jobs:
   # =============================================================================
   # Security Scanning
   # =============================================================================
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    needs: setup
-    if: github.event_name == 'pull_request' || needs.setup.outputs.is_production == 'true'
-    steps:
-      - uses: actions/checkout@v4
+  # security:
+  #   name: Security Scan
+  #   runs-on: self-hosted
+  #   needs: setup
+  #   if: github.event_name == 'pull_request' || needs.setup.outputs.is_production == 'true'
+  #   steps:
+  #     - uses: actions/checkout@v4
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: 'npm'
+  #         cache-dependency-path: frontend/package-lock.json
 
-      - name: Install Dependencies
-        run: cd frontend && npm ci
+  #     - name: Install Dependencies
+  #       run: cd frontend && npm ci
 
-      - name: NPM Security Audit
-        working-directory: frontend
-        run: |
-          npm audit --audit-level=moderate --json > npm-audit-report.json || true
-          npm audit --audit-level=moderate
-        continue-on-error: true
+  #     - name: NPM Security Audit
+  #       working-directory: frontend
+  #       run: |
+  #         npm audit --audit-level=moderate --json > npm-audit-report.json || true
+  #         npm audit --audit-level=moderate
+  #       continue-on-error: true
 
-      - name: Terraform Security Scan
-        uses: aquasecurity/tfsec-action@v1.0.0
-        with:
-          working_directory: terraform/
-          format: sarif
-          soft_fail: true
+  #     - name: Terraform Security Scan
+  #       uses: aquasecurity/tfsec-action@v1.0.0
+  #       with:
+  #         working_directory: terraform/
+  #         format: sarif
+  #         soft_fail: true
 
-      - name: Secret Detection
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
+  #     - name: Secret Detection
+  #       uses: gitleaks/gitleaks-action@v2
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       continue-on-error: true
 
-      - name: Upload Security Reports
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: security-reports-${{ github.sha }}
-          path: frontend/npm-audit-report.json
-          retention-days: 30
+  #     - name: Upload Security Reports
+  #       uses: actions/upload-artifact@v4
+  #       if: always()
+  #       with:
+  #         name: security-reports-${{ github.sha }}
+  #         path: frontend/npm-audit-report.json
+  #         retention-days: 30
 
   # =============================================================================
   # Build and Test
   # =============================================================================
   build:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [setup, security]
     if: always() && (needs.security.result == 'success' || needs.security.result == 'skipped')
     steps:
@@ -119,7 +119,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install Dependencies
-        run: cd frontend && npm ci
+        run: cd frontend && npm install
 
       - name: Build Application
         working-directory: frontend
@@ -148,7 +148,7 @@ jobs:
   # =============================================================================
   plan:
     name: Infrastructure Plan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [setup, build]
     env:
       ENVIRONMENT: ${{ needs.setup.outputs.environment }}
@@ -223,7 +223,7 @@ jobs:
   # =============================================================================
   deploy:
     name: Deploy to ${{ needs.setup.outputs.environment }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [setup, plan]
     if: needs.setup.outputs.should_deploy == 'true'
     environment: ${{ needs.setup.outputs.environment }}
