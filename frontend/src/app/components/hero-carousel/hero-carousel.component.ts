@@ -1,10 +1,11 @@
 
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ButtonComponent } from '../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-hero-carousel',
-  imports: [CommonModule],
+  imports: [CommonModule, ButtonComponent],
   templateUrl: './hero-carousel.component.html',
   styleUrl: './hero-carousel.component.scss'
 })

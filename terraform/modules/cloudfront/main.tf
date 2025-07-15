@@ -93,7 +93,7 @@ resource "aws_cloudfront_cache_policy" "spa" {
 }
 
 # Cache Policy for Static Assets
-resource "aws_cloudfront_cache_policy" "static_assets" {
+resource "aws_cloudfront_cache_policy" "static_assets" {  
   name        = "${var.environment}-static-assets-cache-policy"
   comment     = "Cache policy for static assets (CSS, JS, images)"
   default_ttl = 31536000  # 1 year
@@ -144,7 +144,7 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
 }
 
 # FIXED: Response Headers Policy for Security
-resource "aws_cloudfront_response_headers_policy" "security" {
+resource "aws_cloudfront_response_headers_policy" "security" {  
   name    = "${var.environment}-security-headers"
   comment = "Security headers for CineVerse frontend"
 

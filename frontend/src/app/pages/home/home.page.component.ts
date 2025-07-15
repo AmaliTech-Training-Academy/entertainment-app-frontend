@@ -1,21 +1,16 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { HeroCarouselComponent } from "./components/hero-carousel/hero-carousel.component";
-import { TrendingMovieCardComponent } from './components/trending-movie-card/trending-movie-card.component';
+import { HeroCarouselComponent } from '../../components/hero-carousel/hero-carousel.component';
+import { TrendingMovieCardComponent } from '../../components/trending-movie-card/trending-movie-card.component';
 import { CommonModule } from '@angular/common';
-import { HomePage } from "./pages/home/home.page.component";
-import { NavbarComponent } from './components/navbar/navbar.component';
-
 
 @Component({
-  selector: 'app-root',
-  imports: [CommonModule, RouterOutlet,NavbarComponent],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  selector: 'app-home-page',
+  standalone: true,
+  imports: [CommonModule, HeroCarouselComponent, TrendingMovieCardComponent],
+  templateUrl: './home.page.component.html',
+  styleUrl: './home.page.component.scss'
 })
-export class AppComponent {
-  title = 'entertainment-app-frontend';
-
+export class HomePage {
   trendingMovies = [
     {
       rank: 1,
@@ -38,4 +33,4 @@ export class AppComponent {
       alt: 'Ballerina poster'
     }
   ];
-}
+} 

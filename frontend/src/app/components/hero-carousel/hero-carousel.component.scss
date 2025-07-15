@@ -12,7 +12,7 @@
   overflow: hidden;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: stretch;
 }
 
 .slide-animation {
@@ -43,8 +43,7 @@
 
 .hero-content {
   color: map-get($neutral-colors, 100);
-  max-width: 500px;
-  margin-left: map-get($spacing, 8);
+  flex: 1 1 0;
 }
 
 .hero-title {
@@ -139,21 +138,21 @@
 }
 
 .hero-carousel-indicators {
-  position: absolute;
-  bottom: map-get($spacing, 8);
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: map-get($spacing, 4);
+  // position: absolute;
+  // bottom: map-get($spacing, 8);
+  // left: 50%;
+  // transform: translateX(-50%);
+  // display: flex;
+  // gap: map-get($spacing, 4);
 }
 .hero-carousel-indicators span {
-  display: block;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: map-get($neutral-colors, 700);
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  // display: block;
+  // width: 16px;
+  // height: 16px;
+  // border-radius: 50%;
+  // background: map-get($neutral-colors, 700);
+  // cursor: pointer;
+  // transition: background 0.2s, transform 0.2s;
 }
 .hero-carousel-indicators span.active {
   background: map-get($neutral-colors, 100);
