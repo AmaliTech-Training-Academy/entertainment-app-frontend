@@ -1,6 +1,6 @@
 <section aria-labelledby="register-heading" class="register__container">
   
-  <div>
+  <div class="register__logo">
     <img src="assets/images/cineverse_logo.svg" alt="cineverse logo">
   </div>
 
@@ -15,7 +15,7 @@
 
     <!-- Username Field -->
     <mat-form-field class="register__field">
-      <mat-label for="username">Username</mat-label>
+      <mat-label class="register__label" for="username">Username</mat-label>
       <input
         matInput
         id="username"
@@ -40,13 +40,14 @@
 
     <!-- Email Field -->
     <mat-form-field class="register__field">
-      <mat-label for="email">Email Address</mat-label>
+      <mat-label for="email" class="register__label">Email Address</mat-label>
       <input
         matInput
         id="email"
         formControlName="email"
         type="email"
         autocomplete="email"
+        placeholder="cineverse@example.com"
         required
         aria-required="true"
         aria-describedby="email-error"
@@ -66,7 +67,7 @@
 
     <!-- Password Field -->
     <mat-form-field class="register__field">
-      <mat-label for="password">Password</mat-label>
+      <mat-label for="password" class="register__label">Password</mat-label>
       <input
         matInput
         id="password"
@@ -92,7 +93,7 @@
 
     <!-- Confirm Password Field -->
     <mat-form-field class="register__field">
-      <mat-label for="confirmPassword">Confirm Password</mat-label>
+      <mat-label for="confirmPassword" class="register__label">Confirm Password</mat-label>
       <input
         matInput
         id="confirmPassword"
@@ -118,8 +119,6 @@
 
     <!-- Submit Button -->
     <button
-      mat-raised-button
-      color="primary"
       type="submit"
       aria-label="Submit registration form"
       class="register__submit"

@@ -2,7 +2,7 @@
 @use '../../../../styles/spacing' as *;
 @use 'sass:map';
 
-// Helper to get values from color maps
+// === Helpers ===
 @function color($palette, $shade) {
   @return map.get($palette, $shade);
 }
@@ -11,7 +11,133 @@
   @return map.get($spacing, $size);
 }
 
-
+// === Main container ===
 .register__container {
-  
+  min-height: 100vh;
+  background-color: color($primary-colors, 1000);
+  padding: space(6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: space(6);
+
+  .register__logo {
+    margin-top: space(6);
+
+    img {
+      height: 32px;
+    }
+  }
+
+  .register {
+    width: 100%;
+    max-width: 320px;
+    padding: space(6);
+    border-radius: 12px;
+    background-color: color($primary-colors, 900);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+
+    &__heading {
+      font-size: 1.5rem;
+      color: color($neutral-colors, 100);
+      margin-bottom: space(3);
+    }
+
+    &__form {
+      display: flex;
+      flex-direction: column;
+      margin: space(0) space(4);
+
+      .register__field {
+        width: 100%;
+        border: 2px solid color($neutral-colors, 100);
+
+        .register__label {
+          font-size: 0.85rem;
+          color: color($neutral-colors, 100);
+          font-weight: 400;
+        }
+
+        // .mat-form-field-label,
+        // .mat-input-element {
+        //   color: color($neutral-colors, 100);
+        // }
+
+        // .mat-input-element {
+        //   font-size: 0.95rem;
+        //   background-color: transparent;
+        // }
+
+        // .mat-form-field-outline {
+        //   border-color: color($neutral-colors, 100);
+        // }
+      }
+
+      .register__input {
+        background-color: transparent;
+        color: color($neutral-colors, 100);
+        font-weight: 100;
+        caret-color: color($secondary-colors, 200);
+
+        &:focus {
+          background-color: transparent;
+          color: color($neutral-colors, 100);
+          cursor: pointer;
+        }
+
+        &:cu
+
+        &::placeholder {
+          color: color($neutral-colors, 400);
+        }
+      }
+
+      .register__error {
+        font-size: 0.75rem;
+        color: color($red-colors, 100);
+        display: flex;
+        justify-content: flex-end;
+        margin-top: -1.8rem;
+        margin-left: 3rem;
+      }
+
+      .register__submit {
+        margin-top: space(1);
+        padding: space(3) 0;
+        font-weight: 400;
+        border: none;
+        border-radius: 6px;
+        background-color: color($secondary-colors, 200);
+        color: color($neutral-colors, 100);
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: color($neutral-colors, 100);
+          color: color($secondary-colors, 200);
+        }
+      }
+
+      .register__footer {
+        text-align: center;
+        font-size: 0.85rem;
+        color: color($neutral-colors, 400);
+        margin-top: space(4);
+
+        .register__link {
+          margin-left: 10px;
+          color: color($secondary-colors, 200);
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  // === Tablet/Desktop overrides ===
+  @media (min-width: 768px) {
+    justify-content: center;
+
+    .register__logo {
+      margin-top: 0;
+    }
+  }
 }
