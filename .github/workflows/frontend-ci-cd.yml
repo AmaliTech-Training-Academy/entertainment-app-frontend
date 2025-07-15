@@ -20,7 +20,7 @@ jobs:
   # =============================================================================
   setup:
     name: Setup Environment
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       environment: ${{ steps.config.outputs.environment }}
       should_deploy: ${{ steps.config.outputs.should_deploy }}
@@ -55,7 +55,7 @@ jobs:
   # =============================================================================
   security:
     name: Security Scan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: setup
     if: always() && (github.event_name == 'pull_request' || needs.setup.outputs.is_production == 'true')
     steps:
@@ -105,7 +105,7 @@ jobs:
   # =============================================================================
   build:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [setup]
     if: always()
     steps:
@@ -180,10 +180,10 @@ jobs:
           
           # Verify build output
           if [ -d "dist/${{ env.APP_NAME }}" ]; then
-            echo " Build output found in dist/${{ env.APP_NAME }}"
+            echo "✅ Build output found in dist/${{ env.APP_NAME }}"
             ls -la "dist/${{ env.APP_NAME }}"
           else
-            echo " Build output not found"
+            echo "❌ Build output not found"
             ls -la dist/
             exit 1
           fi
@@ -206,7 +206,7 @@ jobs:
   # =============================================================================
   plan:
     name: Infrastructure Plan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [setup, build]
     if: always() && needs.build.result == 'success'
     env:
@@ -315,7 +315,7 @@ jobs:
   # =============================================================================
   deploy:
     name: Deploy to ${{ needs.setup.outputs.environment }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [setup, plan]
     if: needs.setup.outputs.should_deploy == 'true' && needs.plan.result == 'success'
     environment: ${{ needs.setup.outputs.environment }}
@@ -445,15 +445,15 @@ jobs:
           RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://$DOMAIN)
           
           if [[ "$RESPONSE_CODE" == "200" ]]; then
-            echo " Application is responding correctly (HTTP $RESPONSE_CODE)"
+            echo "✅ Application is responding correctly (HTTP $RESPONSE_CODE)"
           else
-            echo "  Application returned HTTP $RESPONSE_CODE (may need propagation time)"
+            echo "⚠️  Application returned HTTP $RESPONSE_CODE (may need propagation time)"
           fi
 
       - name: Deployment Summary
         run: |
           cat << EOF >> $GITHUB_STEP_SUMMARY
-          #  Deployment Successful
+          # 🚀 Deployment Successful
           
           **Environment:** $ENVIRONMENT  
           **Application URL:** https://${{ steps.outputs.outputs.cloudfront_domain }}  
