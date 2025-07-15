@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { TrendingMovieCardComponent } from '../../../components/trending-movie-card/trending-movie-card.component';
 
+
 @Component({
   selector: 'app-sign-up',
   standalone: true,
@@ -16,7 +17,7 @@ import { TrendingMovieCardComponent } from '../../../components/trending-movie-c
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    RouterLink
+    RouterLink,
   ],
   templateUrl: './sign-up.component.html',
   styleUrls: ['./sign-up.component.scss']

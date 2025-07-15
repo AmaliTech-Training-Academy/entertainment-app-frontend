@@ -4,6 +4,7 @@ import { HeroCarouselComponent } from "./components/hero-carousel/hero-carousel.
 import { TrendingMovieCardComponent } from './components/trending-movie-card/trending-movie-card.component';
 import { CommonModule } from '@angular/common';
 
+
 @Component({
   selector: 'app-root',
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, HeroCarouselComponent, TrendingMovieCardComponent],
