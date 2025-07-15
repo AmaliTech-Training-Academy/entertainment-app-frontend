@@ -1,8 +1,8 @@
-@use "../../../../styles/variables" as *;
-@use "../../../../styles/spacing" as *;
-@use "sass:map";
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/spacing' as *;
+@use 'sass:map';
 
-// === Helpers ===
+// Helpers
 @function color($palette, $shade) {
   @return map.get($palette, $shade);
 }
@@ -11,125 +11,229 @@
   @return map.get($spacing, $size);
 }
 
-// === Main container ===
+// ========== BASE LAYOUT ==========
 .register__container {
   min-height: 100vh;
   background-color: color($primary-colors, 1000);
-  padding: space(6);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: space(6);
+  padding: space(6);
+  animation: fadeIn 0.8s ease-in;
+  overflow: hidden;
+}
 
-  .register__logo {
-    margin-top: space(6);
+// ========== LOGO ==========
+.register__logo {
+  margin-bottom: space(6);
 
-    img {
-      height: 32px;
+  img {
+    height: 28px;
+    animation: fadeInDown 0.6s ease-in;
+  }
+}
+
+// ========== CARD ==========
+.register {
+  background-color: color($primary-colors, 900);
+  padding: space(5);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.6s ease-in-out;
+}
+
+// ========== HEADING ==========
+.register__heading {
+  font-size: 2rem;
+  font-weight: 500;
+  color: color($neutral-colors, 100);
+  margin-bottom: space(3);
+  text-align: left;
+}
+
+// ========== FORM ==========
+.register__form {
+  display: flex;
+  flex-direction: column;
+  gap: space(3);
+  padding: space(2) space(8);
+}
+
+// ========== FIELD GROUP ==========
+.register__field {
+  display: flex;
+  flex-direction: column;
+  gap: space(1);
+  animation: fadeInUp 0.4s ease;
+}
+
+// ========== LABEL ==========
+.register__label {
+  color: color($neutral-colors, 100);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+// ========== INPUT ==========
+.register__input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid color($primary-colors, 500);
+  padding: space(2) 0;
+  color: color($neutral-colors, 100);
+  font-size: 0.95rem;
+  transition: border-color 0.3s, color 0.3s;
+
+  &:focus {
+    outline: none;
+    border-bottom-color: color($neutral-colors, 200);
+    color: color($neutral-colors, 100);
+  }
+
+  &::placeholder {
+    color: color($neutral-colors, 400);
+    font-size: 0.85rem;
+  }
+
+  &.invalid {
+    border-bottom: 2px solid color($red-colors, 100);
+  }
+}
+
+
+// ========== ERROR ==========
+.register__error {
+  color: color($red-colors, 100);
+  font-size: 0.75rem;
+  animation: shake 0.3s ease;
+}
+
+// ========== BUTTON ==========
+.register__submit {
+  margin-top: space(4);
+  padding: space(3) 0;
+  background-color: color($secondary-colors, 200);
+  color: color($neutral-colors, 100);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+
+  &:hover {
+    background-color: color($neutral-colors, 100);
+    transform: translateY(-2px);
+    color: color($secondary-colors, 200);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// ========== FOOTER ==========
+.register__footer {
+  margin-top: space(5);
+  font-size: 0.85rem;
+  text-align: center;
+  color: color($neutral-colors, 400);
+  animation: fadeIn 1s ease;
+
+  .register__link {
+    margin-left: 4px;
+    color: color($secondary-colors, 200);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+
+    &:hover {
+      text-decoration: underline;
+      color: color($secondary-colors, 300);
     }
+  }
+}
+
+// ========== ANIMATIONS ==========
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0px);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+  100% {
+    transform: translateX(0px);
+  }
+}
+
+// ========== RESPONSIVE ==========
+@media (min-width: 768px) {
+  .register__container {
+    justify-content: center;
+    padding: space(9);
   }
 
   .register {
-    width: 100%;
-    max-width: 320px;
-    padding: space(6);
-    border-radius: 12px;
-    background-color: color($primary-colors, 900);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-
-    &__heading {
-      font-size: 1.5rem;
-      color: color($neutral-colors, 100);
-      margin-bottom: space(3);
-    }
-
-    &__form {
-      display: flex;
-      flex-direction: column;
-      margin: space(0) space(4);
-
-      .register__field {
-        width: 100%;
-
-        .register__label {
-          font-size: 0.85rem;
-          color: color($neutral-colors, 100);
-          font-weight: 400;
-        }
-      }
-
-      .register__input {
-        background-color: transparent;
-        color: color($neutral-colors, 100);
-        font-weight: 100;
-        caret-color: color($secondary-colors, 200);
-
-        &:focus {
-          background-color: transparent;
-          color: color($neutral-colors, 100);
-          cursor: pointer;
-        }
-
-        &:cu &::placeholder {
-          color: color($neutral-colors, 400);
-        }
-      }
-
-      .register__error {
-        font-size: 0.75rem;
-        color: color($red-colors, 100);
-        display: flex;
-        justify-content: flex-end;
-      }
-
-      .register__submit {
-        margin-top: space(1);
-        padding: space(3) 0;
-        font-weight: 400;
-        border: none;
-        border-radius: 6px;
-        background-color: color($secondary-colors, 200);
-        color: color($neutral-colors, 100);
-        transition: background-color 0.2s ease;
-
-        &:hover {
-          background-color: color($neutral-colors, 100);
-          color: color($secondary-colors, 200);
-        }
-      }
-
-      .register__footer {
-        text-align: center;
-        font-size: 0.85rem;
-        color: color($neutral-colors, 400);
-        margin-top: space(4);
-
-        .register__link {
-          margin-left: 10px;
-          color: color($secondary-colors, 200);
-          text-decoration: underline;
-        }
-      }
-    }
+    padding: space(4) space(10);
+    border-radius: 20px;
   }
 
-  // === Tablet/Desktop overrides ===
-  @media (min-width: 768px) {
-    justify-content: center;
+  .register__heading {
+    font-size: 1.8rem;
+  }
 
-    .register__logo {
-      margin-top: 0;
-    }
-
-    .register {
-      max-width: 480px;
-      padding: space(6) space(8);
-
-      &__form {
-        margin: space(0);
-      }
-    }
-
-    
+  .register__submit {
+    font-size: 1rem;
   }
 }

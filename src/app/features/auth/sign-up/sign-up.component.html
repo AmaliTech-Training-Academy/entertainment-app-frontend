@@ -12,10 +12,9 @@
       class="register__form"
     >
       <!-- Username Field -->
-      <mat-form-field class="register__field">
-        <mat-label class="register__label" for="username">Username</mat-label>
+      <div class="register__field">
+        <label class="register__label" for="username">Username</label>
         <input
-          matInput
           id="username"
           formControlName="username"
           autocomplete="username"
@@ -23,62 +22,62 @@
           aria-required="true"
           aria-describedby="username-error"
           class="register__input"
-          placeholder="Username"
+          [ngClass]="{ 'invalid': username?.touched && username?.invalid || username?.errors?.['usernameTaken'] }"
         />
         @if (username?.touched && username?.invalid) {
-          <mat-error id="username-error" class="register__error">
+          <p id="username-error" class="register__error">
             @if (username?.errors?.["required"]) {
               Username is required.
             }
             @if (username?.errors?.["minlength"]) {
               Minimum 3 characters required.
             }
-          </mat-error>
+          </p>
         }
         @if (username?.errors?.["usernameTaken"]) {
-          <mat-error id="username-error" class="register__error">
+          <p id="username-error" class="register__error">
             Username already taken.
-          </mat-error>
+          </p>
         }
-      </mat-form-field>
+      </div>
 
       <!-- Email Field -->
-      <mat-form-field class="register__field">
-        <mat-label for="email" class="register__label">Email Address</mat-label>
+      <div class="register__field">
+        <p for="email" class="register__label">Email Address</p>
         <input
-          matInput
           id="email"
           formControlName="email"
           type="email"
           autocomplete="email"
-          placeholder="cineverse@example.com"
           required
           aria-required="true"
           aria-describedby="email-error"
           class="register__input"
+          [ngClass]="{
+    'invalid': (email?.touched && email?.invalid) || email?.errors?.['emailTaken']
+  }"
         />
         @if (email?.touched && email?.invalid) {
-          <mat-error id="email-error" class="register__error">
+          <p id="email-error" class="register__error">
             @if (email?.errors?.["required"]) {
               Email is required.
             }
             @if (email?.errors?.["email"]) {
               Invalid email format.
             }
-          </mat-error>
+          </p>
         }
         @if (email?.errors?.["emailTaken"]) {
-          <mat-error id="email-error" class="register__error">
+          <p id="email-error" class="register__error">
             Email is already registered.
-          </mat-error>
+          </p>
         }
-      </mat-form-field>
+      </div>
 
       <!-- Password Field -->
-      <mat-form-field class="register__field">
-        <mat-label for="password" class="register__label">Password</mat-label>
+      <div class="register__field">
+        <p for="password" class="register__label">Password</p>
         <input
-          matInput
           id="password"
           formControlName="password"
           type="password"
@@ -87,9 +86,12 @@
           aria-required="true"
           aria-describedby="password-error"
           class="register__input"
+          [ngClass]="{
+    'invalid': password?.touched && password?.invalid
+  }"
         />
         @if (password?.touched && password?.invalid) {
-          <mat-error id="password-error" class="register__error">
+          <p id="password-error" class="register__error">
   @if (password?.errors?.['required']) {
     Password is required.
   }
@@ -99,13 +101,13 @@
   @if (password?.errors?.['weakPassword']) {
     Password must contain uppercase, lowercase, number, and special character.
   }
-</mat-error>
+</p>
 
         }
-      </mat-form-field>
+      </div>
 
       <!-- Confirm Password Field -->
-      <mat-form-field class="register__field">
+      <div class="register__field">
         <mat-label for="confirmPassword" class="register__label"
           >Confirm Password</mat-label
         >
@@ -119,21 +121,24 @@
           aria-required="true"
           aria-describedby="confirm-password-error"
           class="register__input"
+          [ngClass]="{
+    'invalid': (confirmPassword?.touched && confirmPassword?.invalid) || passwordMismatch
+  }"
         />
         @if (
           (confirmPassword?.touched && confirmPassword?.invalid) ||
           passwordMismatch
         ) {
-          <mat-error id="confirm-password-error" class="register__error">
+          <p id="confirm-password-error" class="register__error">
             @if (confirmPassword?.errors?.["required"]) {
               Confirm Password is required.
             }
             @if (passwordMismatch) {
               Passwords do not match.
             }
-          </mat-error>
+          </p>
         }
-      </mat-form-field>
+      </div>
 
       <!-- Submit Button -->
       <button
