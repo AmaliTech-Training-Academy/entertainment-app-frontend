@@ -1,0 +1,33 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/typography' as *;  
+@use 'sass:map';
+@use '../../../../styles/mixins' as mixins;
+
+.top-cast-card {
+  display: flex;
+  align-items: center;
+  width: 550px;
+  height: 90px;
+  border-bottom: 2px solid #ffffff;
+  gap: 32px;
+  background: transparent;
+  margin-bottom: 20px;
+}
+
+.cast-image {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.cast-name {
+  width: 163px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  font-family: inherit;
+  @include mixins.typography(body, b2);  /* Adjust as per body/body/200 */
+  font-weight: 400;
+  color: #E0E0E0;
+} 
