@@ -119,7 +119,8 @@ jobs:
       - name: Terraform Init
         working-directory: terraform
         run: |
-          terraform init -input=false
+          terraform init -input=false \
+             -backend-config="environments/${{ github.ref_name }}/backend.hcl"
           terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
 
       # Retrieve outputs dynamically based on workspace
