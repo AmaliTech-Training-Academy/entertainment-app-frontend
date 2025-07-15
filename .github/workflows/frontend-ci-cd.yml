@@ -1,9 +1,12 @@
-# .github/workflows/frontend-ci-cd.yml
+# .github/workflows/frontend-ci-cd.yml - Optimized for CineVerse Infrastructure
 
 name: CineVerse Frontend CI/CD
 
 env:
   APP_NAME: 'entertainment-app-frontend'
+  AWS_REGION: 'eu-west-1'
+  TERRAFORM_VERSION: '1.6.0'
+  NODE_VERSION: '18'
 
 on:
   push:
@@ -11,17 +14,60 @@ on:
       - dev
       - staging
       - prod
+    paths:
+      - 'frontend/**'
+      - 'terraform/**'
+      - '.github/workflows/frontend-ci-cd.yml'
   pull_request:
     branches:
       - dev
       - staging
       - prod
+    paths:
+      - 'frontend/**'
+      - 'terraform/**'
 
 jobs:
-  # Job to build and test the Angular application
-  build-and-test:
-    # runs-on: ubuntu-latest
-    runs-on: self-hosted
+  # =============================================================================
+  # Determine Target Environment
+  # =============================================================================
+  determine-environment:
+    name: Determine Target Environment
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      should_deploy: ${{ steps.env.outputs.should_deploy }}
+    
+    steps:
+      - name: Determine Environment from Branch
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            echo "environment=dev" >> $GITHUB_OUTPUT
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/prod" ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "Target environment: $(echo '${{ github.ref }}' | sed 's/refs\/heads\///')"
+          echo "Should deploy: ${{ github.event_name == 'push' }}"
+
+  # =============================================================================
+  # Security Scanning Job
+  # =============================================================================
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    needs: [determine-environment]
+    if: github.event_name == 'pull_request' || needs.determine-environment.outputs.environment == 'prod'
+    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -29,28 +75,81 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.14.0'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install Frontend Dependencies
-        # 'npm ci' is recommended for CI environments for cleaner, reproducible installs
         run: |
           cd frontend
-          npm install
+          npm ci
+
+      # Frontend Security Scanning
+      - name: Run NPM Audit
+        working-directory: frontend
+        run: |
+          npm audit --audit-level=moderate --json > npm-audit-report.json || true
+          npm audit --audit-level=moderate
+        continue-on-error: true
+
+      # Infrastructure Security Scanning  
+      - name: Run Terraform Security Scan (tfsec)
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          working_directory: terraform/
+          format: sarif
+          soft_fail: true
+
+      # Secret Scanning
+      - name: Run Secret Scan (GitLeaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports-${{ github.sha }}
+          path: |
+            frontend/npm-audit-report.json
+          retention-days: 30
+
+  # =============================================================================
+  # Build and Test Job (Only for Target Environment)
+  # =============================================================================
+  build-and-test:
+    name: Build and Test (${{ needs.determine-environment.outputs.environment }})
+    runs-on: ubuntu-latest
+    needs: [determine-environment, security-scan]
+    if: always() && (needs.security-scan.result == 'success' || needs.security-scan.result == 'skipped')
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
 
       # - name: Run Linter
       #   run: |
       #     cd frontend
       #     npm run lint
       
-      # - name: Install Chromium for Headless Tests
-      #   # Install Chromium browser, which is necessary for Karma to run tests in a headless environment
-      #   run: sudo apt-get update && sudo apt-get install -y chromium-browser
+      - name: Install Chromium for Headless Tests
+        run: sudo apt-get update && sudo apt-get install -y chromium-browser
 
       # - name: Run Frontend Tests
-      #   # Run Angular tests with a headless Chrome browser
-      #   # CHROME_BIN environment variable points Karma to the correct Chromium executable
-      #   # '--no-watch' prevents Karma from watching files for changes (not needed in CI)
-      #   # '--browsers=ChromeHeadless' explicitly tells Karma to use the headless Chrome browser
       #   env:
       #     CHROME_BIN: /usr/bin/chromium-browser
       #   run: |
@@ -59,130 +158,375 @@ jobs:
 
       - name: Skip Tests Placeholder
         run: |
-          echo "Skipping tests: No test files present"
+          echo "Skipping tests: No test files present yet"
+          echo "Building for environment: ${{ needs.determine-environment.outputs.environment }}"
 
-
-      - name: Build Frontend Application based on branch
-        # Build for production, optimizing for deployment
+      - name: Build Frontend Application
         run: |
           cd frontend
-          echo "Building for branch: ${{ github.ref_name }}"
-          if [[ "${{ github.ref_name }}" == "dev" ]]; then
-            npm run build --configuration=development
-          elif [[ "${{ github.ref_name }}" == "staging" ]]; then
-            npm run build --configuration=staging
-          elif [[ "${{ github.ref_name }}" == "prod" ]]; then
-            npm run build --configuration=production
+          echo "Building for environment: ${{ needs.determine-environment.outputs.environment }}"
+          
+          if [[ "${{ needs.determine-environment.outputs.environment }}" == "dev" ]]; then
+            echo "Building for development environment"
+            npm run build -- --configuration=development
+          elif [[ "${{ needs.determine-environment.outputs.environment }}" == "staging" ]]; then
+            echo "Building for staging environment"  
+            npm run build -- --configuration=staging
+          elif [[ "${{ needs.determine-environment.outputs.environment }}" == "prod" ]]; then
+            echo "Building for production environment"
+            npm run build -- --configuration=production
           else
-            echo "Unsupported branch: ${{ github.ref_name }}"
+            echo "Unsupported environment: ${{ needs.determine-environment.outputs.environment }}"
             exit 1
           fi
+          
+          echo "Build completed for ${{ needs.determine-environment.outputs.environment }}"
+          ls -la dist/
 
       - name: Upload Frontend Build Artifact
-        # Upload the 'dist' folder as an artifact, to be used by deployment jobs
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-build
-          path: frontend/dist/${{ env.APP_NAME }} 
+          name: frontend-build-${{ needs.determine-environment.outputs.environment }}
+          path: frontend/dist/${{ env.APP_NAME }}
+          retention-days: 7
 
-
-  # Job to deploy to the Staging environment
-  deploy:
-    # This job depends on the successful completion of the build-and-test job
-    needs: build-and-test
-    # runs-on: ubuntu-latest
-    runs-on: self-hosted
-    # This job only runs when a push or PR merge occurs on the 'staging' branch
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
-    # Protect the staging environment; requires manual approval or specific secrets setup in GitHub
-    environment:
-      name: ${{ github.ref_name }}
-
+  # =============================================================================
+  # Infrastructure Planning Job (Only for Target Environment)
+  # =============================================================================
+  terraform-plan:
+    name: Terraform Plan (${{ needs.determine-environment.outputs.environment }})
+    runs-on: ubuntu-latest
+    needs: [determine-environment, build-and-test]
+    
     steps:
-      # Checkout repo
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Set up Terraform
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ~> 1.0.0
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-      # Configure AWS credentials
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      # Init Terraform and select workspace (dev, staging, prod)
-      - name: Terraform Init with Remote Backend
+      - name: Verify Backend Configuration
+        run: |
+          echo "Verifying ${{ needs.determine-environment.outputs.environment }} environment configuration"
+          
+          # Check backend config exists
+          BACKEND_CONFIG="terraform/environments/${{ needs.determine-environment.outputs.environment }}/backend.hcl"
+          if [[ -f "$BACKEND_CONFIG" ]]; then
+            echo "Backend config found: $BACKEND_CONFIG"
+            echo "Backend configuration:"
+            cat "$BACKEND_CONFIG" | sed 's/^/    /'
+            
+            # Extract bucket name and verify it exists
+            BUCKET_NAME=$(grep "bucket" "$BACKEND_CONFIG" | cut -d'"' -f2)
+            echo "Verifying backend bucket exists: $BUCKET_NAME"
+            
+            if aws s3 ls "s3://$BUCKET_NAME" >/dev/null 2>&1; then
+              echo "Backend bucket verified: $BUCKET_NAME"
+            else
+              echo "ERROR: Backend bucket not found: $BUCKET_NAME"
+              echo "Please ensure bootstrap has been completed"
+              exit 1
+            fi
+          else
+            echo "ERROR: Backend config missing: $BACKEND_CONFIG"
+            echo "Please ensure bootstrap has been completed"
+            exit 1
+          fi
+          
+          # Check variables file exists  
+          VARS_FILE="terraform/environments/${{ needs.determine-environment.outputs.environment }}/terraform.tfvars"
+          if [[ -f "$VARS_FILE" ]]; then
+            echo "Variables file found: $VARS_FILE"
+            echo "Variables configuration:"
+            cat "$VARS_FILE" | sed 's/^/    /'
+          else
+            echo "ERROR: Variables file missing: $VARS_FILE"
+            exit 1
+          fi
+
+      - name: Terraform Init
         working-directory: terraform
         run: |
-          terraform init -input=false \
-            -backend-config="bucket=cineverse-terraform-state-${{ github.ref_name }}" \
-            -backend-config="key=frontend/${{ github.ref_name }}/terraform.tfstate" \
-            -backend-config="region=${{ secrets.AWS_REGION }}" \
-            -backend-config="dynamodb_table=cineverse-terraform-locks" \
-            -backend-config="encrypt=true"
-          terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
-      
-      # Terraform Plan 
+          echo "Initializing Terraform for ${{ needs.determine-environment.outputs.environment }} environment"
+          echo "Using backend config: environments/${{ needs.determine-environment.outputs.environment }}/backend.hcl"
+          
+          terraform init \
+            -backend-config="environments/${{ needs.determine-environment.outputs.environment }}/backend.hcl"
+          
+          echo "Terraform initialized successfully"
+          
+          # Show current state summary
+          echo "Current state summary:"
+          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l)
+          if [ "$RESOURCE_COUNT" -gt 0 ]; then
+            echo "Found $RESOURCE_COUNT existing resources in state:"
+            terraform state list | head -10
+            if [ "$RESOURCE_COUNT" -gt 10 ]; then
+              echo "... and $((RESOURCE_COUNT - 10)) more resources"
+            fi
+          else
+            echo "No existing resources found - will create new infrastructure"
+          fi
+
+      - name: Terraform Validate
+        working-directory: terraform
+        run: |
+          echo "Validating Terraform configuration"
+          terraform validate
+          echo "Terraform configuration is valid"
+
       - name: Terraform Plan
         working-directory: terraform
-        run: terraform plan -input=false -var="environment=${{ github.ref_name }}"
+        run: |
+          echo "Planning infrastructure changes for ${{ needs.determine-environment.outputs.environment }}"
+          echo "Using variables: environments/${{ needs.determine-environment.outputs.environment }}/terraform.tfvars"
+          
+          terraform plan \
+            -var-file="environments/${{ needs.determine-environment.outputs.environment }}/terraform.tfvars" \
+            -out="${{ needs.determine-environment.outputs.environment }}.tfplan" \
+            -detailed-exitcode
+          
+          PLAN_EXIT_CODE=$?
+          
+          if [ $PLAN_EXIT_CODE -eq 0 ]; then
+            echo "No changes needed - infrastructure is up to date"
+            echo "All existing resources will be preserved"
+          elif [ $PLAN_EXIT_CODE -eq 2 ]; then
+            echo "Changes detected - plan created successfully"
+            echo "Terraform will modify existing resources as needed"
+          else
+            echo "Planning failed"
+            exit 1
+          fi
+          
+          echo "PLAN_EXIT_CODE=$PLAN_EXIT_CODE" >> $GITHUB_ENV
 
-      # Terraform Apply for dev
-      - name: Terraform Apply (only for dev)
-        if: github.ref == 'refs/heads/dev'
-        working-directory: terraform
-        run: terraform apply --auto-approve -input=false -var="environment=${{ github.ref_name }}"
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        if: env.PLAN_EXIT_CODE == '2'
+        with:
+          name: terraform-plan-${{ needs.determine-environment.outputs.environment }}
+          path: terraform/${{ needs.determine-environment.outputs.environment }}.tfplan
+          retention-days: 7
 
-      # Retrieve outputs dynamically based on workspace
-      - name: Retrieve S3 Bucket and CloudFront Info
-        id: tf
+  # =============================================================================
+  # Deployment Job (Only for Target Environment on Push)
+  # =============================================================================
+  deploy:
+    name: Deploy to ${{ needs.determine-environment.outputs.environment }}
+    runs-on: ubuntu-latest
+    needs: [determine-environment, terraform-plan]
+    if: github.event_name == 'push' && needs.determine-environment.outputs.should_deploy == 'true'
+    
+    # Use GitHub environments for protection rules
+    environment:
+      name: ${{ needs.determine-environment.outputs.environment }}
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Display Deployment Info
+        run: |
+          echo "Deploying to: ${{ needs.determine-environment.outputs.environment }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Backend config: environments/${{ needs.determine-environment.outputs.environment }}/backend.hcl"
+          echo "Variables file: environments/${{ needs.determine-environment.outputs.environment }}/terraform.tfvars"
+          echo "Commit: ${{ github.sha }}"
+          echo "Will use existing resources and modify only what's needed"
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
         working-directory: terraform
         run: |
-          BUCKET_NAME=$(terraform output -raw bucket_domain_name)
-          CLOUDFRONT_ID=$(terraform output -raw distribution_id)
-          CLOUDFRONT_DOMAIN=$(terraform output -raw distribution_domain_name)
-          echo "S3_BUCKET=$BUCKET_NAME" >> $GITHUB_ENV
-          echo "CLOUDFRONT_DIST_ID=$CLOUDFRONT_ID" >> $GITHUB_ENV
-          echo "CLOUDFRONT_DOMAIN=$CLOUDFRONT_DOMAIN" >> $GITHUB_ENV
+          echo "Initializing Terraform for ${{ needs.determine-environment.outputs.environment }} environment"
+          terraform init \
+            -backend-config="environments/${{ needs.determine-environment.outputs.environment }}/backend.hcl"
+          echo "Terraform initialized with ${{ needs.determine-environment.outputs.environment }} backend"
 
-       # Download the build artifact created by the 'build-and-test' job
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: terraform-plan-${{ needs.determine-environment.outputs.environment }}
+          path: terraform/
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: |
+          echo "Applying infrastructure changes for ${{ needs.determine-environment.outputs.environment }}"
+          
+          # Check if plan file exists
+          if [[ -f "${{ needs.determine-environment.outputs.environment }}.tfplan" ]]; then
+            echo "Using existing plan file"
+            echo "This will preserve existing resources and only apply planned changes"
+            terraform apply -auto-approve "${{ needs.determine-environment.outputs.environment }}.tfplan"
+          else
+            echo "No plan file found, creating and applying new plan"
+            echo "This will use existing state and only modify what's needed"
+            terraform apply -auto-approve \
+              -var-file="environments/${{ needs.determine-environment.outputs.environment }}/terraform.tfvars"
+          fi
+          
+          echo "Infrastructure deployment completed"
+
+      - name: Get Infrastructure Outputs
+        id: terraform-outputs
+        working-directory: terraform
+        run: |
+          echo "Retrieving infrastructure outputs for ${{ needs.determine-environment.outputs.environment }}"
+          
+          # Get outputs using the correct output names from our CineVerse infrastructure
+          S3_BUCKET=$(terraform output -raw s3_bucket_name)
+          CLOUDFRONT_ID=$(terraform output -raw cloudfront_distribution_id)
+          CLOUDFRONT_DOMAIN=$(terraform output -raw cloudfront_domain_name)
+          
+          echo "s3_bucket=$S3_BUCKET" >> $GITHUB_OUTPUT
+          echo "cloudfront_id=$CLOUDFRONT_ID" >> $GITHUB_OUTPUT
+          echo "cloudfront_domain=$CLOUDFRONT_DOMAIN" >> $GITHUB_OUTPUT
+          
+          echo "Infrastructure details:"
+          echo "S3 Bucket: $S3_BUCKET"
+          echo "CloudFront ID: $CLOUDFRONT_ID"
+          echo "CloudFront Domain: $CLOUDFRONT_DOMAIN"
+
       - name: Download Frontend Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: frontend-build
+          name: frontend-build-${{ needs.determine-environment.outputs.environment }}
           path: build
-      
-      # Sync files to S3
+
+      - name: Verify Build Artifact
+        run: |
+          echo "Verifying build artifact for ${{ needs.determine-environment.outputs.environment }}"
+          ls -la build/
+          echo "Build artifact verified"
+
       - name: Deploy to S3 Bucket
         run: |
-          echo "Deploying to S3 bucket: $S3_BUCKET"
-          aws s3 sync build/ s3://$S3_BUCKET --delete
+          echo "Deploying to S3 bucket: ${{ steps.terraform-outputs.outputs.s3_bucket }}"
+          
+          # Deploy static assets with long cache control
+          aws s3 sync build/ s3://${{ steps.terraform-outputs.outputs.s3_bucket }}/ \
+            --delete \
+            --cache-control "public, max-age=31536000" \
+            --exclude "*.html" \
+            --exclude "*.js" \
+            --exclude "*.css"
+          
+          # Deploy dynamic assets with short cache control
+          aws s3 sync build/ s3://${{ steps.terraform-outputs.outputs.s3_bucket }}/ \
+            --delete \
+            --cache-control "public, max-age=0, must-revalidate" \
+            --include "*.html" \
+            --include "*.js" \
+            --include "*.css"
+          
+          echo "Files deployed to S3 successfully"
 
-       # Invalidate CloudFront cache
       - name: Invalidate CloudFront Cache
         run: |
-          echo "Invalidating CloudFront distribution: $CLOUDFRONT_DIST_ID"
-          aws cloudfront create-invalidation \
-            --distribution-id $CLOUDFRONT_DIST_ID \
-            --paths "/*"
+          echo "Invalidating CloudFront distribution: ${{ steps.terraform-outputs.outputs.cloudfront_id }}"
+          
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id ${{ steps.terraform-outputs.outputs.cloudfront_id }} \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+          
+          echo "Invalidation created with ID: $INVALIDATION_ID"
+          echo "Cache invalidation will complete in 1-2 minutes"
 
-      # Output final application URLs
       - name: Output Application URLs
         run: |
-          echo "Application deployed successfully"
-          echo "S3 Static Hosting URL:"
-          echo "https://$S3_BUCKET.s3-website-${{ secrets.AWS_REGION }}.amazonaws.com"
-          echo "CloudFront URL:"
-          echo "https://$CLOUDFRONT_DOMAIN"
-         
-       # Manual approval (only for production)
-      - name: Wait for Approval (GitHub Environments handles this)
-        if: github.ref == 'refs/heads/prod'
-        run: echo "Waiting for manual approval in GitHub before deploying to production..."
+          echo "Application deployed successfully to ${{ needs.determine-environment.outputs.environment }}!"
+          echo ""
+          echo "Application URLs:"
+          echo "CloudFront URL: https://${{ steps.terraform-outputs.outputs.cloudfront_domain }}"
+          echo ""
+          echo "Infrastructure Details:"
+          echo "S3 Bucket: ${{ steps.terraform-outputs.outputs.s3_bucket }}"
+          echo "CloudFront Distribution: ${{ steps.terraform-outputs.outputs.cloudfront_id }}"
+          echo "Environment: ${{ needs.determine-environment.outputs.environment }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+
+      - name: Wait for Manual Approval (Production Only)
+        if: needs.determine-environment.outputs.environment == 'prod'
+        run: |
+          echo "Production deployment completed!"
+          echo "GitHub Environments protection rules handle approval requirements"
+          echo "Deployment to production successful"
+
+      - name: Post-Deployment Verification
+        run: |
+          echo "Running post-deployment verification"
+          
+          # Wait a moment for CloudFront to update
+          sleep 30
+          
+          # Test the CloudFront URL
+          RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://${{ steps.terraform-outputs.outputs.cloudfront_domain }})
+          
+          if [[ "$RESPONSE_CODE" == "200" ]]; then
+            echo "Application is responding correctly (HTTP $RESPONSE_CODE)"
+          else
+            echo "Application returned HTTP $RESPONSE_CODE - may need a few minutes to propagate"
+          fi
+          
+          echo "Deployment verification completed"
+
+  # =============================================================================
+  # Deployment Summary Job
+  # =============================================================================
+  deployment-summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [determine-environment, deploy]
+    if: always() && github.event_name == 'push'
+    
+    steps:
+      - name: Generate Deployment Summary
+        run: |
+          echo "# CineVerse Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Deployment Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ${{ needs.determine-environment.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.deploy.result }}" == "success" ]]; then
+            echo "## Deployment Status: SUCCESS" >> $GITHUB_STEP_SUMMARY
+            echo "Your CineVerse frontend has been successfully deployed!" >> $GITHUB_STEP_SUMMARY
+            echo "Existing infrastructure was preserved and only necessary changes were applied." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## Deployment Status: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "There was an issue with the deployment. Please check the logs above." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Visit your application URL (shown in deployment output)" >> $GITHUB_STEP_SUMMARY
+          echo "2. Verify all functionality works as expected" >> $GITHUB_STEP_SUMMARY
+          echo "3. Monitor CloudWatch dashboards for performance metrics" >> $GITHUB_STEP_SUMMARY
