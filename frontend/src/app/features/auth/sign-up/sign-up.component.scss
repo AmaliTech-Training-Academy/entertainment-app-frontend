@@ -1,4 +1,4 @@
- @use "../../../../styles/variables" as *;
+@use "../../../../styles/variables" as *;
 @use "../../../../styles/spacing" as *;
 @use "sass:map";
 
@@ -104,6 +104,22 @@
   }
 }
 
+// Disabled button
+.register__submit:disabled {
+  background-color: color($secondary-colors, 0);
+  color: color($secondary-colors, 100);
+  cursor: not-allowed;
+  opacity: 0.8;
+  transform: none;
+  font-weight: 400;
+}
+
+// Strong password border
+.register__input.strong {
+  border-bottom: 2px solid color($green-colors, 300);
+}
+
+
 // ========== ERROR ==========
 .register__error {
   color: color($red-colors, 100);
@@ -139,7 +155,7 @@
 
 // ========== FOOTER ==========
 .register__footer {
-  margin-top: space(5);
+  margin-top: space(1);
   font-size: 0.85rem;
   text-align: center;
   color: color($neutral-colors, 400);
@@ -232,6 +248,10 @@
     border-radius: 20px;
   }
 
+  .register__form {
+    padding: space(2) space(1);
+  }
+
   .register__heading {
     font-size: 1.8rem;
   }
@@ -239,11 +259,4 @@
   .register__submit {
     font-size: 1rem;
   }
-
-  .register__form {
-  display: flex;
-  flex-direction: column;
-  gap: space(3);
-  padding: space(2) space(2);
-}
 }
