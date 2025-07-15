@@ -1,5 +1,11 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ValidationErrors, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ValidationErrors,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -15,10 +21,10 @@ import { RouterLink } from '@angular/router';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    RouterLink
+    RouterLink,
   ],
   templateUrl: './sign-up.component.html',
-  styleUrls: ['./sign-up.component.scss']
+  styleUrls: ['./sign-up.component.scss'],
 })
 export class SignUpComponent {
   registerForm: FormGroup;
@@ -29,11 +35,11 @@ export class SignUpComponent {
         username: ['', [Validators.required, Validators.minLength(3)]],
         email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required, Validators.minLength(6)]],
-        confirmPassword: ['', [Validators.required]]
+        confirmPassword: ['', [Validators.required]],
       },
       {
-        validators: this.passwordMatchValidator
-      }
+        validators: this.passwordMatchValidator,
+      },
     );
   }
 
@@ -72,10 +78,9 @@ export class SignUpComponent {
   }
 
   get passwordMismatch(): boolean {
-  return (
-    !!this.confirmPassword?.touched &&
-    this.registerForm.hasError('passwordMismatch')
-  );
-}
-
+    return (
+      !!this.confirmPassword?.touched &&
+      this.registerForm.hasError('passwordMismatch')
+    );
+  }
 }

@@ -1,6 +1,6 @@
-@use '../../../../styles/variables' as *;
-@use '../../../../styles/spacing' as *;
-@use 'sass:map';
+@use "../../../../styles/variables" as *;
+@use "../../../../styles/spacing" as *;
+@use "sass:map";
 
 // === Helpers ===
 @function color($palette, $shade) {
@@ -50,27 +50,12 @@
 
       .register__field {
         width: 100%;
-        border: 2px solid color($neutral-colors, 100);
 
         .register__label {
           font-size: 0.85rem;
           color: color($neutral-colors, 100);
           font-weight: 400;
         }
-
-        // .mat-form-field-label,
-        // .mat-input-element {
-        //   color: color($neutral-colors, 100);
-        // }
-
-        // .mat-input-element {
-        //   font-size: 0.95rem;
-        //   background-color: transparent;
-        // }
-
-        // .mat-form-field-outline {
-        //   border-color: color($neutral-colors, 100);
-        // }
       }
 
       .register__input {
@@ -85,9 +70,7 @@
           cursor: pointer;
         }
 
-        &:cu
-
-        &::placeholder {
+        &:cu &::placeholder {
           color: color($neutral-colors, 400);
         }
       }
@@ -135,6 +118,10 @@
   // === Tablet/Desktop overrides ===
   @media (min-width: 768px) {
     justify-content: center;
+
+    .register {
+      max-width: 480px;
+    }
 
     .register__logo {
       margin-top: 0;

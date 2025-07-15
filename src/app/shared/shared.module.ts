@@ -5,4 +5,4 @@ import { importProvidersFrom } from '@angular/core';
 export const SHARED_IMPORTS = [
   // CommonModule,
   // Add shared components, directives, pipes here
-]; 
+];

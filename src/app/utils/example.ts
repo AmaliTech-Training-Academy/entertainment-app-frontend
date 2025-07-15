@@ -1,3 +1,3 @@
-function example(){
-  return null
+function example() {
+  return null;
 }

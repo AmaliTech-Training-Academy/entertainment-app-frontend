@@ -1,134 +1,148 @@
 <section aria-labelledby="register-heading" class="register__container">
-  
   <div class="register__logo">
-    <img src="assets/images/cineverse_logo.svg" alt="cineverse logo">
+    <img src="assets/images/cineverse_logo.svg" alt="cineverse logo" />
   </div>
 
   <div class="register">
     <h2 id="register-heading" class="register__heading">Sign Up</h2>
     <form
-    [formGroup]="registerForm"
-    (ngSubmit)="onSubmit()"
-    aria-describedby="register-form-description"
-    class="register__form"
-  >
-
-    <!-- Username Field -->
-    <mat-form-field class="register__field">
-      <mat-label class="register__label" for="username">Username</mat-label>
-      <input
-        matInput
-        id="username"
-        formControlName="username"
-        autocomplete="username"
-        required
-        aria-required="true"
-        aria-describedby="username-error"
-        class="register__input"
-      />
-      @if (username?.touched && username?.invalid) {
-        <mat-error id="username-error" class="register__error">
-          @if (username?.errors?.['required']) {
-            Username is required.
-          }
-          @if (username?.errors?.['minlength']) {
-            Minimum 3 characters required.
-          }
-        </mat-error>
-      }
-    </mat-form-field>
-
-    <!-- Email Field -->
-    <mat-form-field class="register__field">
-      <mat-label for="email" class="register__label">Email Address</mat-label>
-      <input
-        matInput
-        id="email"
-        formControlName="email"
-        type="email"
-        autocomplete="email"
-        placeholder="cineverse@example.com"
-        required
-        aria-required="true"
-        aria-describedby="email-error"
-        class="register__input"
-      />
-      @if (email?.touched && email?.invalid) {
-        <mat-error id="email-error" class="register__error">
-          @if (email?.errors?.['required']) {
-            Email is required.
-          }
-          @if (email?.errors?.['email']) {
-            Invalid email format.
-          }
-        </mat-error>
-      }
-    </mat-form-field>
-
-    <!-- Password Field -->
-    <mat-form-field class="register__field">
-      <mat-label for="password" class="register__label">Password</mat-label>
-      <input
-        matInput
-        id="password"
-        formControlName="password"
-        type="password"
-        autocomplete="new-password"
-        required
-        aria-required="true"
-        aria-describedby="password-error"
-        class="register__input"
-      />
-      @if (password?.touched && password?.invalid) {
-        <mat-error id="password-error" class="register__error">
-          @if (password?.errors?.['required']) {
-            Password is required.
-          }
-          @if (password?.errors?.['minlength']) {
-            Minimum 6 characters required.
-          }
-        </mat-error>
-      }
-    </mat-form-field>
-
-    <!-- Confirm Password Field -->
-    <mat-form-field class="register__field">
-      <mat-label for="confirmPassword" class="register__label">Confirm Password</mat-label>
-      <input
-        matInput
-        id="confirmPassword"
-        formControlName="confirmPassword"
-        type="password"
-        autocomplete="new-password"
-        required
-        aria-required="true"
-        aria-describedby="confirm-password-error"
-        class="register__input"
-      />
-      @if (confirmPassword?.touched && confirmPassword?.invalid || passwordMismatch) {
-        <mat-error id="confirm-password-error" class="register__error">
-          @if (confirmPassword?.errors?.['required']) {
-            Confirm Password is required.
-          }
-          @if (passwordMismatch) {
-            Passwords do not match.
-          }
-        </mat-error>
-      }
-    </mat-form-field>
-
-    <!-- Submit Button -->
-    <button
-      type="submit"
-      aria-label="Submit registration form"
-      class="register__submit"
+      [formGroup]="registerForm"
+      (ngSubmit)="onSubmit()"
+      aria-describedby="register-form-description"
+      class="register__form"
     >
-      Create an Account
-    </button>
+      <!-- Username Field -->
+      <mat-form-field class="register__field">
+        <mat-label class="register__label" for="username">Username</mat-label>
+        <input
+          matInput
+          id="username"
+          formControlName="username"
+          autocomplete="username"
+          required
+          aria-required="true"
+          aria-describedby="username-error"
+          class="register__input"
+        />
+        @if (username?.touched && username?.invalid) {
+          <mat-error id="username-error" class="register__error">
+            @if (username?.errors?.["required"]) {
+              Username is required.
+            }
+            @if (username?.errors?.["minlength"]) {
+              Minimum 3 characters required.
+            }
+          </mat-error>
+        }
+        @if (username?.errors?.["usernameTaken"]) {
+          <mat-error id="username-error" class="register__error">
+            Username already taken.
+          </mat-error>
+        }
+      </mat-form-field>
 
-    <p aria-hidden="true" class="register__footer">
-      Already have an account? <a routerLink="/sign-in" class="register__link">Log in</a>
-    </p>
+      <!-- Email Field -->
+      <mat-form-field class="register__field">
+        <mat-label for="email" class="register__label">Email Address</mat-label>
+        <input
+          matInput
+          id="email"
+          formControlName="email"
+          type="email"
+          autocomplete="email"
+          placeholder="cineverse@example.com"
+          required
+          aria-required="true"
+          aria-describedby="email-error"
+          class="register__input"
+        />
+        @if (email?.touched && email?.invalid) {
+          <mat-error id="email-error" class="register__error">
+            @if (email?.errors?.["required"]) {
+              Email is required.
+            }
+            @if (email?.errors?.["email"]) {
+              Invalid email format.
+            }
+          </mat-error>
+        }
+        @if (email?.errors?.["emailTaken"]) {
+          <mat-error id="email-error" class="register__error">
+            Email is already registered.
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Password Field -->
+      <mat-form-field class="register__field">
+        <mat-label for="password" class="register__label">Password</mat-label>
+        <input
+          matInput
+          id="password"
+          formControlName="password"
+          type="password"
+          autocomplete="new-password"
+          required
+          aria-required="true"
+          aria-describedby="password-error"
+          class="register__input"
+        />
+        @if (password?.touched && password?.invalid) {
+          <mat-error id="password-error" class="register__error">
+            @if (password?.errors?.["required"]) {
+              Password is required.
+            }
+            @if (password?.errors?.["minlength"]) {
+              Minimum 6 characters required.
+            }
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Confirm Password Field -->
+      <mat-form-field class="register__field">
+        <mat-label for="confirmPassword" class="register__label"
+          >Confirm Password</mat-label
+        >
+        <input
+          matInput
+          id="confirmPassword"
+          formControlName="confirmPassword"
+          type="password"
+          autocomplete="new-password"
+          required
+          aria-required="true"
+          aria-describedby="confirm-password-error"
+          class="register__input"
+        />
+        @if (
+          (confirmPassword?.touched && confirmPassword?.invalid) ||
+          passwordMismatch
+        ) {
+          <mat-error id="confirm-password-error" class="register__error">
+            @if (confirmPassword?.errors?.["required"]) {
+              Confirm Password is required.
+            }
+            @if (passwordMismatch) {
+              Passwords do not match.
+            }
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        aria-label="Submit registration form"
+        class="register__submit"
+      >
+        Create an Account
+      </button>
+
+      <p aria-hidden="true" class="register__footer">
+        Already have an account?
+        <a routerLink="/sign-in" class="register__link">Log in</a>
+      </p>
     </form>
   </div>
 </section>

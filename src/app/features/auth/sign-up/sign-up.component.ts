@@ -1,5 +1,11 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ValidationErrors, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ValidationErrors,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -15,27 +21,59 @@ import { RouterLink } from '@angular/router';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    RouterLink
+    RouterLink,
   ],
   templateUrl: './sign-up.component.html',
-  styleUrl: './sign-up.component.scss'
+  styleUrl: './sign-up.component.scss',
 })
 export class SignUpComponent {
   registerForm: FormGroup;
+  private registeredUsers = [
+    { username: 'ernesto', email: 'ernesto@example.com' },
+    { username: 'cineversefan', email: 'fan@cineverse.com' },
+  ];
 
   constructor(private fb: FormBuilder) {
     this.registerForm = this.fb.group(
       {
-        username: ['', [Validators.required, Validators.minLength(3)]],
-        email: ['', [Validators.required, Validators.email]],
+        username: [
+          '',
+          [Validators.required, Validators.minLength(3)],
+          [this.usernameTakenValidator],
+        ],
+        email: [
+          '',
+          [Validators.required, Validators.email],
+          [this.emailTakenValidator],
+        ],
         password: ['', [Validators.required, Validators.minLength(6)]],
-        confirmPassword: ['', [Validators.required]]
+        confirmPassword: ['', Validators.required],
       },
       {
-        validators: this.passwordMatchValidator
-      }
+        validators: this.passwordMatchValidator,
+      },
     );
   }
+
+  // Validator for username taken
+  usernameTakenValidator = (control: any): Promise<ValidationErrors | null> => {
+    return new Promise((resolve) => {
+      const exists = this.registeredUsers.some(
+        (user) => user.username === control.value,
+      );
+      setTimeout(() => resolve(exists ? { usernameTaken: true } : null), 500);
+    });
+  };
+
+  // Validator for email taken
+  emailTakenValidator = (control: any): Promise<ValidationErrors | null> => {
+    return new Promise((resolve) => {
+      const exists = this.registeredUsers.some(
+        (user) => user.email === control.value,
+      );
+      setTimeout(() => resolve(exists ? { emailTaken: true } : null), 500);
+    });
+  };
 
   passwordMatchValidator(formGroup: FormGroup): ValidationErrors | null {
     const password = formGroup.get('password')?.value;
@@ -53,7 +91,7 @@ export class SignUpComponent {
     }
   }
 
-  // Getters for easy access in template
+  
   get username() {
     return this.registerForm.get('username');
   }
@@ -71,10 +109,9 @@ export class SignUpComponent {
   }
 
   get passwordMismatch(): boolean {
-  return (
-    !!this.confirmPassword?.touched &&
-    this.registerForm.hasError('passwordMismatch')
-  );
-}
-
+    return (
+      !!this.confirmPassword?.touched &&
+      this.registerForm.hasError('passwordMismatch')
+    );
+  }
 }

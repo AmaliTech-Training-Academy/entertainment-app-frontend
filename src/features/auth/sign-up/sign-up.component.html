@@ -1,9 +1,11 @@
 <section aria-labelledby="register-heading" class="container">
   <h2 id="register-heading">Sign Up</h2>
 
-  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" aria-describedby="register-form-description">
-    
-
+  <form
+    [formGroup]="registerForm"
+    (ngSubmit)="onSubmit()"
+    aria-describedby="register-form-description"
+  >
     <!-- Username Field -->
     <mat-form-field appearance="outline" class="full-width">
       <mat-label for="username">Username</mat-label>
@@ -18,10 +20,10 @@
       />
       @if (username?.touched && username?.invalid) {
         <mat-error id="username-error">
-          @if (username?.errors?.['required']) {
+          @if (username?.errors?.["required"]) {
             Username is required.
           }
-          @if (username?.errors?.['minlength']) {
+          @if (username?.errors?.["minlength"]) {
             Minimum 3 characters required.
           }
         </mat-error>
@@ -43,10 +45,10 @@
       />
       @if (email?.touched && email?.invalid) {
         <mat-error id="email-error">
-          @if (email?.errors?.['required']) {
+          @if (email?.errors?.["required"]) {
             Email is required.
           }
-          @if (email?.errors?.['email']) {
+          @if (email?.errors?.["email"]) {
             Invalid email format.
           }
         </mat-error>
@@ -68,10 +70,10 @@
       />
       @if (password?.touched && password?.invalid) {
         <mat-error id="password-error">
-          @if (password?.errors?.['required']) {
+          @if (password?.errors?.["required"]) {
             Password is required.
           }
-          @if (password?.errors?.['minlength']) {
+          @if (password?.errors?.["minlength"]) {
             Minimum 6 characters required.
           }
         </mat-error>
@@ -91,9 +93,12 @@
         aria-required="true"
         aria-describedby="confirm-password-error"
       />
-      @if (confirmPassword?.touched && confirmPassword?.invalid || passwordMismatch) {
+      @if (
+        (confirmPassword?.touched && confirmPassword?.invalid) ||
+        passwordMismatch
+      ) {
         <mat-error id="confirm-password-error">
-          @if (confirmPassword?.errors?.['required']) {
+          @if (confirmPassword?.errors?.["required"]) {
             Confirm Password is required.
           }
           @if (passwordMismatch) {
