@@ -11,39 +11,58 @@
       aria-describedby="register-form-description"
       class="register__form"
     >
-      <!-- Username Field -->
-      <div class="register__field">
-        <label class="register__label" for="username">Username</label>
-        <input
-          id="username"
-          formControlName="username"
-          autocomplete="username"
-          required
-          aria-required="true"
-          aria-describedby="username-error"
-          class="register__input"
-          [ngClass]="{
-            invalid:
-              (username?.touched && username?.invalid) ||
-              username?.errors?.['usernameTaken'],
-          }"
-        />
-        @if (username?.touched && username?.invalid) {
-          <p id="username-error" class="register__error">
-            @if (username?.errors?.["required"]) {
-              Username is required.
-            }
-            @if (username?.errors?.["minlength"]) {
-              Minimum 3 characters required.
-            }
-          </p>
-        }
-        @if (username?.errors?.["usernameTaken"]) {
-          <p id="username-error" class="register__error">
-            Username already taken.
-          </p>
-        }
-      </div>
+    <div class="register__field register__field--row">
+            <!-- First Name Field -->
+<div class="register__field">
+  <label class="register__label" for="firstName">First Name</label>
+  <input
+    id="firstName"
+    formControlName="firstName"
+    autocomplete="given-name"
+    required
+    aria-required="true"
+    aria-describedby="firstName-error"
+    class="register__input"
+    [ngClass]="{ invalid: firstName?.touched && firstName?.invalid }"
+  />
+  @if (firstName?.touched && firstName?.invalid) {
+    <p id="firstName-error" class="register__error">
+      @if (firstName?.errors?.['required']) {
+        First name is required.
+      }
+      @if (firstName?.errors?.['minlength']) {
+        Minimum 2 characters required.
+      }
+    </p>
+  }
+</div>
+
+<!-- Last Name Field -->
+<div class="register__field">
+  <label class="register__label" for="lastName">Last Name</label>
+  <input
+    id="lastName"
+    formControlName="lastName"
+    autocomplete="family-name"
+    required
+    aria-required="true"
+    aria-describedby="lastName-error"
+    class="register__input"
+    [ngClass]="{ invalid: lastName?.touched && lastName?.invalid }"
+  />
+  @if (lastName?.touched && lastName?.invalid) {
+    <p id="lastName-error" class="register__error">
+      @if (lastName?.errors?.['required']) {
+        Last name is required.
+      }
+      @if (lastName?.errors?.['minlength']) {
+        Minimum 2 characters required.
+      }
+    </p>
+  }
+</div>
+    </div>
+
 
       <!-- Email Field -->
       <div class="register__field">

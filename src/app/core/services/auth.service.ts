@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface RegisterPayload {
-  username: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
 }
@@ -12,7 +13,7 @@ export interface RegisterPayload {
   providedIn: 'root',
 })
 export class AuthService {
-  private baseUrl = 'https://your-api-base-url.com/api'; // Update when backend is ready
+  private baseUrl = 'https://your-api-base-url.com/api'; // Replace with actual backend URL
 
   constructor(private http: HttpClient) {}
 

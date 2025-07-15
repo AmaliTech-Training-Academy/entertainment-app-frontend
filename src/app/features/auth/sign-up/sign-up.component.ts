@@ -39,31 +39,20 @@ export class SignUpComponent {
     private authService: AuthService,
   ) {
     this.registerForm = this.fb.group(
-      {
-        username: [
-          '',
-          [Validators.required, Validators.minLength(3)],
-          [this.usernameTakenValidator],
-        ],
-        email: [
-          '',
-          [Validators.required, Validators.email],
-          [this.emailTakenValidator],
-        ],
-        password: [
-          '',
-          [
-            Validators.required,
-            Validators.minLength(8),
-            this.strongPasswordValidator,
-          ],
-        ],
-        confirmPassword: ['', Validators.required],
-      },
-      {
-        validators: this.passwordMatchValidator,
-      },
-    );
+  {
+    firstName: ['', [Validators.required, Validators.minLength(2)]],
+    lastName: ['', [Validators.required, Validators.minLength(2)]],
+    email: ['', [Validators.required, Validators.email], [this.emailTakenValidator]],
+    password: [
+      '',
+      [Validators.required, Validators.minLength(8), this.strongPasswordValidator],
+    ],
+    confirmPassword: ['', Validators.required],
+  },
+  {
+    validators: this.passwordMatchValidator,
+  }
+);
   }
 
   // Add this method inside the SignUpComponent class
@@ -102,32 +91,35 @@ export class SignUpComponent {
   }
 
   onSubmit(): void {
-    if (this.registerForm.valid) {
-      const { username, email, password } = this.registerForm.value;
+  if (this.registerForm.valid) {
+    const { firstName, lastName, email, password } = this.registerForm.value;
 
-      this.authService.register({ username, email, password }).subscribe({
-        next: (response) => {
-          console.log('Registered successfully:', response);
-          // Redirect to login or dashboard
-        },
-        error: (error) => {
-          console.error('Registration error:', error);
-          if (error.error?.message === 'Username already taken') {
-            this.username?.setErrors({ usernameTaken: true });
-          }
-          if (error.error?.message === 'Email already registered') {
-            this.email?.setErrors({ emailTaken: true });
-          }
-        },
-      });
-    } else {
-      this.registerForm.markAllAsTouched();
-    }
+    this.authService.register({ firstName, lastName, email, password }).subscribe({
+      next: (response) => {
+        console.log('Registered successfully:', response);
+        // Redirect to login or dashboard
+      },
+      error: (error) => {
+        console.error('Registration error:', error);
+        if (error.error?.message === 'Email already registered') {
+          this.email?.setErrors({ emailTaken: true });
+        }
+      },
+    });
+  } else {
+    this.registerForm.markAllAsTouched();
   }
+}
 
-  get username() {
-    return this.registerForm.get('username');
-  }
+
+  get firstName() {
+  return this.registerForm.get('firstName');
+}
+
+get lastName() {
+  return this.registerForm.get('lastName');
+}
+
 
   get email() {
     return this.registerForm.get('email');
