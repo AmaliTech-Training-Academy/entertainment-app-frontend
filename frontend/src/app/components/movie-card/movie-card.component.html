@@ -2,13 +2,6 @@
   <div class="card-container">
     <div class="image-container">
       <img src="movie.png" [alt]="title" class="movie-image" />
-      <!-- <button
-        mat-icon-button
-        class="bookmark-button"
-        (click)="toggleBookmark()"
-      >
-        <mat-icon>{{ isBookmarked ? "bookmark" : "bookmark_border" }}</mat-icon>
-      </button> -->
     </div>
 
     <div class="content-container">
@@ -27,22 +20,22 @@
       </div>
       <div class="meta-container">
         <div class="meta-item">
-          <mat-icon class="calendar-icon">calendar_month</mat-icon>
           <span>{{ year }}</span>
+          <mat-icon class="calendar-icon">calendar_month</mat-icon>
         </div>
 
         <span class="separator">•</span>
 
         <div class="meta-item">
-          <mat-icon class="meta-icon">{{ getTypeIcon(type) }}</mat-icon>
           <span>{{ type }}</span>
+          <mat-icon class="meta-icon">{{ getTypeIcon(type) }}</mat-icon>
         </div>
 
         <span class="separator">•</span>
 
-        <div class="meta-item">
+        <div class="meta-item rating">
           <span>{{ rating }}/10</span>
-          <mat-icon class="star-icon">star</mat-icon>
+          <mat-icon class="outlined-star">star</mat-icon>
         </div>
       </div>
 
