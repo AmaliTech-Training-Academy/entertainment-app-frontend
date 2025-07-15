@@ -17,12 +17,15 @@ provider "aws" {
   region = var.aws_region
 
   default_tags {
-    tags = {
-      Project     = "CineVerse"
-      ManagedBy   = "Terraform"
-      Environment = var.environment
-      Owner       = "DevOps-Team"
-    }
+    tags = merge(
+      {
+        Project     = "CineVerse"
+        ManagedBy   = "Terraform"
+        Environment = var.environment
+        Owner       = "DevOps-Team"
+      },
+      var.tags
+    )
   }
 }
 
@@ -32,16 +35,36 @@ provider "aws" {
   region = "us-east-1"
 
   default_tags {
-    tags = {
-      Project     = "CineVerse"
-      ManagedBy   = "Terraform"
-      Environment = var.environment
-      Owner       = "DevOps-Team"
-    }
+    tags = merge(
+      {
+        Project     = "CineVerse"
+        ManagedBy   = "Terraform"
+        Environment = var.environment
+        Owner       = "DevOps-Team"
+      },
+      var.tags
+    )
   }
 }
 
-# Create CloudFront distribution first to get ARN for S3 bucket policy
+# WAF with us-east-1 provider - Create first so CloudFront can reference it
+module "waf" {
+  count  = var.enable_waf ? 1 : 0
+  source = "./modules/waf"
+
+  project_name      = var.project_name
+  environment       = var.environment
+  rate_limit        = local.env_config[var.environment].waf_rate_limit
+  use_existing_waf  = var.use_existing_resources
+
+  tags = local.common_tags
+
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
+}
+
+# CloudFront distribution
 module "cloudfront" {
   source = "./modules/cloudfront"
 
@@ -51,9 +74,12 @@ module "cloudfront" {
   origin_access_control_id = module.s3_website.origin_access_control_id
   price_class              = local.env_config[var.environment].cloudfront_price_class
   waf_web_acl_id           = var.enable_waf ? module.waf[0].web_acl_id : ""
-  api_endpoint             = var.domain_name != "" ? "https://api.${var.domain_name}" : ""
+  api_endpoint             = var.domain_name != "" ? "https://api.${var.domain_name}" : var.api_endpoint
+  use_existing_policies    = var.use_existing_resources
 
   tags = local.common_tags
+
+  depends_on = [module.waf]
 }
 
 # S3 Website bucket
@@ -66,23 +92,6 @@ module "s3_website" {
   cloudfront_distribution_arn = module.cloudfront.distribution_arn
 
   tags = local.common_tags
-}
-
-# WAF with us-east-1 provider
-module "waf" {
-  count  = var.enable_waf ? 1 : 0
-  source = "./modules/waf"
-
-  project_name = var.project_name
-  environment  = var.environment
-  rate_limit   = local.env_config[var.environment].waf_rate_limit
-
-  tags = local.common_tags
-
-  # ADDED: Provider for us-east-1
-  providers = {
-    aws.us_east_1 = aws.us_east_1
-  }
 }
 
 # Monitoring
