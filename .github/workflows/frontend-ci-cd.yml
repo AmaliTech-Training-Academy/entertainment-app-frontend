@@ -134,6 +134,10 @@ jobs:
         working-directory: terraform
         run: terraform plan -input=false -var="environment=${{ github.ref_name }}"
 
+      - name: List Terraform directory contents
+        working-directory: terraform
+        run: ls -la
+
       # Terraform Apply for dev
       - name: Terraform Apply (only for dev)
         if: github.ref == 'refs/heads/dev'
