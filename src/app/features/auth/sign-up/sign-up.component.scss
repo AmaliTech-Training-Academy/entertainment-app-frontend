@@ -1,6 +1,6 @@
-@use '../../../../styles/variables' as *;
-@use '../../../../styles/spacing' as *;
-@use 'sass:map';
+@use "../../../../styles/variables" as *;
+@use "../../../../styles/spacing" as *;
+@use "sass:map";
 
 // Helpers
 @function color($palette, $shade) {
@@ -84,7 +84,9 @@
   padding: space(2) 0;
   color: color($neutral-colors, 100);
   font-size: 0.95rem;
-  transition: border-color 0.3s, color 0.3s;
+  transition:
+    border-color 0.3s,
+    color 0.3s;
 
   &:focus {
     outline: none;
@@ -101,7 +103,6 @@
     border-bottom: 2px solid color($red-colors, 100);
   }
 }
-
 
 // ========== ERROR ==========
 .register__error {
@@ -121,7 +122,9 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
 
   &:hover {
     background-color: color($neutral-colors, 100);

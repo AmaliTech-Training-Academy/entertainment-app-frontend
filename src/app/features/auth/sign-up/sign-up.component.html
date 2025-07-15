@@ -22,7 +22,11 @@
           aria-required="true"
           aria-describedby="username-error"
           class="register__input"
-          [ngClass]="{ 'invalid': username?.touched && username?.invalid || username?.errors?.['usernameTaken'] }"
+          [ngClass]="{
+            invalid:
+              (username?.touched && username?.invalid) ||
+              username?.errors?.['usernameTaken'],
+          }"
         />
         @if (username?.touched && username?.invalid) {
           <p id="username-error" class="register__error">
@@ -54,8 +58,10 @@
           aria-describedby="email-error"
           class="register__input"
           [ngClass]="{
-    'invalid': (email?.touched && email?.invalid) || email?.errors?.['emailTaken']
-  }"
+            invalid:
+              (email?.touched && email?.invalid) ||
+              email?.errors?.['emailTaken'],
+          }"
         />
         @if (email?.touched && email?.invalid) {
           <p id="email-error" class="register__error">
@@ -87,22 +93,22 @@
           aria-describedby="password-error"
           class="register__input"
           [ngClass]="{
-    'invalid': password?.touched && password?.invalid
-  }"
+            invalid: password?.touched && password?.invalid,
+          }"
         />
         @if (password?.touched && password?.invalid) {
           <p id="password-error" class="register__error">
-  @if (password?.errors?.['required']) {
-    Password is required.
-  }
-  @if (password?.errors?.['minlength']) {
-    Minimum 8 characters required.
-  }
-  @if (password?.errors?.['weakPassword']) {
-    Password must contain uppercase, lowercase, number, and special character.
-  }
-</p>
-
+            @if (password?.errors?.["required"]) {
+              Password is required.
+            }
+            @if (password?.errors?.["minlength"]) {
+              Minimum 8 characters required.
+            }
+            @if (password?.errors?.["weakPassword"]) {
+              Password must contain uppercase, lowercase, number, and special
+              character.
+            }
+          </p>
         }
       </div>
 
@@ -122,8 +128,10 @@
           aria-describedby="confirm-password-error"
           class="register__input"
           [ngClass]="{
-    'invalid': (confirmPassword?.touched && confirmPassword?.invalid) || passwordMismatch
-  }"
+            invalid:
+              (confirmPassword?.touched && confirmPassword?.invalid) ||
+              passwordMismatch,
+          }"
         />
         @if (
           (confirmPassword?.touched && confirmPassword?.invalid) ||

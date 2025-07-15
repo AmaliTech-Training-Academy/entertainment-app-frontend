@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -33,7 +34,10 @@ export class SignUpComponent {
     { username: 'cineversefan', email: 'fan@cineverse.com' },
   ];
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+  ) {
     this.registerForm = this.fb.group(
       {
         username: [
@@ -46,7 +50,14 @@ export class SignUpComponent {
           [Validators.required, Validators.email],
           [this.emailTakenValidator],
         ],
-        password: ['', [Validators.required, Validators.minLength(8), this.strongPasswordValidator]],
+        password: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(8),
+            this.strongPasswordValidator,
+          ],
+        ],
         confirmPassword: ['', Validators.required],
       },
       {
@@ -56,16 +67,13 @@ export class SignUpComponent {
   }
 
   // Add this method inside the SignUpComponent class
-private strongPasswordValidator(control: any): ValidationErrors | null {
-  const value = control.value;
-  const strongPasswordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+  private strongPasswordValidator(control: any): ValidationErrors | null {
+    const value = control.value;
+    const strongPasswordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
-  return strongPasswordRegex.test(value)
-    ? null
-    : { weakPassword: true };
-}
-
+    return strongPasswordRegex.test(value) ? null : { weakPassword: true };
+  }
 
   // Validator for username taken
   usernameTakenValidator = (control: any): Promise<ValidationErrors | null> => {
@@ -95,15 +103,28 @@ private strongPasswordValidator(control: any): ValidationErrors | null {
 
   onSubmit(): void {
     if (this.registerForm.valid) {
-      console.log('Form Data:', this.registerForm.value);
-      // Handle API submission here
+      const { username, email, password } = this.registerForm.value;
+
+      this.authService.register({ username, email, password }).subscribe({
+        next: (response) => {
+          console.log('Registered successfully:', response);
+          // Redirect to login or dashboard
+        },
+        error: (error) => {
+          console.error('Registration error:', error);
+          if (error.error?.message === 'Username already taken') {
+            this.username?.setErrors({ usernameTaken: true });
+          }
+          if (error.error?.message === 'Email already registered') {
+            this.email?.setErrors({ emailTaken: true });
+          }
+        },
+      });
     } else {
-      console.log('Form Invalid');
       this.registerForm.markAllAsTouched();
     }
   }
 
-  
   get username() {
     return this.registerForm.get('username');
   }
