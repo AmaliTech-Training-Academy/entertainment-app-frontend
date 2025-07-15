@@ -122,6 +122,17 @@ jobs:
           terraform init -input=false \
              -backend-config="environments/${{ github.ref_name }}/backend.hcl"
           terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
+      
+      # Terraform Plan 
+      - name: Terraform Plan
+        working-directory: terraform
+        run: terraform plan -input=false
+
+      # Terraform Apply for dev
+      - name: Terraform Apply (only for dev)
+        if: github.ref == 'refs/heads/dev'
+        working-directory: terraform
+        run: terraform apply --auto-approve -input=false
 
       # Retrieve outputs dynamically based on workspace
       - name: Retrieve S3 Bucket and CloudFront Info
