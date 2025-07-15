@@ -37,3 +37,10 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+
+variable "create_policies" {
+  description = "Whether to create CloudFront and WAF policies"
+  type        = bool
+  default     = true  # This ensures it's created by default (e.g., in dev)
+}

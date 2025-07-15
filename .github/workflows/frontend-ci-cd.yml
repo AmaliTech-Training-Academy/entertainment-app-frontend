@@ -142,7 +142,9 @@ jobs:
       - name: Terraform Apply (only for dev)
         if: github.ref == 'refs/heads/dev'
         working-directory: terraform
-        run: terraform apply --auto-approve -input=false -var="environment=${{ github.ref_name }}"
+        run: terraform apply --auto-approve -input=false \ 
+          -var="environment=${{ github.ref_name }}" \
+          -var="create_policies=false"
 
       # Retrieve outputs dynamically based on workspace
       - name: Retrieve S3 Bucket and CloudFront Info
