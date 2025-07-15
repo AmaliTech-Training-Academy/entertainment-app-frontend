@@ -83,6 +83,8 @@ resource "aws_cloudfront_origin_access_control" "website" {
 
 # S3 bucket policy for CloudFront access
 resource "aws_s3_bucket_policy" "website" {
+  count = var.create_policies ? 1 : 0
+
   bucket = aws_s3_bucket.website.id
   policy = jsonencode({
     Version = "2012-10-17"

@@ -21,7 +21,6 @@ resource "aws_cloudfront_distribution" "website" {
     compress                   = true
     viewer_protocol_policy     = "redirect-to-https"
     cache_policy_id            = aws_cloudfront_cache_policy.spa.id
-    # FIXED: Use our own origin request policy instead of non-existent one
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
@@ -35,7 +34,6 @@ resource "aws_cloudfront_distribution" "website" {
     compress                   = true
     viewer_protocol_policy     = "redirect-to-https"
     cache_policy_id            = aws_cloudfront_cache_policy.static_assets.id
-    # FIXED: Use our own origin request policy
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
@@ -70,6 +68,8 @@ resource "aws_cloudfront_distribution" "website" {
 
 # Cache Policy for SPA
 resource "aws_cloudfront_cache_policy" "spa" {
+  count = var.create_policies ? 1 : 0
+
   name        = "${var.environment}-spa-cache-policy"
   comment     = "Cache policy for SPA applications"
   default_ttl = 86400
@@ -96,6 +96,8 @@ resource "aws_cloudfront_cache_policy" "spa" {
 
 # Cache Policy for Static Assets
 resource "aws_cloudfront_cache_policy" "static_assets" {
+  count = var.create_policies ? 1 : 0
+  
   name        = "${var.environment}-static-assets-cache-policy"
   comment     = "Cache policy for static assets (CSS, JS, images)"
   default_ttl = 31536000  # 1 year
@@ -120,8 +122,10 @@ resource "aws_cloudfront_cache_policy" "static_assets" {
   }
 }
 
-# FIXED: Create our own Origin Request Policy instead of using non-existent one
+# Origin Request Policy for S3
 resource "aws_cloudfront_origin_request_policy" "s3_origin" {
+  count = var.create_policies ? 1 : 0
+
   name    = "${var.environment}-s3-origin-request-policy"
   comment = "Origin request policy for S3 static website"
 
@@ -145,8 +149,10 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
   }
 }
 
-# Response Headers Policy for Security
+# FIXED: Response Headers Policy for Security
 resource "aws_cloudfront_response_headers_policy" "security" {
+  count = var.create_policies ? 1 : 0
+  
   name    = "${var.environment}-security-headers"
   comment = "Security headers for CineVerse frontend"
 
@@ -158,7 +164,7 @@ resource "aws_cloudfront_response_headers_policy" "security" {
     }
 
     access_control_allow_methods {
-      items = ["GET", "HEAD", "OPTIONS"]
+      items = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "DELETE"]
     }
 
     access_control_allow_origins {
@@ -188,13 +194,13 @@ resource "aws_cloudfront_response_headers_policy" "security" {
       referrer_policy = "strict-origin-when-cross-origin"
       override        = true
     }
-  }
 
-  custom_headers_config {
-    items {
-      header   = "Content-Security-Policy"
-      value    = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ${var.api_endpoint}; media-src 'self';"
+    
+    content_security_policy {
+      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ${var.api_endpoint}; media-src 'self';"
       override = true
     }
   }
+
+  
 }
