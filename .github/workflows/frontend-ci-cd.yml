@@ -126,13 +126,13 @@ jobs:
       # Terraform Plan 
       - name: Terraform Plan
         working-directory: terraform
-        run: terraform plan -input=false
+        run: terraform plan -input=false -var="environment=${{ github.ref_name }}"
 
       # Terraform Apply for dev
       - name: Terraform Apply (only for dev)
         if: github.ref == 'refs/heads/dev'
         working-directory: terraform
-        run: terraform apply --auto-approve -input=false
+        run: terraform apply --auto-approve -input=false -var="environment=${{ github.ref_name }}"
 
       # Retrieve outputs dynamically based on workspace
       - name: Retrieve S3 Bucket and CloudFront Info
