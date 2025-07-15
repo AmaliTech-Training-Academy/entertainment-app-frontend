@@ -119,7 +119,7 @@ jobs:
       - name: Terraform Init
         working-directory: terraform
         run: |
-          terraform init
+          terraform init -input=false
           terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
 
       # Retrieve outputs dynamically based on workspace
