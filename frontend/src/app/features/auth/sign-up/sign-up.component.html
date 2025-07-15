@@ -1,120 +1,207 @@
-<section aria-labelledby="register-heading" class="container">
-  <h2 id="register-heading">Sign Up</h2>
+<section aria-labelledby="register-heading" class="register__container">
+  <div class="register__logo">
+    <img src="assets/images/cineverse_logo.svg" alt="cineverse logo" />
+  </div>
 
-  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" aria-describedby="register-form-description">
-    
+  <div class="register">
+    <h2 id="register-heading" class="register__heading">Sign Up</h2>
 
-    <!-- Username Field -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label for="username">Username</mat-label>
-      <input
-        matInput
-        id="username"
-        formControlName="username"
-        autocomplete="username"
-        required
-        aria-required="true"
-        aria-describedby="username-error"
-      />
-      @if (username?.touched && username?.invalid) {
-        <mat-error id="username-error">
-          @if (username?.errors?.['required']) {
-            Username is required.
-          }
-          @if (username?.errors?.['minlength']) {
-            Minimum 3 characters required.
-          }
-        </mat-error>
-      }
-    </mat-form-field>
-
-    <!-- Email Field -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label for="email">Email</mat-label>
-      <input
-        matInput
-        id="email"
-        formControlName="email"
-        type="email"
-        autocomplete="email"
-        required
-        aria-required="true"
-        aria-describedby="email-error"
-      />
-      @if (email?.touched && email?.invalid) {
-        <mat-error id="email-error">
-          @if (email?.errors?.['required']) {
-            Email is required.
-          }
-          @if (email?.errors?.['email']) {
-            Invalid email format.
-          }
-        </mat-error>
-      }
-    </mat-form-field>
-
-    <!-- Password Field -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label for="password">Password</mat-label>
-      <input
-        matInput
-        id="password"
-        formControlName="password"
-        type="password"
-        autocomplete="new-password"
-        required
-        aria-required="true"
-        aria-describedby="password-error"
-      />
-      @if (password?.touched && password?.invalid) {
-        <mat-error id="password-error">
-          @if (password?.errors?.['required']) {
-            Password is required.
-          }
-          @if (password?.errors?.['minlength']) {
-            Minimum 6 characters required.
-          }
-        </mat-error>
-      }
-    </mat-form-field>
-
-    <!-- Confirm Password Field -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label for="confirmPassword">Confirm Password</mat-label>
-      <input
-        matInput
-        id="confirmPassword"
-        formControlName="confirmPassword"
-        type="password"
-        autocomplete="new-password"
-        required
-        aria-required="true"
-        aria-describedby="confirm-password-error"
-      />
-      @if (confirmPassword?.touched && confirmPassword?.invalid || passwordMismatch) {
-        <mat-error id="confirm-password-error">
-          @if (confirmPassword?.errors?.['required']) {
-            Confirm Password is required.
-          }
-          @if (passwordMismatch) {
-            Passwords do not match.
-          }
-        </mat-error>
-      }
-    </mat-form-field>
-
-    <!-- Submit Button -->
-    <button
-      mat-raised-button
-      color="primary"
-      type="submit"
-      aria-label="Submit registration form"
+    <form
+      [formGroup]="registerForm"
+      (ngSubmit)="step === 1 ? nextStep() : createAccount()"
+      aria-describedby="register-form-description"
+      class="register__form"
     >
-      Create an Account
-    </button>
+      <!-- Step 1: First Name, Last Name, Email -->
+      <ng-container *ngIf="step === 1">
+        <div class="register__field register__field--row">
+          <!-- First Name Field -->
+          <div class="register__field">
+            <label class="register__label" for="firstName">First Name</label>
+            <input
+              id="firstName"
+              formControlName="firstName"
+              autocomplete="given-name"
+              aria-required="true"
+              aria-describedby="firstName-error"
+              class="register__input"
+              [ngClass]="{ invalid: firstName?.touched && firstName?.invalid }"
+            />
+            @if (firstName?.touched && firstName?.invalid) {
+              <p id="firstName-error" class="register__error">
+                @if (firstName?.errors?.['required']) {
+                  First name is required.
+                }
+                @if (firstName?.errors?.['minlength']) {
+                  Minimum 2 characters required.
+                }
+              </p>
+            }
+          </div>
 
-    <p aria-hidden="true">
-      Already have an account? <a routerLink="/sign-in">Log in</a>
-    </p>
-  </form>
+          <!-- Last Name Field -->
+          <div class="register__field">
+            <label class="register__label" for="lastName">Last Name</label>
+            <input
+              id="lastName"
+              formControlName="lastName"
+              autocomplete="family-name"
+              aria-required="true"
+              aria-describedby="lastName-error"
+              class="register__input"
+              [ngClass]="{ invalid: lastName?.touched && lastName?.invalid }"
+            />
+            @if (lastName?.touched && lastName?.invalid) {
+              <p id="lastName-error" class="register__error">
+                @if (lastName?.errors?.['required']) {
+                  Last name is required.
+                }
+                @if (lastName?.errors?.['minlength']) {
+                  Minimum 2 characters required.
+                }
+              </p>
+            }
+          </div>
+        </div>
+
+        <!-- Email Field -->
+        <div class="register__field">
+          <label class="register__label" for="email">Email Address</label>
+          <input
+            id="email"
+            formControlName="email"
+            type="email"
+            autocomplete="email"
+            aria-required="true"
+            aria-describedby="email-error"
+            class="register__input"
+            [ngClass]="{
+              invalid:
+                (email?.touched && email?.invalid) ||
+                email?.errors?.['emailTaken']
+            }"
+          />
+          @if (email?.touched && email?.invalid) {
+            <p id="email-error" class="register__error">
+              @if (email?.errors?.['required']) {
+                Email is required.
+              }
+              @if (email?.errors?.['email']) {
+                Invalid email format.
+              }
+            </p>
+          }
+          @if (email?.errors?.['emailTaken']) {
+            <p id="email-error" class="register__error">
+              Email is already registered.
+            </p>
+          }
+        </div>
+
+        <button
+  type="submit"
+  class="register__submit"
+  [disabled]="!firstName?.valid || !lastName?.valid || !email?.valid"
+>
+  Next
+</button>
+
+      </ng-container>
+
+      <!-- Step 2: Username, Password, Confirm Password -->
+      <ng-container *ngIf="step === 2">
+        <!-- Username Field -->
+        <div class="register__field">
+          <label class="register__label" for="username">Username</label>
+          <input
+            id="username"
+            formControlName="username"
+            class="register__input"
+            readonly
+            aria-required="true"
+          />
+        </div>
+
+        <!-- Password Field -->
+        <div class="register__field">
+          <label class="register__label" for="password">Password</label>
+          <input
+  id="password"
+  formControlName="password"
+  type="password"
+  autocomplete="new-password"
+  aria-required="true"
+  aria-describedby="password-error"
+  class="register__input"
+  [ngClass]="{
+    invalid: password?.touched && password?.invalid,
+    strong: password?.valid && !password?.errors?.['weakPassword']
+  }"
+/>
+
+          @if (password?.touched && password?.invalid) {
+            <p id="password-error" class="register__error">
+              @if (password?.errors?.['required']) {
+                Password is required.
+              }
+              @if (password?.errors?.['minlength']) {
+                Minimum 8 characters required.
+              }
+              @if (password?.errors?.['weakPassword']) {
+                Password must contain uppercase, lowercase, number, and special character.
+              }
+            </p>
+          }
+        </div>
+
+        <!-- Confirm Password Field -->
+        <div class="register__field">
+          <label class="register__label" for="confirmPassword">Confirm Password</label>
+          <input
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            type="password"
+            autocomplete="new-password"
+            aria-required="true"
+            aria-describedby="confirm-password-error"
+            class="register__input"
+            [ngClass]="{
+              invalid:
+                (confirmPassword?.touched && confirmPassword?.invalid) ||
+                passwordMismatch
+            }"
+          />
+          @if (
+            (confirmPassword?.touched && confirmPassword?.invalid) ||
+            passwordMismatch
+          ) {
+            <p id="confirm-password-error" class="register__error">
+              @if (confirmPassword?.errors?.['required']) {
+                Confirm Password is required.
+              }
+              @if (passwordMismatch) {
+                Passwords do not match.
+              }
+            </p>
+          }
+        </div>
+
+        <button
+  type="submit"
+  class="register__submit"
+  [disabled]="!registerForm.valid"
+>
+  Create an Account
+</button>
+
+      </ng-container>
+
+      <!-- Footer -->
+      <p aria-hidden="true" class="register__footer">
+        Already have an account?
+        <a routerLink="/sign-in
+        " class="register__link">Log in</a>
+      </p>
+    </form>
+  </div>
 </section>
