@@ -20,7 +20,8 @@ on:
 jobs:
   # Job to build and test the Angular application
   build-and-test:
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -89,7 +90,8 @@ jobs:
   deploy:
     # This job depends on the successful completion of the build-and-test job
     needs: build-and-test
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    runs-on: self-hosted
     # This job only runs when a push or PR merge occurs on the 'staging' branch
     if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
     # Protect the staging environment; requires manual approval or specific secrets setup in GitHub
