@@ -116,11 +116,15 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       # Init Terraform and select workspace (dev, staging, prod)
-      - name: Terraform Init
+      - name: Terraform Init with Remote Backend
         working-directory: terraform
         run: |
           terraform init -input=false \
-             -backend-config="environments/${{ github.ref_name }}/backend.hcl"
+            -backend-config="bucket=cineverse-terraform-state-${{ github.ref_name }}" \
+            -backend-config="key=frontend/${{ github.ref_name }}/terraform.tfstate" \
+            -backend-config="region=${{ secrets.AWS_REGION }}" \
+            -backend-config="dynamodb_table=cineverse-terraform-locks" \
+            -backend-config="encrypt=true"
           terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
       
       # Terraform Plan 
