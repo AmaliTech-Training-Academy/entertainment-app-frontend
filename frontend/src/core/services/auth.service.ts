@@ -13,8 +13,7 @@ export interface RegisterPayload {
   providedIn: 'root',
 })
 export class AuthService {
-  private baseUrl = 'https://your-api-base-url.com/api'; // Replace with actual backend URL
-
+  private baseUrl = 'https://your-api-base-url.com/api';
   constructor(private http: HttpClient) {}
 
   register(payload: RegisterPayload): Observable<any> {
