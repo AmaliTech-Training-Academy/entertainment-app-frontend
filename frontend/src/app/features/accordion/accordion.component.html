@@ -1,0 +1,21 @@
+
+<h2>Frequently Asked Questions</h2>
+<div class="accordion">
+  <div
+    div class="accordion-item" [ngClass]="{ 'open': activeIndex === i }"
+    *ngFor="let item of accordionItems; let i = index"
+  >
+    <div class="accordion-header" (click)="toggle(i)">
+      <h3>{{ item.title }}</h3>
+      <lucide-icon
+        [name]="activeIndex === i ? X : Plus"
+        class="icon"
+        [attr.aria-label]="activeIndex === i ? 'Close' : 'Expand'"
+      />
+    </div>
+
+    <div class="accordion-content" *ngIf="activeIndex === i">
+      <p>{{ item.content }}</p>
+    </div>
+  </div>
+</div>
