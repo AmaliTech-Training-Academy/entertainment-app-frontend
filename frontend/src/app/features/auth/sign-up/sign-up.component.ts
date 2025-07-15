@@ -16,7 +16,7 @@ import { TrendingMovieCardComponent } from '../../../components/trending-movie-c
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    RouterLink,TrendingMovieCardComponent
+    RouterLink
   ],
   templateUrl: './sign-up.component.html',
   styleUrls: ['./sign-up.component.scss']
