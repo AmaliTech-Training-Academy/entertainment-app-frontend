@@ -1,1 +1,56 @@
-<p>movie-card works!</p>
+<div class="movie-card">
+  <div class="card-container">
+    <div class="image-container">
+      <img src="movie.png" [alt]="title" class="movie-image" />
+      <!-- <button
+        mat-icon-button
+        class="bookmark-button"
+        (click)="toggleBookmark()"
+      >
+        <mat-icon>{{ isBookmarked ? "bookmark" : "bookmark_border" }}</mat-icon>
+      </button> -->
+    </div>
+
+    <div class="content-container">
+      <div class="title-container">
+        <h1 class="movie-title">{{ title }}</h1>
+
+        <button
+          mat-icon-button
+          class="bookmark-button"
+          (click)="toggleBookmark()"
+        >
+          <mat-icon>{{
+            isBookmarked ? "bookmark" : "bookmark_border"
+          }}</mat-icon>
+        </button>
+      </div>
+      <div class="meta-container">
+        <div class="meta-item">
+          <mat-icon class="calendar-icon">calendar_month</mat-icon>
+          <span>{{ year }}</span>
+        </div>
+
+        <span class="separator">•</span>
+
+        <div class="meta-item">
+          <mat-icon class="meta-icon">{{ getTypeIcon(type) }}</mat-icon>
+          <span>{{ type }}</span>
+        </div>
+
+        <span class="separator">•</span>
+
+        <div class="meta-item">
+          <span>{{ rating }}/10</span>
+          <mat-icon class="star-icon">star</mat-icon>
+        </div>
+      </div>
+
+      <div class="genres-container">
+        <span *ngFor="let genre of genres" class="genre-tag">
+          {{ genre }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

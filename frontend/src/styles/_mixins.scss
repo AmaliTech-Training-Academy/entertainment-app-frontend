@@ -1,0 +1,22 @@
+@use "sass:map";
+@use "typography" as *;
+
+@mixin apply-heading-style($level) {
+  $heading: map.get($headings, $level);
+
+  font-family: map.get($heading, font-family);
+  font-weight: map.get($heading, font-weight);
+  font-size: map.get($heading, font-size);
+  line-height: map.get($heading, line-height);
+  letter-spacing: map.get($heading, letter-spacing);
+}
+
+@mixin apply-body-style($level) {
+  $body: map.get($body, $level);
+
+  font-family: map.get($body, font-family);
+  font-weight: map.get($body, font-weight);
+  font-size: map.get($body, font-size);
+  line-height: map.get($body, line-height);
+  letter-spacing: map.get($body, letter-spacing);
+}

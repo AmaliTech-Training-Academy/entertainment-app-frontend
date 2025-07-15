@@ -1,8 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-movie-card',
-  imports: [],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './movie-card.component.html',
   styleUrl: './movie-card.component.scss',
 })
