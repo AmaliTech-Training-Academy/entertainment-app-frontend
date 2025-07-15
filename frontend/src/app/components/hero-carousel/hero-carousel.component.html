@@ -1,0 +1,23 @@
+<div class="hero-carousel" [ngStyle]="{'background-image': 'url(' + currentHero.image + ')'}">
+  <div class="hero-overlay">
+    <div class="hero-content" [ngClass]="{'slide-animation': animate}">
+      <h1 class="hero-title">{{ currentHero.title }}</h1>
+      <p class="hero-description">{{ currentHero.description }}</p>
+      <div class="hero-meta">
+        <span class="hero-rating">★ {{ currentHero.rating }}</span>
+        <span class="hero-year">• {{ currentHero.year }}</span>
+        <span class="hero-duration">• {{ currentHero.duration }}</span>
+        <span class="hero-genres">• {{ currentHero.genres.join(' ') }}</span>
+      </div>
+      <div class="hero-actions">
+        <button class="play-btn">▶ Play Now</button>
+        <button class="info-btn">ℹ Info</button>
+      </div>
+    </div>
+    <div class="hero-carousel-indicators">
+      <span *ngFor="let item of heroItems; let i = index" 
+            [class.active]="i === currentIndex" 
+            (click)="goToSlide(i)"></span>
+    </div>
+  </div>
+</div>

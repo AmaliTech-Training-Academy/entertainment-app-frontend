@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 
@@ -10,5 +10,7 @@ import { MatCardModule } from '@angular/material/card';
   styleUrl: './trending-movie-card.component.scss'
 })
 export class TrendingMovieCardComponent {
-
+  @Input() rank!: number;
+  @Input() image!: string;
+  @Input() alt!: string;
 }

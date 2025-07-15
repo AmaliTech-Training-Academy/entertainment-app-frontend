@@ -1,0 +1,20 @@
+.trending-section {
+  max-width: 1256px;
+  margin: 2rem auto;
+  height: 100%;
+  overflow: hidden;
+  &__title {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    margin-left: 1rem;
+  }
+  &__list {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    padding: 0 1rem 2rem 1rem;
+    align-items: flex-end;
+  }
+}
