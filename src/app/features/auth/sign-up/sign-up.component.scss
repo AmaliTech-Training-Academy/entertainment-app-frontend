@@ -80,8 +80,6 @@
         color: color($red-colors, 100);
         display: flex;
         justify-content: flex-end;
-        margin-top: -1.8rem;
-        margin-left: 3rem;
       }
 
       .register__submit {
@@ -119,12 +117,19 @@
   @media (min-width: 768px) {
     justify-content: center;
 
-    .register {
-      max-width: 480px;
-    }
-
     .register__logo {
       margin-top: 0;
     }
+
+    .register {
+      max-width: 480px;
+      padding: space(6) space(8);
+
+      &__form {
+        margin: space(0);
+      }
+    }
+
+    
   }
 }

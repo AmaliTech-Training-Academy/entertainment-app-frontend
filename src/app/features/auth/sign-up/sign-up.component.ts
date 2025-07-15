@@ -46,7 +46,7 @@ export class SignUpComponent {
           [Validators.required, Validators.email],
           [this.emailTakenValidator],
         ],
-        password: ['', [Validators.required, Validators.minLength(6)]],
+        password: ['', [Validators.required, Validators.minLength(8), this.strongPasswordValidator]],
         confirmPassword: ['', Validators.required],
       },
       {
@@ -54,6 +54,18 @@ export class SignUpComponent {
       },
     );
   }
+
+  // Add this method inside the SignUpComponent class
+private strongPasswordValidator(control: any): ValidationErrors | null {
+  const value = control.value;
+  const strongPasswordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+  return strongPasswordRegex.test(value)
+    ? null
+    : { weakPassword: true };
+}
+
 
   // Validator for username taken
   usernameTakenValidator = (control: any): Promise<ValidationErrors | null> => {

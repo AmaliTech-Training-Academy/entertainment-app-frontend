@@ -23,6 +23,7 @@
           aria-required="true"
           aria-describedby="username-error"
           class="register__input"
+          placeholder="Username"
         />
         @if (username?.touched && username?.invalid) {
           <mat-error id="username-error" class="register__error">
@@ -89,13 +90,17 @@
         />
         @if (password?.touched && password?.invalid) {
           <mat-error id="password-error" class="register__error">
-            @if (password?.errors?.["required"]) {
-              Password is required.
-            }
-            @if (password?.errors?.["minlength"]) {
-              Minimum 6 characters required.
-            }
-          </mat-error>
+  @if (password?.errors?.['required']) {
+    Password is required.
+  }
+  @if (password?.errors?.['minlength']) {
+    Minimum 8 characters required.
+  }
+  @if (password?.errors?.['weakPassword']) {
+    Password must contain uppercase, lowercase, number, and special character.
+  }
+</mat-error>
+
         }
       </mat-form-field>
 
