@@ -1,6 +1,6 @@
 <section aria-labelledby="register-heading" class="register__container">
   <div class="register__logo">
-    <img src="assets/images/cineverse_logo.svg" alt="cineverse logo" />
+    <img src="Logo.png" alt="cineverse logo" />
   </div>
 
   <div class="register">
@@ -30,7 +30,7 @@
             />
             @if (firstName?.touched && firstName?.invalid) {
               <p id="firstName-error" class="register__error">
-                @if (firstName?.errors?.['required']) {
+                @if (firstName?.errors?.["required"]) {
                   First name is required.
                 }
               </p>
@@ -52,7 +52,7 @@
             />
             @if (lastName?.touched && lastName?.invalid) {
               <p id="lastName-error" class="register__error">
-                @if (lastName?.errors?.['required']) {
+                @if (lastName?.errors?.["required"]) {
                   Last name is required.
                 }
               </p>
@@ -75,20 +75,20 @@
             [ngClass]="{
               invalid:
                 (email?.touched && email?.invalid) ||
-                email?.errors?.['emailTaken']
+                email?.errors?.['emailTaken'],
             }"
           />
           @if (email?.touched && email?.invalid) {
             <p id="email-error" class="register__error">
-              @if (email?.errors?.['required']) {
+              @if (email?.errors?.["required"]) {
                 Email is required.
               }
-              @if (email?.errors?.['email']) {
+              @if (email?.errors?.["email"]) {
                 Invalid email format.
               }
             </p>
           }
-          @if (email?.errors?.['emailTaken']) {
+          @if (email?.errors?.["emailTaken"]) {
             <p id="email-error" class="register__error">
               Email is already registered.
             </p>
@@ -96,101 +96,105 @@
         </div>
 
         <button
-  type="submit"
-  class="register__submit"
-  [disabled]="!firstName?.valid || !lastName?.valid || !email?.valid"
->
-  Next
-</button>
-
+          type="submit"
+          class="register__submit"
+          [disabled]="!firstName?.valid || !lastName?.valid || !email?.valid"
+        >
+          Next
+        </button>
       </ng-container>
 
       <!-- Step 2: Username, Password, Confirm Password -->
       <ng-container *ngIf="step === 2">
         <!-- Password Field -->
         <!-- Password Field -->
-<div class="register__field">
-  <label class="register__label" for="password">Set a password</label>
-  <input
-    id="password"
-    formControlName="password"
-    type="password"
-    autocomplete="new-password"
-    placeholder="********"
-    aria-required="true"
-    aria-describedby="password-error"
-    class="register__input"
-    [ngClass]="{
-      invalid: password?.touched && password?.invalid,
-      strong: password?.valid && !password?.errors?.['weakPassword']
-    }"
-  />
+        <div class="register__field">
+          <label class="register__label" for="password">Set a password</label>
+          <input
+            id="password"
+            formControlName="password"
+            type="password"
+            autocomplete="new-password"
+            placeholder="********"
+            aria-required="true"
+            aria-describedby="password-error"
+            class="register__input"
+            [ngClass]="{
+              invalid: password?.touched && password?.invalid,
+              strong: password?.valid && !password?.errors?.['weakPassword'],
+            }"
+          />
 
-  @if (password?.touched) {
-  @if (password?.errors?.['required']) {
-    <p id="password-error" class="register__error">
-      Password is required.
-    </p>
-  } @else if (password?.errors?.['minlength']) {
-    <p id="password-error" class="register__error">
-      Minimum 8 characters required.
-    </p>
-  } @else if (password?.errors?.['weakPassword']) {
-    <p id="password-error" class="register__error">
-      Password must contain uppercase, lowercase, number, and special character.
-    </p>
-  } @else {
-    <p class="register__success">Strong password</p>
-  }
-}
-
-</div>
-
+          @if (password?.touched) {
+            @if (password?.errors?.["required"]) {
+              <p id="password-error" class="register__error">
+                Password is required.
+              </p>
+            } @else if (password?.errors?.["minlength"]) {
+              <p id="password-error" class="register__error">
+                Minimum 8 characters required.
+              </p>
+            } @else if (password?.errors?.["weakPassword"]) {
+              <p id="password-error" class="register__error">
+                Password must contain uppercase, lowercase, number, and special
+                character.
+              </p>
+            } @else {
+              <p class="register__success">Strong password</p>
+            }
+          }
+        </div>
 
         <!-- Confirm Password Field -->
-<div class="register__field">
-  <label class="register__label" for="confirmPassword">Confirm password</label>
-  <input
-    id="confirmPassword"
-    formControlName="confirmPassword"
-    type="password"
-    placeholder="confirm password"
-    autocomplete="new-password"
-    aria-required="true"
-    aria-describedby="confirm-password-error"
-    class="register__input"
-    [ngClass]="{
-      invalid:
-        (confirmPassword?.touched && confirmPassword?.invalid) || passwordMismatch
-    }"
-  />
+        <div class="register__field">
+          <label class="register__label" for="confirmPassword"
+            >Confirm password</label
+          >
+          <input
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            type="password"
+            placeholder="confirm password"
+            autocomplete="new-password"
+            aria-required="true"
+            aria-describedby="confirm-password-error"
+            class="register__input"
+            [ngClass]="{
+              invalid:
+                (confirmPassword?.touched && confirmPassword?.invalid) ||
+                passwordMismatch,
+            }"
+          />
 
-  @if (confirmPassword?.touched && (confirmPassword?.invalid || passwordMismatch)) {
-    <p id="confirm-password-error" class="register__error">
-      @if (confirmPassword?.errors?.['required']) {
-        Confirm Password is required.
-      }
-      @else if (!confirmPassword?.errors?.['required'] && passwordMismatch) {
-        Passwords do not match.
-      }
-    </p>
-  }
-</div>
+          @if (
+            confirmPassword?.touched &&
+            (confirmPassword?.invalid || passwordMismatch)
+          ) {
+            <p id="confirm-password-error" class="register__error">
+              @if (confirmPassword?.errors?.["required"]) {
+                Confirm Password is required.
+              } @else if (
+                !confirmPassword?.errors?.["required"] && passwordMismatch
+              ) {
+                Passwords do not match.
+              }
+            </p>
+          }
+        </div>
 
         <button
-  type="submit"
-  class="register__submit"
-  [disabled]="!registerForm.valid"
->
-  Create account
-</button>
-
+          type="submit"
+          class="register__submit"
+          [disabled]="!registerForm.valid"
+        >
+          Create account
+        </button>
       </ng-container>
 
       <!-- Footer -->
       <p aria-hidden="true" class="register__footer">
         Already have an account?
-         <a routerLink="/login" class="register__link">Login</a>
+        <a routerLink="/login" class="register__link">Login</a>
       </p>
     </form>
   </div>

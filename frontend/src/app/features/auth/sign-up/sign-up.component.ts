@@ -38,7 +38,7 @@ export class SignUpComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {
     this.registerForm = this.fb.group(
       {
@@ -52,13 +52,17 @@ export class SignUpComponent {
         username: [{ value: '', disabled: true }, [Validators.required]],
         password: [
           '',
-          [Validators.required, Validators.minLength(8), this.strongPasswordValidator],
+          [
+            Validators.required,
+            Validators.minLength(8),
+            this.strongPasswordValidator,
+          ],
         ],
         confirmPassword: ['', Validators.required],
       },
       {
         validators: this.passwordMatchValidator,
-      }
+      },
     );
   }
 
@@ -106,78 +110,80 @@ export class SignUpComponent {
   //   }
   // }
 
-//   createAccount(): void {
-//   if (this.registerForm.valid) {
-//     const formValue = {
-//       ...this.registerForm.getRawValue(),
-//     };
+  //   createAccount(): void {
+  //   if (this.registerForm.valid) {
+  //     const formValue = {
+  //       ...this.registerForm.getRawValue(),
+  //     };
 
-//     this.authService.register(formValue).subscribe({
-//       next: (res) => {
-//         // Save to localStorage
-//         localStorage.setItem('token', res.token);
-//         localStorage.setItem('user', JSON.stringify(res.user));
-//         localStorage.setItem('role', res.user.role);
-//         console.log('User registered successfully:', res);
+  //     this.authService.register(formValue).subscribe({
+  //       next: (res) => {
+  //         // Save to localStorage
+  //         localStorage.setItem('token', res.token);
+  //         localStorage.setItem('user', JSON.stringify(res.user));
+  //         localStorage.setItem('role', res.user.role);
+  //         console.log('User registered successfully:', res);
 
-//         // Redirect to home
-//         this.router.navigate(['/home']);
-//       },
-//       error: (err) => {
-//         console.error('Registration failed:', err);
-//         if (err.error?.message === 'Email already registered') {
-//           this.email?.setErrors({ emailTaken: true });
-//         }
-//       },
-//     });
-//   } else {
-//     this.registerForm.markAllAsTouched();
-//   }
+  //         // Redirect to home
+  //         this.router.navigate(['/home']);
+  //       },
+  //       error: (err) => {
+  //         console.error('Registration failed:', err);
+  //         if (err.error?.message === 'Email already registered') {
+  //           this.email?.setErrors({ emailTaken: true });
+  //         }
+  //       },
+  //     });
+  //   } else {
+  //     this.registerForm.markAllAsTouched();
+  //   }
   // }
-  
+
   createAccount(): void {
-  if (this.registerForm.valid) {
-    const formValue = {
-      ...this.registerForm.getRawValue(),
-    };
+    if (this.registerForm.valid) {
+      const formValue = {
+        ...this.registerForm.getRawValue(),
+      };
 
-    this.authService.register(formValue).subscribe({
-      next: (res) => {
-        // Save data to localStorage
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
-        localStorage.setItem('role', res.user.role);
+      this.authService.register(formValue).subscribe({
+        next: (res) => {
+          // Save data to localStorage
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('user', JSON.stringify(res.user));
+          localStorage.setItem('role', res.user.role);
 
-        console.log('User registered successfully:', res);
+          console.log('User registered successfully:', res);
 
-        // Redirect to home
-        this.router.navigate(['/']);
-      },
-      error: (err) => {
-        console.error('Registration failed:', err);
-        if (err.error?.message === 'Email already registered') {
-          this.email?.setErrors({ emailTaken: true });
-        }
-      },
-    });
-  } else {
-    // Mark all fields as touched to trigger validation errors
-    this.password?.markAsTouched();
-    this.confirmPassword?.markAsTouched();
-    this.registerForm.markAllAsTouched();
+          // Redirect to home
+          this.router.navigate(['/']);
+        },
+        error: (err) => {
+          console.error('Registration failed:', err);
+          if (err.error?.message === 'Email already registered') {
+            this.email?.setErrors({ emailTaken: true });
+          }
+        },
+      });
+    } else {
+      // Mark all fields as touched to trigger validation errors
+      this.password?.markAsTouched();
+      this.confirmPassword?.markAsTouched();
+      this.registerForm.markAllAsTouched();
+    }
   }
-}
 
-
-
-  private strongPasswordValidator(control: AbstractControl): ValidationErrors | null {
+  private strongPasswordValidator(
+    control: AbstractControl,
+  ): ValidationErrors | null {
     const value = control.value;
     const strongPasswordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     return strongPasswordRegex.test(value) ? null : { weakPassword: true };
   }
 
-  emailTakenValidator = (control: AbstractControl): Promise<ValidationErrors | null> => {
+  emailTakenValidator = (
+    control: AbstractControl,
+  ): Promise<ValidationErrors | null> => {
     return new Promise((resolve) => {
       const fakeEmails = ['ernesto@example.com', 'fan@cineverse.com'];
       const exists = fakeEmails.includes(control.value);

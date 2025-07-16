@@ -8,9 +8,8 @@ describe('TrendingMovieCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TrendingMovieCardComponent]
-    })
-    .compileComponents();
+      imports: [TrendingMovieCardComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TrendingMovieCardComponent);
     component = fixture.componentInstance;

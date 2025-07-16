@@ -8,54 +8,70 @@ import { AccordionComponent } from '../../features/accordion/accordion.component
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, HeroCarouselComponent, TrendingMovieCardComponent,SubscriptionFormComponent, AccordionComponent],
+  imports: [
+    CommonModule,
+    HeroCarouselComponent,
+    TrendingMovieCardComponent,
+    SubscriptionFormComponent,
+    AccordionComponent,
+  ],
   templateUrl: './home.page.component.html',
-  styleUrl: './home.page.component.scss'
+  styleUrl: './home.page.component.scss',
 })
 export class HomePage {
   trendingMovies = [
     {
       rank: 1,
-      image: 'https://upload.wikimedia.org/wikipedia/en/a/ab/Final_Destination_Bloodlines_%282025%29_poster.jpg',
-      alt: 'Final Destination Bloodlines poster'
+      image:
+        'https://upload.wikimedia.org/wikipedia/en/a/ab/Final_Destination_Bloodlines_%282025%29_poster.jpg',
+      alt: 'Final Destination Bloodlines poster',
     },
     {
       rank: 2,
-      image: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      alt: 'Maa poster'
+      image:
+        'https://images.unsplash.com/photo-1635805737707-575885ab0820?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      alt: 'Maa poster',
     },
     {
       rank: 3,
-      image: 'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      alt: 'Heads of State poster'
+      image:
+        'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      alt: 'Heads of State poster',
     },
     {
       rank: 4,
-      image: 'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      alt: 'Heads of State poster'
+      image:
+        'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      alt: 'Heads of State poster',
     },
     {
       rank: 5,
-      image: 'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      alt: 'Heads of State poster'
+      image:
+        'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      alt: 'Heads of State poster',
     },
     {
       rank: 6,
-      image: 'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      alt: 'Heads of State poster'
+      image:
+        'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      alt: 'Heads of State poster',
     },
     {
       rank: 7,
-      image: 'https://images.unsplash.com/photo-1556684996-c32e7604965a?q=80&w=2148&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      alt: 'Ballerina poster'
-    }
+      image:
+        'https://images.unsplash.com/photo-1556684996-c32e7604965a?q=80&w=2148&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      alt: 'Ballerina poster',
+    },
   ];
 
   currentTrendingStartIndex = 0;
   trendingSlideDirection: 'slide-left' | 'slide-right' | '' = '';
 
   get visibleTrendingMovies() {
-    return this.trendingMovies.slice(this.currentTrendingStartIndex, this.currentTrendingStartIndex + 4);
+    return this.trendingMovies.slice(
+      this.currentTrendingStartIndex,
+      this.currentTrendingStartIndex + 4,
+    );
   }
 
   nextTrending() {
@@ -77,4 +93,4 @@ export class HomePage {
       }, 400);
     }
   }
-} 
+}

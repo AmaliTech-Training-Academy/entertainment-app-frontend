@@ -14,8 +14,11 @@ export const routes: Routes = [
       },
       {
         path: 'movie/:id',
-         loadComponent: () => import('./pages/home/detail-page/detail.page').then(m => m.DetailPage)}
-      ,
+        loadComponent: () =>
+          import('./pages/home/detail-page/detail.page').then(
+            (m) => m.DetailPage,
+          ),
+      },
       {
         path: 'advanced-search',
         loadComponent: () =>
@@ -27,7 +30,7 @@ export const routes: Routes = [
         path: 'for-you',
         loadComponent: () =>
           import('./pages/for-you.page.component').then(
-            (m) => m.ForYouComponent
+            (m) => m.ForYouComponent,
           ),
       },
       // Add other main routes here
@@ -37,28 +40,28 @@ export const routes: Routes = [
     path: 'signup',
     loadComponent: () =>
       import('./features/auth/sign-up/sign-up.component').then(
-        (m) => m.SignUpComponent
+        (m) => m.SignUpComponent,
       ),
   },
   {
     path: 'login',
     loadComponent: () =>
       import('./features/auth/login/login.component').then(
-        (m) => m.LoginComponent
+        (m) => m.LoginComponent,
       ),
   },
   {
     path: 'admin',
     loadComponent: () =>
       import('./pages/admin-layout/admin-layout.component').then(
-        (m) => m.AdminLayoutComponent
+        (m) => m.AdminLayoutComponent,
       ),
     children: [
       {
         path: 'dashboard',
         loadComponent: () =>
           import('./features/admin-dashboard/admin-dashboard.component').then(
-            (m) => m.AdminDashboardComponent
+            (m) => m.AdminDashboardComponent,
           ),
       },
 
@@ -66,7 +69,7 @@ export const routes: Routes = [
         path: 'users',
         loadComponent: () =>
           import('./features/admin-user/admin-user.component').then(
-            (m) => m.AdminUserComponent
+            (m) => m.AdminUserComponent,
           ),
       },
       {
