@@ -13,13 +13,6 @@ export const routes: Routes = [
           import('./pages/home/home.page.component').then((m) => m.HomePage),
       },
       {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./features/admin-dashboard/admin-dashboard.component').then(
-            (m) => m.AdminDashboardComponent
-          ),
-      },
-      {
         path: 'movie/:id',
          loadComponent: () => import('./pages/home/detail-page/detail.page').then(m => m.DetailPage)}
       ,

@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { LucideAngularModule, Search } from 'lucide-angular';
+
 
 @Component({
   selector: 'app-admin-user',
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule],
   templateUrl: './admin-user.component.html',
   styleUrls: ['./admin-user.component.scss'],
 })
 export class AdminUserComponent {
-  readonly Search = Search;
+  // readonly Search = Search;
 
   users = [
     { name: 'Ethan Carter', role: 'Admin', status: 'Active', joined: '2022-01-15', lastActive: '2024-03-20' },
