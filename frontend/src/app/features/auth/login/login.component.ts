@@ -5,7 +5,7 @@ import { MatFormField, MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -24,7 +24,7 @@ import { RouterModule } from '@angular/router';
 })
 export class LoginComponent {
   loginForm: any;
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private router: Router) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
@@ -33,7 +33,9 @@ export class LoginComponent {
 
   onSubmit() {
     if (this.loginForm.valid) {
-      console.log('Form submitted:', this.loginForm.value);
+      this.router.navigate(['']);
+    } else {
+      this.loginForm.markAllAsTouched();
     }
   }
 }

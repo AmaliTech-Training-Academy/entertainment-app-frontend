@@ -1,3 +1,140 @@
+# CloudFront Cache Policy for SPA
+resource "aws_cloudfront_cache_policy" "spa" {
+  name        = "${var.environment}-spa-cache-policy"
+  comment     = "Cache policy for SPA applications - ${var.environment}"
+  default_ttl = 86400
+  max_ttl     = 31536000
+  min_ttl     = 0
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "none"
+    }
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+  }
+
+  # REMOVED: lifecycle block for destruction
+}
+
+# CloudFront Cache Policy for Static Assets
+resource "aws_cloudfront_cache_policy" "static_assets" {  
+  name        = "${var.environment}-static-assets-cache-policy"
+  comment     = "Cache policy for static assets (CSS, JS, images) - ${var.environment}"
+  default_ttl = 31536000  # 1 year
+  max_ttl     = 31536000  # 1 year
+  min_ttl     = 31536000  # 1 year
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "none"
+    }
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+  }
+
+  # REMOVED: lifecycle block for destruction
+}
+
+# CloudFront Origin Request Policy for S3
+resource "aws_cloudfront_origin_request_policy" "s3_origin" {
+  name    = "${var.environment}-s3-origin-request-policy"
+  comment = "Origin request policy for S3 static website - ${var.environment}"
+
+  cookies_config {
+    cookie_behavior = "none"
+  }
+
+  headers_config {
+    header_behavior = "whitelist"
+    headers {
+      items = [
+        "Access-Control-Request-Headers",
+        "Access-Control-Request-Method",
+        "Origin"
+      ]
+    }
+  }
+
+  query_strings_config {
+    query_string_behavior = "none"
+  }
+
+  # REMOVED: lifecycle block for destruction
+}
+
+# CloudFront Response Headers Policy for Security
+resource "aws_cloudfront_response_headers_policy" "security" {  
+  name    = "${var.environment}-security-headers"
+  comment = "Security headers for CineVerse frontend - ${var.environment}"
+
+  cors_config {
+    access_control_allow_credentials = false
+
+    access_control_allow_headers {
+      items = ["*"]
+    }
+
+    access_control_allow_methods {
+      items = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "DELETE"]
+    }
+
+    access_control_allow_origins {
+      items = ["*"]
+    }
+
+    origin_override = true
+  }
+
+  security_headers_config {
+    strict_transport_security {
+      access_control_max_age_sec = 31536000
+      include_subdomains         = true
+      override                   = true
+    }
+
+    content_type_options {
+      override = true
+    }
+
+    frame_options {
+      frame_option = "DENY"
+      override     = true
+    }
+
+    referrer_policy {
+      referrer_policy = "strict-origin-when-cross-origin"
+      override        = true
+    }
+
+    content_security_policy {
+      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ${var.api_endpoint}; media-src 'self';"
+      override = true
+    }
+  }
+
+  # REMOVED: lifecycle block for destruction
+}
+
+# CloudFront Distribution
 resource "aws_cloudfront_distribution" "website" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -64,135 +201,6 @@ resource "aws_cloudfront_distribution" "website" {
   }
 
   tags = var.tags
-}
 
-# Cache Policy for SPA
-resource "aws_cloudfront_cache_policy" "spa" {
-  name        = "${var.environment}-spa-cache-policy"
-  comment     = "Cache policy for SPA applications"
-  default_ttl = 86400
-  max_ttl     = 31536000
-  min_ttl     = 0
-
-  parameters_in_cache_key_and_forwarded_to_origin {
-    enable_accept_encoding_brotli = true
-    enable_accept_encoding_gzip   = true
-
-    query_strings_config {
-      query_string_behavior = "none"
-    }
-
-    headers_config {
-      header_behavior = "none"
-    }
-
-    cookies_config {
-      cookie_behavior = "none"
-    }
-  }
-}
-
-# Cache Policy for Static Assets
-resource "aws_cloudfront_cache_policy" "static_assets" {  
-  name        = "${var.environment}-static-assets-cache-policy"
-  comment     = "Cache policy for static assets (CSS, JS, images)"
-  default_ttl = 31536000  # 1 year
-  max_ttl     = 31536000  # 1 year
-  min_ttl     = 31536000  # 1 year
-
-  parameters_in_cache_key_and_forwarded_to_origin {
-    enable_accept_encoding_brotli = true
-    enable_accept_encoding_gzip   = true
-
-    query_strings_config {
-      query_string_behavior = "none"
-    }
-
-    headers_config {
-      header_behavior = "none"
-    }
-
-    cookies_config {
-      cookie_behavior = "none"
-    }
-  }
-}
-
-# Origin Request Policy for S3
-resource "aws_cloudfront_origin_request_policy" "s3_origin" {
-  name    = "${var.environment}-s3-origin-request-policy"
-  comment = "Origin request policy for S3 static website"
-
-  cookies_config {
-    cookie_behavior = "none"
-  }
-
-  headers_config {
-    header_behavior = "whitelist"
-    headers {
-      items = [
-        "Access-Control-Request-Headers",
-        "Access-Control-Request-Method",
-        "Origin"
-      ]
-    }
-  }
-
-  query_strings_config {
-    query_string_behavior = "none"
-  }
-}
-
-# FIXED: Response Headers Policy for Security
-resource "aws_cloudfront_response_headers_policy" "security" {  
-  name    = "${var.environment}-security-headers"
-  comment = "Security headers for CineVerse frontend"
-
-  cors_config {
-    access_control_allow_credentials = false
-
-    access_control_allow_headers {
-      items = ["*"]
-    }
-
-    access_control_allow_methods {
-      items = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "DELETE"]
-    }
-
-    access_control_allow_origins {
-      items = ["*"]
-    }
-
-    origin_override = true
-  }
-
-  security_headers_config {
-    strict_transport_security {
-      access_control_max_age_sec = 31536000
-      include_subdomains         = true
-      override                   = true
-    }
-
-    content_type_options {
-      override = true
-    }
-
-    frame_options {
-      frame_option = "DENY"
-      override     = true
-    }
-
-    referrer_policy {
-      referrer_policy = "strict-origin-when-cross-origin"
-      override        = true
-    }
-
-    
-    content_security_policy {
-      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ${var.api_endpoint}; media-src 'self';"
-      override = true
-    }
-  }
-
-  
+  # REMOVED: lifecycle block for destruction
 }

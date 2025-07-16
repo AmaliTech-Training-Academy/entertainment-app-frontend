@@ -3,11 +3,12 @@ import { HeroCarouselComponent } from '../../components/hero-carousel/hero-carou
 import { TrendingMovieCardComponent } from '../../components/trending-movie-card/trending-movie-card.component';
 import { CommonModule } from '@angular/common';
 import { SubscriptionFormComponent } from '../../components/subscription-form/subscription-form.component';
+import { AccordionComponent } from '../../features/accordion/accordion.component';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, HeroCarouselComponent, TrendingMovieCardComponent,SubscriptionFormComponent],
+  imports: [CommonModule, HeroCarouselComponent, TrendingMovieCardComponent,SubscriptionFormComponent, AccordionComponent],
   templateUrl: './home.page.component.html',
   styleUrl: './home.page.component.scss'
 })

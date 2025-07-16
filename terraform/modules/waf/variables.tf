@@ -14,6 +14,8 @@ variable "enable_waf" {
   default     = true
 }
 
+
+
 variable "rate_limit" {
   description = "Rate limit for WAF"
   type        = number
@@ -37,4 +39,3 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
-

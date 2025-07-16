@@ -19,6 +19,12 @@ variable "project_name" {
   default     = "cineverse"
 }
 
+variable "app_name" {
+  description = "Application name"
+  type        = string
+  default     = "entertainment-app-frontend"
+}
+
 variable "domain_name" {
   description = "Domain name for the application"
   type        = string
@@ -41,4 +47,10 @@ variable "api_endpoint" {
   description = "Backend API endpoint URL"
   type        = string
   default     = ""
+}
+
+variable "tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
+  default     = {}
 }
