@@ -480,6 +480,13 @@ jobs:
           # API endpoint
           api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
           EOF
+          
+          echo "Created terraform.tfvars:"
+          cat environments/$ENVIRONMENT/terraform.tfvars
+          
+          echo ""
+          echo "Created backend.hcl:"
+          cat environments/$ENVIRONMENT/backend.hcl
 
       - name: Terraform Init
         working-directory: terraform
@@ -493,13 +500,12 @@ jobs:
           }
 
       - name: Download Terraform Plan
-        uses: actions/upload-artifact@v4
+        uses: actions/download-artifact@v4
         if: needs.plan.outputs.plan_changes == 'true'
         continue-on-error: true
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
-          path: terraform/${{ env.ENVIRONMENT }}.tfplan
-          retention-days: 7
+          path: terraform/
 
       - name: Apply Infrastructure Changes
         working-directory: terraform
@@ -519,19 +525,31 @@ jobs:
           RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
           echo "Current state contains $RESOURCE_COUNT resources"
           echo "Plan changes: ${{ needs.plan.outputs.plan_changes }}"
+          echo "Plan file exists: $([[ -f "$ENVIRONMENT.tfplan" ]] && echo 'yes' || echo 'no')"
           
           if [[ $RESOURCE_COUNT -eq 0 ]]; then
             echo "State file is empty - creating new resources"
-            terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
+            terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars" || {
+              echo "ERROR: Terraform apply failed"
+              terraform plan -var-file="environments/$ENVIRONMENT/terraform.tfvars" -out="$ENVIRONMENT.tfplan" -detailed-exitcode
+              echo "Plan exit code: $?"
+              exit 1
+            }
           elif [[ "${{ needs.plan.outputs.plan_changes }}" == "true" && -f "$ENVIRONMENT.tfplan" ]]; then
             echo "Applying existing plan with changes"
-            terraform apply -auto-approve "$ENVIRONMENT.tfplan"
+            terraform apply -auto-approve "$ENVIRONMENT.tfplan" || {
+              echo "ERROR: Terraform apply failed for plan"
+              exit 1
+            }
           elif [[ "${{ needs.plan.outputs.plan_changes }}" == "false" ]]; then
             echo "No changes needed - infrastructure is up to date"
             echo "Skipping terraform apply"
           else
             echo "Unexpected state - creating and applying new plan"
-            terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
+            terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars" || {
+              echo "ERROR: Terraform apply failed"
+              exit 1
+            }
           fi
           
           # Verify state file after apply
@@ -539,8 +557,13 @@ jobs:
           echo "State now contains $NEW_RESOURCE_COUNT resources"
           if [[ $NEW_RESOURCE_COUNT -eq 0 ]]; then
             echo "ERROR: Terraform apply did not create any resources"
+            terraform state list 2>&1 || echo "No state file or empty state"
             exit 1
           fi
+          
+          # Debug outputs
+          echo "Available outputs after apply:"
+          terraform output -json || echo "No outputs available"
 
       - name: Get Infrastructure Outputs
         id: outputs
@@ -548,21 +571,21 @@ jobs:
         run: |
           {
             S3_OUTPUT=$(terraform output -raw s3_bucket_name 2>&1)
-            if [[ "$S3_OUTPUT" =~ "No outputs found" ]]; then
+            if [[ "$S3_OUTPUT" =~ "No outputs found" || -z "$S3_OUTPUT" ]]; then
               echo "s3_bucket=ERROR: s3_bucket_name not found" >> $GITHUB_OUTPUT
             else
               echo "s3_bucket=$S3_OUTPUT" >> $GITHUB_OUTPUT
             fi
             
             CF_ID_OUTPUT=$(terraform output -raw cloudfront_distribution_id 2>&1)
-            if [[ "$CF_ID_OUTPUT" =~ "No outputs found" ]]; then
+            if [[ "$CF_ID_OUTPUT" =~ "No outputs found" || -z "$CF_ID_OUTPUT" ]]; then
               echo "cloudfront_id=ERROR: cloudfront_distribution_id not found" >> $GITHUB_OUTPUT
             else
               echo "cloudfront_id=$CF_ID_OUTPUT" >> $GITHUB_OUTPUT
             fi
             
             CF_DOMAIN_OUTPUT=$(terraform output -raw cloudfront_domain_name 2>&1)
-            if [[ "$CF_DOMAIN_OUTPUT" =~ "No outputs found" ]]; then
+            if [[ "$CF_DOMAIN_OUTPUT" =~ "No outputs found" || -z "$CF_DOMAIN_OUTPUT" ]]; then
               echo "cloudfront_domain=ERROR: cloudfront_domain_name not found" >> $GITHUB_OUTPUT
             else
               echo "cloudfront_domain=$CF_DOMAIN_OUTPUT" >> $GITHUB_OUTPUT
