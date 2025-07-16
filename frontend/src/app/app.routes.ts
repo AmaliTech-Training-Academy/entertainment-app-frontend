@@ -27,4 +27,11 @@ export const routes: Routes = [
         (m) => m.DashboardPage
       ),
   },
+  {
+    path: 'advanced-search',
+    loadComponent: () =>
+      import('./pages/advanced-search/advanced-search.component').then(
+        (m) => m.AdvancedSearchComponent
+      ),
+  },
 ];
