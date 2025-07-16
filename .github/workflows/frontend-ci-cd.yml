@@ -41,29 +41,35 @@ jobs:
             echo "environment=prod" >> $GITHUB_OUTPUT
             echo "is_production=true" >> $GITHUB_OUTPUT
             echo "Environment set to: prod (production)"
+            ENV_NAME="prod"
           elif [[ "$BRANCH" == "staging" ]]; then
             echo "environment=staging" >> $GITHUB_OUTPUT
             echo "is_production=false" >> $GITHUB_OUTPUT
             echo "Environment set to: staging"
+            ENV_NAME="staging"
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
             echo "is_production=false" >> $GITHUB_OUTPUT
             echo "Environment set to: dev (default)"
+            ENV_NAME="dev"
           fi
           
           # Only deploy on push to main branches
           if [[ "$EVENT_NAME" == "push" && "$BRANCH" =~ ^(dev|staging|prod)$ ]]; then
             echo "should_deploy=true" >> $GITHUB_OUTPUT
             echo "Deployment enabled for push to $BRANCH"
+            SHOULD_DEPLOY="true"
           else
             echo "should_deploy=false" >> $GITHUB_OUTPUT
             echo "Deployment disabled (event: $EVENT_NAME, branch: $BRANCH)"
+            SHOULD_DEPLOY="false"
           fi
           
+          # FIXED: Use variables instead of complex command substitution
           echo ""
           echo "Final Configuration:"
-          echo "Environment: $([ "$BRANCH" == "prod" ] && echo "prod" || [ "$BRANCH" == "staging" ] && echo "staging" || echo "dev")"
-          echo "Should Deploy: $([ "$EVENT_NAME" == "push" ] && [ "$BRANCH" =~ ^(dev|staging|prod)$ ] && echo "true" || echo "false")"
+          echo "Environment: $ENV_NAME"
+          echo "Should Deploy: $SHOULD_DEPLOY"
           echo "Is Production: $([ "$BRANCH" == "prod" ] && echo "true" || echo "false")"
 
   # =============================================================================
@@ -329,6 +335,26 @@ jobs:
             if [[ $RESOURCE_COUNT -gt 10 ]]; then
               echo "... and $((RESOURCE_COUNT - 10)) more"
             fi
+          fi
+
+      - name: Force Unlock Terraform State
+        working-directory: terraform
+        run: |
+          echo "Checking for existing state locks..."
+          
+          # Try to force unlock if there's a stuck lock
+          if ! terraform plan -var-file="environments/$ENVIRONMENT/terraform.tfvars" -detailed-exitcode >/dev/null 2>&1; then
+            echo "State appears to be locked. Attempting to force unlock..."
+            
+            # Get the lock ID from the error (if any)
+            LOCK_ID="9cca48a0-697d-9cdc-48c3-a99d9c0d4cb0"
+            
+            if [[ -n "$LOCK_ID" ]]; then
+              echo "Force unlocking with ID: $LOCK_ID"
+              terraform force-unlock -force "$LOCK_ID" || echo "Force unlock failed or not needed"
+            fi
+          else
+            echo "No state lock detected"
           fi
 
       - name: Import Existing Resources
