@@ -357,93 +357,6 @@ jobs:
             echo "No state lock detected"
           fi
 
-      # - name: Import Existing Resources
-      #   working-directory: terraform
-      #   run: |
-      #     echo "Checking for existing resources to import..."
-      #     echo "Environment: $ENVIRONMENT"
-          
-      #     # Function to import if not in state
-      #     import_if_needed() {
-      #       local resource_address="$1"
-      #       local resource_id="$2"
-      #       local resource_name="$3"
-            
-      #       if ! terraform state show "$resource_address" >/dev/null 2>&1; then
-      #         echo "Importing $resource_name: $resource_address"
-      #         echo "Resource ID: $resource_id"
-              
-      #         if terraform import -var-file="environments/$ENVIRONMENT/terraform.tfvars" "$resource_address" "$resource_id" 2>/dev/null; then
-      #           echo "Successfully imported $resource_name"
-      #         else
-      #           echo "$resource_name not found or already managed - will be created if needed"
-      #         fi
-      #       else
-      #         echo "$resource_name already in state"
-      #       fi
-      #     }
-          
-      #     # Try to import existing CloudFront policies
-      #     echo "Looking for CloudFront policies..."
-          
-      #     SPA_POLICY_ID=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?Name=='${ENVIRONMENT}-spa-cache-policy'].Id" --output text 2>/dev/null || echo "")
-      #     if [[ -n "$SPA_POLICY_ID" && "$SPA_POLICY_ID" != "None" && "$SPA_POLICY_ID" != "" ]]; then
-      #       echo "Found SPA Cache Policy: $SPA_POLICY_ID"
-      #       import_if_needed "module.cloudfront.aws_cloudfront_cache_policy.spa" "$SPA_POLICY_ID" "SPA Cache Policy"
-      #     else
-      #       echo "SPA Cache Policy not found - will be created"
-      #     fi
-          
-      #     STATIC_POLICY_ID=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?Name=='${ENVIRONMENT}-static-assets-cache-policy'].Id" --output text 2>/dev/null || echo "")
-      #     if [[ -n "$STATIC_POLICY_ID" && "$STATIC_POLICY_ID" != "None" && "$STATIC_POLICY_ID" != "" ]]; then
-      #       echo "Found Static Assets Cache Policy: $STATIC_POLICY_ID"
-      #       import_if_needed "module.cloudfront.aws_cloudfront_cache_policy.static_assets" "$STATIC_POLICY_ID" "Static Assets Cache Policy"
-      #     else
-      #       echo "Static Assets Cache Policy not found - will be created"
-      #     fi
-          
-      #     ORIGIN_POLICY_ID=$(aws cloudfront list-origin-request-policies --type custom --query "OriginRequestPolicyList.Items[?Name=='${ENVIRONMENT}-s3-origin-request-policy'].Id" --output text 2>/dev/null || echo "")
-      #     if [[ -n "$ORIGIN_POLICY_ID" && "$ORIGIN_POLICY_ID" != "None" && "$ORIGIN_POLICY_ID" != "" ]]; then
-      #       echo "Found Origin Request Policy: $ORIGIN_POLICY_ID"
-      #       import_if_needed "module.cloudfront.aws_cloudfront_origin_request_policy.s3_origin" "$ORIGIN_POLICY_ID" "Origin Request Policy"
-      #     else
-      #       echo "Origin Request Policy not found - will be created"
-      #     fi
-          
-      #     HEADERS_POLICY_ID=$(aws cloudfront list-response-headers-policies --type custom --query "ResponseHeadersPolicyList.Items[?Name=='${ENVIRONMENT}-security-headers'].Id" --output text 2>/dev/null || echo "")
-      #     if [[ -n "$HEADERS_POLICY_ID" && "$HEADERS_POLICY_ID" != "None" && "$HEADERS_POLICY_ID" != "" ]]; then
-      #       echo "Found Response Headers Policy: $HEADERS_POLICY_ID"
-      #       import_if_needed "module.cloudfront.aws_cloudfront_response_headers_policy.security" "$HEADERS_POLICY_ID" "Response Headers Policy"
-      #     else
-      #       echo "Response Headers Policy not found - will be created"
-      #     fi
-          
-      #     # Try to import existing WAF resources (only if WAF is enabled)
-      #     if [[ "$ENVIRONMENT" != "dev" ]]; then
-      #       echo "Looking for WAF resources (WAF enabled for $ENVIRONMENT)..."
-            
-      #       WAF_ID=$(aws wafv2 list-web-acls --scope CLOUDFRONT --region us-east-1 --query "WebACLs[?Name=='cineverse-${ENVIRONMENT}-waf'].Id" --output text 2>/dev/null || echo "")
-      #       if [[ -n "$WAF_ID" && "$WAF_ID" != "None" && "$WAF_ID" != "" ]]; then
-      #         echo "Found WAF Web ACL: $WAF_ID"
-      #         import_if_needed "module.waf[0].aws_wafv2_web_acl.main[0]" "$WAF_ID/CLOUDFRONT/us-east-1" "WAF Web ACL"
-      #       else
-      #         echo "WAF Web ACL not found - will be created"
-      #       fi
-            
-      #       # Try to import CloudWatch Log Group
-      #       LOG_GROUP_NAME="/aws/wafv2/cineverse-${ENVIRONMENT}"
-      #       if aws logs describe-log-groups --log-group-name-prefix "$LOG_GROUP_NAME" --region us-east-1 --query "logGroups[?logGroupName=='$LOG_GROUP_NAME']" --output text >/dev/null 2>&1; then
-      #         echo "Found CloudWatch Log Group: $LOG_GROUP_NAME"
-      #         import_if_needed "module.waf[0].aws_cloudwatch_log_group.waf[0]" "$LOG_GROUP_NAME" "CloudWatch Log Group"
-      #       else
-      #         echo "CloudWatch Log Group not found - will be created"
-      #       fi
-      #     else
-      #       echo "WAF disabled for dev environment - skipping WAF resource import"
-      #     fi
-          
-      #     echo "Import process completed!"
-
       - name: Terraform Plan
         working-directory: terraform
         run: |
@@ -602,14 +515,56 @@ jobs:
           echo "Build contents:"
           ls -la build/
           
+          # For Angular SSR, the client files are in browser/ subdirectory
+          if [ -d "build/browser" ]; then
+            echo "Angular SSR detected - deploying from browser/ directory"
+            DEPLOY_PATH="build/browser"
+          elif [ -f "build/index.html" ]; then
+            echo "Standard Angular build detected"
+            DEPLOY_PATH="build"
+          else
+            echo "ERROR: Neither build/browser nor build/index.html found!"
+            echo "Available directories:"
+            find build/ -type d
+            echo "Available files:"
+            find build/ -name "*.html"
+            exit 1
+          fi
+          
+          echo "Deploying from: $DEPLOY_PATH"
+          echo "Contents of deploy directory:"
+          ls -la "$DEPLOY_PATH"
+          
+          # Verify index.html exists in deploy path
+          if [ ! -f "$DEPLOY_PATH/index.html" ]; then
+            echo "ERROR: index.html not found in $DEPLOY_PATH"
+            exit 1
+          fi
+          
           # Deploy with appropriate cache headers
-          aws s3 sync build/ s3://$S3_BUCKET/ --delete \
+          echo "Syncing files to S3..."
+          
+          # First sync: everything except HTML/JS/CSS with long cache
+          aws s3 sync "$DEPLOY_PATH/" s3://$S3_BUCKET/ --delete \
             --cache-control "public, max-age=31536000" \
             --exclude "*.html" --exclude "*.js" --exclude "*.css"
           
-          aws s3 sync build/ s3://$S3_BUCKET/ --delete \
+          # Second sync: HTML/JS/CSS with short cache
+          aws s3 sync "$DEPLOY_PATH/" s3://$S3_BUCKET/ --delete \
             --cache-control "public, max-age=0, must-revalidate" \
             --include "*.html" --include "*.js" --include "*.css"
+          
+          # Verify files were uploaded correctly
+          echo "Files uploaded to S3:"
+          aws s3 ls s3://$S3_BUCKET/ --recursive | head -20
+          
+          # Verify index.html is in root
+          if aws s3 ls s3://$S3_BUCKET/index.html; then
+            echo "✅ index.html successfully uploaded to S3 root"
+          else
+            echo "❌ index.html not found in S3 root!"
+            exit 1
+          fi
 
       - name: Invalidate CloudFront Cache
         run: |
@@ -654,7 +609,7 @@ jobs:
           **Deployed by:** ${{ github.actor }}
           
           ## Resources Status
-          Using existing CloudFront policies and WAF resources where available  
           All resources managed by Terraform state  
           Infrastructure deployed successfully  
+          Angular SSR build deployed from browser/ directory to S3 root
           EOF
