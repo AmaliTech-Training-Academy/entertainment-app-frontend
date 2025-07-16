@@ -4,7 +4,7 @@ name: CineVerse Frontend CI/CD
 env:
   APP_NAME: 'entertainment-app-frontend'
   AWS_REGION: 'eu-west-1'
-  TERRAFORM_VERSION: '1.6.0'
+  TERRAFORM_VERSION: '1.9.8'
   NODE_VERSION: '18'
 
 on:
@@ -309,23 +309,22 @@ jobs:
           echo "Created backend.hcl:"
           cat environments/$ENVIRONMENT/backend.hcl
 
-      - name: Clean Terraform Cache for Current Environment
-        working-directory: terraform
-        run: |
-          echo "Cleaning .terraform and lock file for $ENVIRONMENT"
-          rm -rf .terraform
-          rm -f .terraform.lock.hcl
-
       - name: Terraform Init & Validate
         working-directory: terraform
         run: |
           echo "Initializing Terraform for environment: $ENVIRONMENT"
           
-          terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl"
+          terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl" || {
+            echo "Terraform init failed. Checking S3 bucket and DynamoDB table..."
+            aws s3 ls s3://cineverse-terraform-state-$ENVIRONMENT || echo "S3 bucket cineverse-terraform-state-$ENVIRONMENT not found"
+            aws dynamodb describe-table --table-name cineverse-terraform-locks --region ${{ env.AWS_REGION }} || echo "DynamoDB table cineverse-terraform-locks not found"
+            exit 1
+          }
+          
           terraform validate
           
           # Show current state summary
-          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l)
+          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
           echo "Current state contains $RESOURCE_COUNT resources"
           
           if [[ $RESOURCE_COUNT -gt 0 ]]; then
@@ -375,6 +374,10 @@ jobs:
             "DeployedAt": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
           }'
           
+          # Check if state file exists and has resources
+          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
+          echo "Current state contains $RESOURCE_COUNT resources"
+          
           terraform plan \
             -var-file="environments/$ENVIRONMENT/terraform.tfvars" \
             -out="$ENVIRONMENT.tfplan" \
@@ -383,10 +386,7 @@ jobs:
           PLAN_EXIT_CODE=$?
           echo "plan_exitcode=$PLAN_EXIT_CODE" >> $GITHUB_OUTPUT
           
-          # Check if state is empty
-          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
-          
-          if [[ $PLAN_EXIT_CODE -eq 0 && $RESOURCE_COUNT -eq 0 ]]; then
+          if [[ $RESOURCE_COUNT -eq 0 ]]; then
             echo "State is empty - forcing plan creation for initial deployment"
             echo "plan_changes=true" >> $GITHUB_OUTPUT
           elif [[ $PLAN_EXIT_CODE -eq 0 ]]; then
@@ -399,6 +399,13 @@ jobs:
           elif [[ $PLAN_EXIT_CODE -eq 2 ]]; then
             echo "Changes detected - plan created successfully"
             echo "plan_changes=true" >> $GITHUB_OUTPUT
+          fi
+          
+          # Verify plan file exists
+          if [[ -f "$ENVIRONMENT.tfplan" ]]; then
+            echo "Plan file created: $ENVIRONMENT.tfplan"
+          else
+            echo "WARNING: Plan file $ENVIRONMENT.tfplan not created"
           fi
 
       - name: Upload Terraform Plan
@@ -473,25 +480,26 @@ jobs:
           # API endpoint
           api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
           EOF
-      
-      - name: Clean Terraform Cache for Current Environment
-        working-directory: terraform
-        run: |
-          echo "Cleaning .terraform and lock file for $ENVIRONMENT"
-          rm -rf .terraform
-          rm -f .terraform.lock.hcl
 
       - name: Terraform Init
         working-directory: terraform
-        run: terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl"
+        run: |
+          echo "Initializing Terraform for environment: $ENVIRONMENT"
+          terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl" || {
+            echo "Terraform init failed. Checking S3 bucket and DynamoDB table..."
+            aws s3 ls s3://cineverse-terraform-state-$ENVIRONMENT || echo "S3 bucket cineverse-terraform-state-$ENVIRONMENT not found"
+            aws dynamodb describe-table --table-name cineverse-terraform-locks --region ${{ env.AWS_REGION }} || echo "DynamoDB table cineverse-terraform-locks not found"
+            exit 1
+          }
 
       - name: Download Terraform Plan
-        uses: actions/download-artifact@v4
+        uses: actions/upload-artifact@v4
         if: needs.plan.outputs.plan_changes == 'true'
         continue-on-error: true
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
-          path: terraform/
+          path: terraform/${{ env.ENVIRONMENT }}.tfplan
+          retention-days: 7
 
       - name: Apply Infrastructure Changes
         working-directory: terraform
@@ -510,19 +518,28 @@ jobs:
           # Check if state file exists and has resources
           RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
           echo "Current state contains $RESOURCE_COUNT resources"
+          echo "Plan changes: ${{ needs.plan.outputs.plan_changes }}"
           
-          if [[ "${{ needs.plan.outputs.plan_changes }}" == "true" && -f "$ENVIRONMENT.tfplan" ]]; then
-            echo "Applying existing plan with changes"
-            terraform apply -auto-approve "$ENVIRONMENT.tfplan"
-          elif [[ "${{ needs.plan.outputs.plan_changes }}" == "false" && $RESOURCE_COUNT -eq 0 ]]; then
+          if [[ $RESOURCE_COUNT -eq 0 ]]; then
             echo "State file is empty - creating new resources"
             terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
+          elif [[ "${{ needs.plan.outputs.plan_changes }}" == "true" && -f "$ENVIRONMENT.tfplan" ]]; then
+            echo "Applying existing plan with changes"
+            terraform apply -auto-approve "$ENVIRONMENT.tfplan"
           elif [[ "${{ needs.plan.outputs.plan_changes }}" == "false" ]]; then
             echo "No changes needed - infrastructure is up to date"
             echo "Skipping terraform apply"
           else
-            echo "Creating and applying new plan"
+            echo "Unexpected state - creating and applying new plan"
             terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
+          fi
+          
+          # Verify state file after apply
+          NEW_RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
+          echo "State now contains $NEW_RESOURCE_COUNT resources"
+          if [[ $NEW_RESOURCE_COUNT -eq 0 ]]; then
+            echo "ERROR: Terraform apply did not create any resources"
+            exit 1
           fi
 
       - name: Get Infrastructure Outputs
@@ -530,9 +547,26 @@ jobs:
         working-directory: terraform
         run: |
           {
-            echo "s3_bucket=$(terraform output -raw s3_bucket_name 2>/dev/null || echo 'ERROR: s3_bucket_name not found')"
-            echo "cloudfront_id=$(terraform output -raw cloudfront_distribution_id 2>/dev/null || echo 'ERROR: cloudfront_distribution_id not found')"
-            echo "cloudfront_domain=$(terraform output -raw cloudfront_domain_name 2>/dev/null || echo 'ERROR: cloudfront_domain_name not found')"
+            S3_OUTPUT=$(terraform output -raw s3_bucket_name 2>&1)
+            if [[ "$S3_OUTPUT" =~ "No outputs found" ]]; then
+              echo "s3_bucket=ERROR: s3_bucket_name not found" >> $GITHUB_OUTPUT
+            else
+              echo "s3_bucket=$S3_OUTPUT" >> $GITHUB_OUTPUT
+            fi
+            
+            CF_ID_OUTPUT=$(terraform output -raw cloudfront_distribution_id 2>&1)
+            if [[ "$CF_ID_OUTPUT" =~ "No outputs found" ]]; then
+              echo "cloudfront_id=ERROR: cloudfront_distribution_id not found" >> $GITHUB_OUTPUT
+            else
+              echo "cloudfront_id=$CF_ID_OUTPUT" >> $GITHUB_OUTPUT
+            fi
+            
+            CF_DOMAIN_OUTPUT=$(terraform output -raw cloudfront_domain_name 2>&1)
+            if [[ "$CF_DOMAIN_OUTPUT" =~ "No outputs found" ]]; then
+              echo "cloudfront_domain=ERROR: cloudfront_domain_name not found" >> $GITHUB_OUTPUT
+            else
+              echo "cloudfront_domain=$CF_DOMAIN_OUTPUT" >> $GITHUB_OUTPUT
+            fi
           } >> $GITHUB_OUTPUT
 
       - name: Download Build Artifact
