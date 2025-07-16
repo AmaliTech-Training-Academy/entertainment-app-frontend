@@ -2,6 +2,7 @@
 @use '../../../styles/spacing' as *;
 @use '../../../styles/radius' as *;
 @use '../../../styles/typography' as *;
+@use 'sass:map';
 
 .hero-carousel {
   position: relative;
@@ -42,89 +43,89 @@
 }
 
 .hero-content {
-  color: map-get($neutral-colors, 100);
+  color: map.get($neutral-colors, 100);
   // flex: 1 1 0;
 }
 
 .hero-title {
-  font-size: map-get(map-get($headings, h1), font-size);
-  font-weight: map-get(map-get($headings, h1), font-weight);
-  margin-bottom: map-get($spacing, 4);
+  font-size: map.get(map.get($headings, h1), font-size);
+  font-weight: map.get(map.get($headings, h1), font-weight);
+  margin-bottom: map.get($spacing, 4);
 }
 
 .hero-description {
-  font-size: map-get(map-get($body, b1), font-size);
-  margin-bottom: map-get($spacing, 6);
-  color: map-get($neutral-colors, 200);
+  font-size: map.get(map.get($body, b1), font-size);
+  margin-bottom: map.get($spacing, 6);
+  color: map.get($neutral-colors, 200);
 }
 
 .hero-meta {
-  font-size: map-get(map-get($body, b1), font-size);
-  margin-bottom: map-get($spacing, 6);
+  font-size: map.get(map.get($body, b1), font-size);
+  margin-bottom: map.get($spacing, 6);
   display: flex;
-  gap: map-get($spacing, 2);
+  gap: map.get($spacing, 2);
   align-items: center;
 }
 
 .hero-rating {
-  color: map-get($yellow-colors, 100);
+  color: map.get($yellow-colors, 100);
   font-weight: $font-weight-bold;
 }
 
 .hero-actions {
   display: flex;
-  gap: map-get($spacing, 4);
+  gap: map.get($spacing, 4);
 }
 
 .play-btn {
-  background: map-get($secondary-colors, 200);
-  color: map-get($neutral-colors, 100);
+  background: map.get($secondary-colors, 200);
+  color: map.get($neutral-colors, 100);
   border: none;
-  border-radius: map-get($radius, 4);
+  border-radius: map.get($radius, 4);
   padding: 0.8rem 2rem;
-  font-size: map-get(map-get($body, b1), font-size);
+  font-size: map.get(map.get($body, b1), font-size);
   font-weight: $font-weight-bold;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: map-get($spacing, 1);
+  gap: map.get($spacing, 1);
   transition: background 0.2s;
 }
 .play-btn:hover {
-  background: map-get($secondary-colors, 400);
+  background: map.get($secondary-colors, 400);
 }
 
 .info-btn {
   background: rgba(255,255,255,0.1);
-  color: map-get($neutral-colors, 100);
-  border: 1px solid map-get($neutral-colors, 100);
-  border-radius: map-get($radius, 4);
+  color: map.get($neutral-colors, 100);
+  border: 1px solid map.get($neutral-colors, 100);
+  border-radius: map.get($radius, 4);
   padding: 0.8rem 2rem;
-  font-size: map-get(map-get($body, b1), font-size);
+  font-size: map.get(map.get($body, b1), font-size);
   font-weight: $font-weight-bold;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: map-get($spacing, 1);
+  gap: map.get($spacing, 1);
   transition: background 0.2s, color 0.2s;
 }
 .info-btn:hover {
-  background: map-get($neutral-colors, 100);
-  color: map-get($neutral-colors, 1000);
+  background: map.get($neutral-colors, 100);
+  color: map.get($neutral-colors, 1000);
 }
 
 .hero-carousel-controls {
   position: absolute;
   top: 50%;
-  right: map-get($spacing, 8);
+  right: map.get($spacing, 8);
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: map-get($spacing, 4);
+  gap: map.get($spacing, 4);
 }
 .hero-carousel-controls button {
   background: rgba(0,0,0,0.5);
-  color: map-get($neutral-colors, 100);
+  color: map.get($neutral-colors, 100);
   border: none;
   border-radius: 50%;
   width: 20px;
@@ -134,16 +135,16 @@
   transition: background 0.2s;
 }
 .hero-carousel-controls button:hover {
-  background: map-get($secondary-colors, 200);
+  background: map.get($secondary-colors, 200);
 }
 
 .hero-carousel-indicators {
   display: flex;
-  gap: map-get($spacing, 4);
+  gap: map.get($spacing, 4);
   justify-content: center;
   align-items: center;
   position: static; // Remove absolute positioning
-  margin-top: map-get($spacing, 8); // Add space below carousel
+  margin-top: map.get($spacing, 8); // Add space below carousel
   border: none; // Remove debug border
 }
 .hero-carousel-indicators span {
@@ -151,22 +152,22 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: map-get($neutral-colors, 700);
+  background: map.get($neutral-colors, 700);
   cursor: pointer;
   transition: background 0.2s, transform 0.2s;
 }
 .hero-carousel-indicators span.active {
-  background: map-get($neutral-colors, 100);
+  background: map.get($neutral-colors, 100);
   transform: scale(1.2);
 }
 
 @media (max-width: 900px) {
   .hero-content {
-    margin-left: map-get($spacing, 4);
+    margin-left: map.get($spacing, 4);
     max-width: 90vw;
   }
   .hero-title {
-    font-size: map-get(map-get($headings, h3), font-size);
+    font-size: map.get(map.get($headings, h3), font-size);
   }
   .hero-carousel {
     height: 350px;

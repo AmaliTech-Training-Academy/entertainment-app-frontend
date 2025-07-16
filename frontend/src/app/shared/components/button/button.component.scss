@@ -2,6 +2,13 @@
 @use'../../../../styles/mixins' as *;
 @use '../../../../styles/button' as *;
 
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
 .full-width {
   width: 100%;
 }
