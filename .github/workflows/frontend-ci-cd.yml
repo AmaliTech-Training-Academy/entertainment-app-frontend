@@ -248,9 +248,6 @@ jobs:
           enable_waf       = $([ "$ENVIRONMENT" = "dev" ] && echo "false" || echo "true")
           enable_monitoring = true
           
-          # Use existing resources (CloudFront policies, WAF, etc.)
-          use_existing_resources = true
-          
           # Domain configuration
           domain_name = $([ "$ENVIRONMENT" = "dev" ] && echo '""' || echo '"'"$ENVIRONMENT.cineverse.com"'"')
           
@@ -305,22 +302,22 @@ jobs:
           # Try to import existing CloudFront policies
           SPA_POLICY_ID=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?Name=='${ENVIRONMENT}-spa-cache-policy'].Id" --output text 2>/dev/null || echo "")
           if [[ -n "$SPA_POLICY_ID" && "$SPA_POLICY_ID" != "None" ]]; then
-            import_if_needed "module.cloudfront.aws_cloudfront_cache_policy.spa[0]" "$SPA_POLICY_ID" "SPA Cache Policy"
+            import_if_needed "module.cloudfront.aws_cloudfront_cache_policy.spa" "$SPA_POLICY_ID" "SPA Cache Policy"
           fi
           
           STATIC_POLICY_ID=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?Name=='${ENVIRONMENT}-static-assets-cache-policy'].Id" --output text 2>/dev/null || echo "")
           if [[ -n "$STATIC_POLICY_ID" && "$STATIC_POLICY_ID" != "None" ]]; then
-            import_if_needed "module.cloudfront.aws_cloudfront_cache_policy.static_assets[0]" "$STATIC_POLICY_ID" "Static Assets Cache Policy"
+            import_if_needed "module.cloudfront.aws_cloudfront_cache_policy.static_assets" "$STATIC_POLICY_ID" "Static Assets Cache Policy"
           fi
           
           ORIGIN_POLICY_ID=$(aws cloudfront list-origin-request-policies --type custom --query "OriginRequestPolicyList.Items[?Name=='${ENVIRONMENT}-s3-origin-request-policy'].Id" --output text 2>/dev/null || echo "")
           if [[ -n "$ORIGIN_POLICY_ID" && "$ORIGIN_POLICY_ID" != "None" ]]; then
-            import_if_needed "module.cloudfront.aws_cloudfront_origin_request_policy.s3_origin[0]" "$ORIGIN_POLICY_ID" "Origin Request Policy"
+            import_if_needed "module.cloudfront.aws_cloudfront_origin_request_policy.s3_origin" "$ORIGIN_POLICY_ID" "Origin Request Policy"
           fi
           
           HEADERS_POLICY_ID=$(aws cloudfront list-response-headers-policies --type custom --query "ResponseHeadersPolicyList.Items[?Name=='${ENVIRONMENT}-security-headers'].Id" --output text 2>/dev/null || echo "")
           if [[ -n "$HEADERS_POLICY_ID" && "$HEADERS_POLICY_ID" != "None" ]]; then
-            import_if_needed "module.cloudfront.aws_cloudfront_response_headers_policy.security[0]" "$HEADERS_POLICY_ID" "Response Headers Policy"
+            import_if_needed "module.cloudfront.aws_cloudfront_response_headers_policy.security" "$HEADERS_POLICY_ID" "Response Headers Policy"
           fi
           
           # Try to import existing WAF resources
@@ -400,9 +397,6 @@ jobs:
           aws_region       = "${{ env.AWS_REGION }}"
           enable_waf       = $([ "$ENVIRONMENT" = "dev" ] && echo "false" || echo "true")
           enable_monitoring = true
-          
-          # Use existing resources (CloudFront policies, WAF, etc.)
-          use_existing_resources = true
           
           # Domain configuration
           domain_name = $([ "$ENVIRONMENT" = "dev" ] && echo '""' || echo '"'"$ENVIRONMENT.cineverse.com"'"')

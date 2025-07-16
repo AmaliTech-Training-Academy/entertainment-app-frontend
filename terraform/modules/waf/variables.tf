@@ -14,9 +14,8 @@ variable "enable_waf" {
   default     = true
 }
 
-# NEW: Variable to control whether to use existing WAF
-variable "use_existing_waf" {
-  description = "Whether to use existing WAF resources instead of creating new ones"
+variable "enable_waf" {
+  description = "Enable WAF"
   type        = bool
   default     = true
 }
