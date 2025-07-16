@@ -15,7 +15,7 @@ export class SidebarComponent {
 
   topItems = [
   { label: 'Dashboard', icon: Home, route: '/admin/dashboard' },
-  { label: 'Users', icon: Users, route: '/admin/users' }, // Placeholder
+  { label: 'Users', icon: Users, route: '/admin/users' }, 
 ];
 
 }

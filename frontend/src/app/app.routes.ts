@@ -34,6 +34,14 @@ export const routes: Routes = [
             (m) => m.AdminDashboardComponent
           ),
       },
+
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/admin-user/admin-user.component').then(
+            (m) => m.AdminUserComponent
+          ),
+      },
       {
         path: '',
         redirectTo: 'dashboard',
