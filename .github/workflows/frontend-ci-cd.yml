@@ -311,6 +311,13 @@ jobs:
           echo "Created backend.hcl:"
           cat environments/$ENVIRONMENT/backend.hcl
 
+      - name: Clean Terraform Cache for Current Environment
+        working-directory: terraform
+        run: |
+          echo "Cleaning .terraform and lock file for $ENVIRONMENT"
+          rm -rf .terraform
+          rm -f .terraform.lock.hcl
+
       - name: Terraform Init & Validate
         working-directory: terraform
         run: |
@@ -466,6 +473,13 @@ jobs:
           
           # FIXED: Remove tags from terraform.tfvars - they're passed via variables
           EOF
+      
+      - name: Clean Terraform Cache for Current Environment
+        working-directory: terraform
+        run: |
+          echo "Cleaning .terraform and lock file for $ENVIRONMENT"
+          rm -rf .terraform
+          rm -f .terraform.lock.hcl
 
       - name: Terraform Init
         working-directory: terraform
