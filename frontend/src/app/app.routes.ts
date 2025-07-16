@@ -21,11 +21,8 @@ export const routes: Routes = [
       },
       {
         path: 'movie/:id',
-        loadComponent: () =>
-          import('./pages/movie-details.page.component').then(
-            (m) => m.MovieDetailsComponent
-          ),
-      },
+         loadComponent: () => import('./pages/home/detail-page/detail.page').then(m => m.DetailPage)}
+      ,
       {
         path: 'advanced-search',
         loadComponent: () =>
