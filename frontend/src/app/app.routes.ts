@@ -3,7 +3,6 @@ import { MainLayoutComponent } from './features/main-layout.component';
 import { AuthLayoutComponent } from './features/auth/auth-layout.component';
 
 export const routes: Routes = [
- 
   {
     path: '',
     component: MainLayoutComponent,
