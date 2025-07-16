@@ -42,8 +42,8 @@ export class SignUpComponent {
   ) {
     this.registerForm = this.fb.group(
       {
-        firstName: ['', [Validators.required, Validators.minLength(2)]],
-        lastName: ['', [Validators.required, Validators.minLength(2)]],
+        firstName: ['', [Validators.required]],
+        lastName: ['', [Validators.required]],
         email: [
           '',
           [Validators.required, Validators.email],
@@ -106,6 +106,35 @@ export class SignUpComponent {
   //   }
   // }
 
+//   createAccount(): void {
+//   if (this.registerForm.valid) {
+//     const formValue = {
+//       ...this.registerForm.getRawValue(),
+//     };
+
+//     this.authService.register(formValue).subscribe({
+//       next: (res) => {
+//         // Save to localStorage
+//         localStorage.setItem('token', res.token);
+//         localStorage.setItem('user', JSON.stringify(res.user));
+//         localStorage.setItem('role', res.user.role);
+//         console.log('User registered successfully:', res);
+
+//         // Redirect to home
+//         this.router.navigate(['/home']);
+//       },
+//       error: (err) => {
+//         console.error('Registration failed:', err);
+//         if (err.error?.message === 'Email already registered') {
+//           this.email?.setErrors({ emailTaken: true });
+//         }
+//       },
+//     });
+//   } else {
+//     this.registerForm.markAllAsTouched();
+//   }
+  // }
+  
   createAccount(): void {
   if (this.registerForm.valid) {
     const formValue = {
@@ -114,14 +143,15 @@ export class SignUpComponent {
 
     this.authService.register(formValue).subscribe({
       next: (res) => {
-        // Save to localStorage
+        // Save data to localStorage
         localStorage.setItem('token', res.token);
         localStorage.setItem('user', JSON.stringify(res.user));
         localStorage.setItem('role', res.user.role);
+
         console.log('User registered successfully:', res);
 
         // Redirect to home
-        this.router.navigate(['/home']);
+        this.router.navigate(['/']);
       },
       error: (err) => {
         console.error('Registration failed:', err);
@@ -131,9 +161,13 @@ export class SignUpComponent {
       },
     });
   } else {
+    // Mark all fields as touched to trigger validation errors
+    this.password?.markAsTouched();
+    this.confirmPassword?.markAsTouched();
     this.registerForm.markAllAsTouched();
   }
 }
+
 
 
   private strongPasswordValidator(control: AbstractControl): ValidationErrors | null {

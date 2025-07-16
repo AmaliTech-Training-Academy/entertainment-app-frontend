@@ -46,7 +46,7 @@
 
 // ========== HEADING ==========
 .register__heading {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 500;
   color: color($neutral-colors, 100);
   margin-bottom: space(3);
@@ -58,7 +58,7 @@
   display: flex;
   flex-direction: column;
   gap: space(3);
-  padding: space(2) space(8);
+  padding: space(2) space(1);
 }
 
 // ========== FIELD GROUP ==========
@@ -72,18 +72,20 @@
 // ========== LABEL ==========
 .register__label {
   color: color($neutral-colors, 100);
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 400;
+  margin-top: space(2);
 }
 
 // ========== INPUT ==========
 .register__input {
   background: transparent;
   border: none;
-  border-bottom: 1px solid color($primary-colors, 500);
+  border-bottom: 1px solid color($neutral-colors, 500);
   padding: space(2) 0;
   color: color($neutral-colors, 100);
   font-size: 0.95rem;
+  cursor: pointer;
   transition:
     border-color 0.3s,
     color 0.3s;
@@ -95,18 +97,17 @@
   }
 
   &::placeholder {
-    color: color($neutral-colors, 400);
-    font-size: 0.85rem;
+    color: color($neutral-colors, 500);
+    font-size: 0.75rem;
   }
 
   &.invalid {
-    border-bottom: 2px solid color($red-colors, 100);
+    border-bottom: 2px solid rgba(251, 55, 72, 1);
   }
 }
 
-// Disabled button
 .register__submit:disabled {
-  background-color: color($secondary-colors, 0);
+  background-color: rgba(252, 71, 71, 0.1);
   color: color($secondary-colors, 100);
   cursor: not-allowed;
   opacity: 0.8;
@@ -122,7 +123,7 @@
 
 // ========== ERROR ==========
 .register__error {
-  color: color($red-colors, 100);
+  color: #FB3748;
   font-size: 0.75rem;
   animation: shake 0.3s ease;
 }
