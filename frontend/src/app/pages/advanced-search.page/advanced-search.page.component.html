@@ -1,7 +1,7 @@
 <div class="app-container">
   <main class="main-content">
     <form class="search-section">
-      <app-advanced-search></app-advanced-search>
+      <app-advanced-search (search)="onSearch($event)"></app-advanced-search>
     </form>
 
     <section class="trending-section">
@@ -9,7 +9,7 @@
       <!-- pagination -->
       <div class="movies-grid">
         <app-movie-card
-          *ngFor="let movie of trendingMovies"
+          *ngFor="let movie of filteredMovies"
           [movie]="movie"
         ></app-movie-card>
       </div>

@@ -210,7 +210,6 @@
     .filters-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem 1.5rem;
       margin-top: 1.5rem;
       max-width: 900px;
       width: 100%;
@@ -266,6 +265,10 @@
 
     .section-title {
       color: map.get($neutral-colors, 100);
+      @include mixins.typography(heading, h1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-weight: 700;
       font-size: 1.25rem;
       margin-bottom: 1rem;
@@ -284,63 +287,6 @@
 
       @media (min-width: 640px) {
         grid-template-columns: repeat(3, 1fr);
-      }
-    }
-  }
-}
-
-.footer {
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  color: map.get($neutral-colors, 300);
-  font-size: 0.875rem;
-
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .footer-column {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-
-    p {
-      cursor: pointer;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-
-  .footer-copyright {
-    grid-column: span 2;
-    margin-top: 2rem;
-    text-align: center;
-    font-size: 0.75rem;
-    color: map.get($neutral-colors, 400);
-    user-select: none;
-
-    @media (min-width: 640px) {
-      grid-column: span 4;
-    }
-
-    .recaptcha-notice {
-      max-width: 400px;
-      margin: 0.5rem auto 0;
-
-      a {
-        color: inherit;
-        text-decoration: underline;
-
-        &:hover {
-          color: map.get($neutral-colors, 100);
-        }
       }
     }
   }
