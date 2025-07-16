@@ -21,10 +21,10 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'dashboard',
+    path: 'admin',
     loadComponent: () =>
-      import('./pages/dashboard/dashboard.page.component').then(
-        (m) => m.DashboardPage
+      import('./pages/admin-layout/admin-layout.component').then(
+        (m) => m.AdminLayoutComponent
       ),
   },
 ];
