@@ -23,9 +23,13 @@ output "website_url" {
   value       = "https://${module.cloudfront.distribution_domain_name}"
 }
 
-output "waf_web_acl_id" {
-  description = "WAF Web ACL ID"
-  value       = var.enable_waf ? module.waf[0].web_acl_id : null
+# output "waf_web_acl_id" {
+#   description = "WAF Web ACL ID"
+#   value       = var.enable_waf ? module.waf[0].web_acl_id : null
+# }
+output "waf_web_acl_arn" {
+  description = "WAF Web ACL ARN"
+  value       = var.enable_waf ? module.waf[0].web_acl_arn : null
 }
 
 output "dashboard_url" {
