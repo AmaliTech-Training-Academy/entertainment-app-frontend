@@ -1,22 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ScreenShotComponent } from '../../../shared/components/screen-shot/screen-shot.component';
 import { CommentCardComponent } from '../../../shared/components/comment-card/comment-card.component';
 import { TopCastCardComponent } from '../../../shared/top-cast-card/top-cast-card.component';
 import { RatingCardComponent } from '../../../shared/components/rating-card/rating-card.component';
-import { FooterComponent } from '../../../features/footer/footer.component';
 
 @Component({
   selector: 'app-detail-page',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ScreenShotComponent,
     CommentCardComponent,
     TopCastCardComponent,
-    RatingCardComponent,
-    FooterComponent
+    RatingCardComponent
   ],
   templateUrl: './detail.page.html',
   styleUrls: ['./detail.page.scss']
@@ -26,6 +26,9 @@ export class DetailPage implements OnInit {
   comments: any[] = [];
   topCast: any[] = [];
   reviews: any[] = [];
+  isLoggedIn = false;
+  user = { id: 1, name: 'John Doe', avatar: 'https://randomuser.me/api/portraits/men/1.jpg' };
+  commentText = '';
 
   constructor(private http: HttpClient) {
     console.log('HttpClient injected:', !!http);
@@ -48,5 +51,21 @@ export class DetailPage implements OnInit {
       .subscribe(data => {
         this.reviews = data.reviews;
       });
+  }
+
+  login() {
+    this.isLoggedIn = true;
+  }
+
+  submitComment() {
+    if (this.commentText.trim()) {
+      this.comments.push({
+        avatar: this.user.avatar,
+        user: this.user.name,
+        date: new Date().toLocaleString(),
+        text: this.commentText
+      });
+      this.commentText = '';
+    }
   }
 } 
