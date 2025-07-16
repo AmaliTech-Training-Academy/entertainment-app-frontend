@@ -37,9 +37,9 @@ export const routes: Routes = [
       {
         path: 'advanced-search',
         loadComponent: () =>
-          import('./pages/advanced-search.page.component').then(
-            (m) => m.AdvancedSearchComponent
-          ),
+          import(
+            './pages/advanced-search.page/advanced-search.page.component'
+          ).then((m) => m.AdvancedSearchPageComponent),
       },
       {
         path: 'for-you',

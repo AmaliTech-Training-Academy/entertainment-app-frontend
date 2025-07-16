@@ -1,0 +1,20 @@
+<div class="app-container">
+  <main class="main-content">
+    <form class="search-section">
+      <app-advanced-search></app-advanced-search>
+    </form>
+
+    <section class="trending-section">
+      <h3 class="section-title">Trending Now</h3>
+      <!-- pagination -->
+      <div class="movies-grid">
+        <app-movie-card
+          *ngFor="let movie of trendingMovies"
+          [movie]="movie"
+        ></app-movie-card>
+      </div>
+
+      <!-- pagination -->
+    </section>
+  </main>
+</div>
