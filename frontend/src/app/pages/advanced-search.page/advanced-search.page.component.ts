@@ -150,4 +150,11 @@ export class AdvancedSearchPageComponent implements OnInit {
       );
     });
   }
+
+  resetFilters() {
+    this.filteredMovies = [...this.allMovies];
+    // If you need to reset the search component's state:
+    // You'll need to use @ViewChild to access the child component
+    // or emit an event from the child when reset is clicked
+  }
 }

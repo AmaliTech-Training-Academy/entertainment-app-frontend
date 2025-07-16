@@ -291,3 +291,48 @@
     }
   }
 }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: spacing(8);
+  margin: spacing(4) 0;
+  background-color: rgba(map.get($neutral-colors, 800), 0.5);
+  border-radius: map.get(radius.$radius, 4);
+
+  .empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: spacing(3);
+    color: map.get($neutral-colors, 400);
+  }
+
+  .empty-title {
+    @include mixins.typography(heading, h4);
+    color: map.get($neutral-colors, 100);
+    margin-bottom: spacing(1);
+  }
+
+  .empty-message {
+    @include mixins.typography(body, b1);
+    color: map.get($neutral-colors, 300);
+    margin-bottom: spacing(3);
+  }
+
+  button {
+    margin-top: spacing(2);
+  }
+}
+
+.empty-state,
+.movies-grid {
+  transition: opacity 0.3s ease;
+}
+
+.movies-grid:empty + .empty-state {
+  display: flex;
+}
