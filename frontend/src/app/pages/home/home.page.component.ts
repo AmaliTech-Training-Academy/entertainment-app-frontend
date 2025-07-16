@@ -2,12 +2,13 @@ import { Component } from '@angular/core';
 import { HeroCarouselComponent } from '../../components/hero-carousel/hero-carousel.component';
 import { TrendingMovieCardComponent } from '../../components/trending-movie-card/trending-movie-card.component';
 import { CommonModule } from '@angular/common';
+import { SubscriptionFormComponent } from '../../components/subscription-form/subscription-form.component';
 import { AccordionComponent } from '../../features/accordion/accordion.component';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, HeroCarouselComponent, TrendingMovieCardComponent, AccordionComponent],
+  imports: [CommonModule, HeroCarouselComponent, TrendingMovieCardComponent,SubscriptionFormComponent, AccordionComponent],
   templateUrl: './home.page.component.html',
   styleUrl: './home.page.component.scss'
 })
@@ -30,8 +31,50 @@ export class HomePage {
     },
     {
       rank: 4,
+      image: 'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      alt: 'Heads of State poster'
+    },
+    {
+      rank: 5,
+      image: 'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      alt: 'Heads of State poster'
+    },
+    {
+      rank: 6,
+      image: 'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      alt: 'Heads of State poster'
+    },
+    {
+      rank: 7,
       image: 'https://images.unsplash.com/photo-1556684996-c32e7604965a?q=80&w=2148&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       alt: 'Ballerina poster'
     }
   ];
+
+  currentTrendingStartIndex = 0;
+  trendingSlideDirection: 'slide-left' | 'slide-right' | '' = '';
+
+  get visibleTrendingMovies() {
+    return this.trendingMovies.slice(this.currentTrendingStartIndex, this.currentTrendingStartIndex + 4);
+  }
+
+  nextTrending() {
+    if (this.currentTrendingStartIndex < this.trendingMovies.length - 4) {
+      this.trendingSlideDirection = 'slide-left';
+      setTimeout(() => {
+        this.currentTrendingStartIndex++;
+        this.trendingSlideDirection = '';
+      }, 400);
+    }
+  }
+
+  prevTrending() {
+    if (this.currentTrendingStartIndex > 0) {
+      this.trendingSlideDirection = 'slide-right';
+      setTimeout(() => {
+        this.currentTrendingStartIndex--;
+        this.trendingSlideDirection = '';
+      }, 400);
+    }
+  }
 } 

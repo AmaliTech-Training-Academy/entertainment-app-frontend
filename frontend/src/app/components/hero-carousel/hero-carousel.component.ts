@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 
@@ -9,7 +9,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
   templateUrl: './hero-carousel.component.html',
   styleUrl: './hero-carousel.component.scss'
 })
-export class HeroCarouselComponent {
+export class HeroCarouselComponent implements OnInit, OnDestroy {
   heroItems = [
     {
       title: 'The Shawshank Redemption',
@@ -59,6 +59,7 @@ export class HeroCarouselComponent {
   ];
   currentIndex = 0;
   animate = true;
+  private intervalId: any;
 
   get currentHero() {
     return this.heroItems[this.currentIndex];
@@ -74,13 +75,25 @@ export class HeroCarouselComponent {
     this.triggerAnimation();
   }
 
-  prevSlide() {
-    this.currentIndex = (this.currentIndex - 1 + this.heroItems.length) % this.heroItems.length;
-    this.triggerAnimation();
-  }
+  // prevSlide() {
+  //   this.currentIndex = (this.currentIndex - 1 + this.heroItems.length) % this.heroItems.length;
+  //   this.triggerAnimation();
+  // }
 
   goToSlide(index: number) {
     this.currentIndex = index;
     this.triggerAnimation();
+  }
+
+  ngOnInit() {
+    this.intervalId = setInterval(() => {
+      this.nextSlide();
+    }, 5000);
+  }
+
+  ngOnDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
   }
 }
