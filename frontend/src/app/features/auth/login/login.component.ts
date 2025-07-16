@@ -24,6 +24,14 @@ import { Router, RouterModule } from '@angular/router';
 })
 export class LoginComponent {
   loginForm: any;
+  loginError = '';
+  // Sample user
+  private readonly sampleUser = {
+    email: 'test@example.com',
+    password: 'password123',
+    avatar: 'assets/images/cineverse_logo.svg', // You can use any avatar image
+    name: 'Test User'
+  };
   constructor(private fb: FormBuilder, private router: Router) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.email]],
@@ -32,8 +40,24 @@ export class LoginComponent {
   }
 
   onSubmit() {
+    this.loginError = '';
     if (this.loginForm.valid) {
-      this.router.navigate(['']);
+      const { username, password } = this.loginForm.value;
+      if (
+        username === this.sampleUser.email &&
+        password === this.sampleUser.password
+      ) {
+        // Store a sample token and user info in localStorage
+        localStorage.setItem('auth_token', 'sample_token_123');
+        localStorage.setItem('auth_user', JSON.stringify({
+          email: this.sampleUser.email,
+          name: this.sampleUser.name,
+          avatar: this.sampleUser.avatar
+        }));
+        this.router.navigate(['']);
+      } else {
+        this.loginError = 'Invalid email or password.';
+      }
     } else {
       this.loginForm.markAllAsTouched();
     }
