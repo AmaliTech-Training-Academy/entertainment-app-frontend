@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { HeroCarouselComponent } from '../../components/hero-carousel/hero-carousel.component';
 import { TrendingMovieCardComponent } from '../../components/trending-movie-card/trending-movie-card.component';
 import { CommonModule } from '@angular/common';
+import { AccordionComponent } from '../../features/accordion/accordion.component';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, HeroCarouselComponent, TrendingMovieCardComponent],
+  imports: [CommonModule, HeroCarouselComponent, TrendingMovieCardComponent, AccordionComponent],
   templateUrl: './home.page.component.html',
   styleUrl: './home.page.component.scss'
 })

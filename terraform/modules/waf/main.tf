@@ -124,9 +124,7 @@ resource "aws_wafv2_web_acl" "main" {
     sampled_requests_enabled   = true
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # REMOVED: lifecycle block for destruction
 }
 
 # CloudWatch Log Group for WAF in us-east-1
@@ -139,9 +137,7 @@ resource "aws_cloudwatch_log_group" "waf" {
   
   tags = var.tags
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # REMOVED: lifecycle block for destruction
 }
 
 # WAF Logging Configuration
