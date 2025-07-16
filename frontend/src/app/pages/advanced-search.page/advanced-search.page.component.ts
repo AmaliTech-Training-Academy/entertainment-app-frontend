@@ -6,12 +6,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import { FormsModule } from '@angular/forms';
 import { AdvancedSearchComponent as AdvancedSearch } from '../../components/advanced-search/advanced-search.component';
+import { MovieCardComponent } from '../../components/movie-card/movie-card.component';
 
 @Component({
-  selector: 'app-advanced-search',
+  selector: 'app-advanced-search.page',
   imports: [
     CommonModule,
     RouterModule,
@@ -20,16 +20,15 @@ import { AdvancedSearchComponent as AdvancedSearch } from '../../components/adva
     MatInputModule,
     MatSelectModule,
     MatCardModule,
-    MatPaginatorModule,
     FormsModule,
     AdvancedSearch,
+    MovieCardComponent,
   ],
-  templateUrl: './advanced-search.component.html',
-  styleUrl: './advanced-search.component.scss',
+  templateUrl: './advanced-search.page.component.html',
+  styleUrl: './advanced-search.page.component.scss',
 })
-export class AdvancedSearchComponent {
+export class AdvancedSearchPageComponent {
   constructor() {}
-
   searchQuery = '';
   currentPage = 1;
   totalPages = 7;
@@ -42,8 +41,8 @@ export class AdvancedSearchComponent {
       type: 'Movie',
       rating: '9/10',
       genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl:
-        'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+      imageUrl: '../../../assets/images/movie.png',
+      isBookmarked: false,
     },
     {
       title: 'Beylife',
@@ -53,6 +52,7 @@ export class AdvancedSearchComponent {
       genres: ['Action', 'Adventure', 'Thriller'],
       imageUrl:
         'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+      isBookmarked: false,
     },
     {
       title: "Ann's Bey",
@@ -62,6 +62,7 @@ export class AdvancedSearchComponent {
       genres: ['Action', 'Adventure', 'Thriller'],
       imageUrl:
         'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+      isBookmarked: false,
     },
     {
       title: 'Beyond Earth',
@@ -71,6 +72,7 @@ export class AdvancedSearchComponent {
       genres: ['Action', 'Adventure', 'Thriller'],
       imageUrl:
         'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+      isBookmarked: false,
     },
     {
       title: 'Beylife',
@@ -80,6 +82,7 @@ export class AdvancedSearchComponent {
       genres: ['Action', 'Adventure', 'Thriller'],
       imageUrl:
         'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+      isBookmarked: false,
     },
     {
       title: "Ann's Bey",
@@ -89,6 +92,7 @@ export class AdvancedSearchComponent {
       genres: ['Action', 'Adventure', 'Thriller'],
       imageUrl:
         'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+      isBookmarked: false,
     },
   ];
 
