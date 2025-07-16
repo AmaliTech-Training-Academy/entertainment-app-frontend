@@ -1,0 +1,25 @@
+// src/styles/_theme.scss
+@use "@angular/material" as mat;
+@use "./variables" as vars;
+
+// Include core styles (required)
+@include mat.core();
+
+// Define theme
+$theme: mat.define-light-theme(
+  (
+    color: (
+      primary: mat.define-palette(vars.$material-primary, 500),
+      accent: mat.define-palette(vars.$material-accent, 200),
+      warn: mat.define-palette(vars.$material-warn, 200),
+    ),
+    typography:
+      mat.define-typography-config(
+        $font-family: "Outfit, sans-serif",
+      ),
+    density: 0,
+  )
+);
+
+// Apply theme
+@include mat.all-component-themes($theme);

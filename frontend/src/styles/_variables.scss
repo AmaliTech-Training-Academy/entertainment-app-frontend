@@ -1,3 +1,6 @@
+@use "@angular/material" as mat;
+
+// Your original color maps (keep these for non-Material components)
 $primary-colors: (
   100: #cbcfe2,
   200: #acb7d3,
@@ -9,7 +12,7 @@ $primary-colors: (
   800: #2d3955,
   900: #1f273a,
   1000: #10141e,
-  1010: #10141e
+  1010: #10141e,
 );
 
 $secondary-colors: (
@@ -18,11 +21,11 @@ $secondary-colors: (
   300: #f50404,
   400: #ab0303,
   10: #fc4747,
-  0: #FC47471A
+  0: #fc47471a,
 );
 
 $neutral-colors: (
-    100: #ffffff,
+  100: #ffffff,
   200: #e3e3e3,
   300: #c6c6c6,
   400: #aaaaaa,
@@ -32,23 +35,99 @@ $neutral-colors: (
   800: #393939,
   900: #1c1c1c,
   1000: #000000,
-  1010: #000000
+  1010: #000000,
 );
 
 $red-colors: (
   100: #fb3748,
   200: #d00416,
-  10: #fb3748
+  10: #fb3748,
 );
 
 $yellow-colors: (
   100: #ffdb43,
   200: #dfb400,
-  1000: #ffdb43
+  1000: #ffdb43,
 );
 
 $green-colors: (
   100: #84ebb4,
   200: #1fc16b,
-  1000: #1fc16b
+  1000: #1fc16b,
+);
+
+// Material-compatible palettes (must include all required shades)
+$material-primary: (
+  50: #e0e5f0,
+  100: #cbcfe2,
+  200: #acb7d3,
+  300: #91a0c4,
+  400: #7588b6,
+  500: #5a70a7,
+  600: #4b5d8c,
+  700: #3c4b71,
+  800: #2d3955,
+  900: #1f273a,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  ),
+);
+
+$material-accent: (
+  50: #ffecec,
+  100: #fea3a3,
+  200: #fc4747,
+  300: #f50404,
+  400: #ab0303,
+  500: #fc4747,
+  600: #f50404,
+  700: #ab0303,
+  800: #8a0000,
+  900: #5a0000,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: white,
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  ),
+);
+
+$material-warn: (
+  50: #fee8ea,
+  100: #fb3748,
+  200: #d00416,
+  300: #a80012,
+  400: #8a0000,
+  500: #d00416,
+  600: #a80012,
+  700: #8a0000,
+  800: #5a0000,
+  900: #3d0000,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: white,
+    200: white,
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  ),
 );

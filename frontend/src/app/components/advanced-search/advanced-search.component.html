@@ -1,0 +1,134 @@
+<form (submit)="$event.preventDefault(); emitSearchEvent()">
+  <div class="search-container">
+    <div class="container">
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Search for movies and tv series</mat-label>
+        <input
+          matInput
+          type="text"
+          placeholder="Search"
+          [formControl]="searchControl"
+          aria-label="Search input"
+          class="search-input"
+        />
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="emitSearchEvent()"
+        aria-label="Search button"
+        class="search-button"
+      >
+        <span>Search</span>
+        <mat-icon>search</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-container">
+    <div class="container" role="region" aria-label="Filter options">
+      <!-- Type -->
+      <div class="filter-group">
+        <span class="filter-label">Type:</span>
+        <button mat-button [matMenuTriggerFor]="typeMenu" class="filter-button">
+          <span>{{ selectedFilters.type }}</span>
+          <mat-icon fontIcon="arrow_drop_down"></mat-icon>
+        </button>
+        <mat-menu #typeMenu="matMenu">
+          <button
+            mat-menu-item
+            *ngFor="let option of filters.type"
+            (click)="onFilterChange('type', option)"
+          >
+            {{ option }}
+          </button>
+        </mat-menu>
+      </div>
+
+      <!-- Genre -->
+      <div class="filter-group">
+        <span class="filter-label">Genre:</span>
+        <button
+          mat-button
+          [matMenuTriggerFor]="genreMenu"
+          class="filter-button"
+        >
+          {{ selectedFilters.genre }}
+          <mat-icon fontIcon="arrow_drop_down"></mat-icon>
+        </button>
+        <mat-menu #genreMenu="matMenu">
+          <button
+            mat-menu-item
+            *ngFor="let option of filters.genre"
+            (click)="onFilterChange('genre', option)"
+          >
+            {{ option }}
+          </button>
+        </mat-menu>
+      </div>
+
+      <!-- Rating -->
+      <div class="filter-group">
+        <span class="filter-label">Rating:</span>
+        <button
+          mat-button
+          [matMenuTriggerFor]="ratingMenu"
+          class="filter-button"
+        >
+          {{ selectedFilters.rating }}
+          <mat-icon fontIcon="arrow_drop_down"></mat-icon>
+        </button>
+        <mat-menu #ratingMenu="matMenu">
+          <button
+            mat-menu-item
+            *ngFor="let option of filters.rating"
+            (click)="onFilterChange('rating', option)"
+          >
+            {{ option }}
+          </button>
+        </mat-menu>
+      </div>
+
+      <!-- Year -->
+      <div class="filter-group">
+        <span class="filter-label">Year:</span>
+        <button mat-button [matMenuTriggerFor]="yearMenu" class="filter-button">
+          {{ selectedFilters.year }}
+          <mat-icon fontIcon="arrow_drop_down"></mat-icon>
+        </button>
+        <mat-menu #yearMenu="matMenu">
+          <button
+            mat-menu-item
+            *ngFor="let option of filters.year"
+            (click)="onFilterChange('year', option)"
+          >
+            {{ option }}
+          </button>
+        </mat-menu>
+      </div>
+
+      <!-- Language -->
+      <div class="filter-group">
+        <span class="filter-label">Language:</span>
+        <button
+          mat-button
+          [matMenuTriggerFor]="languageMenu"
+          class="filter-button"
+        >
+          {{ selectedFilters.language
+          }}<mat-icon fontIcon="arrow_drop_down"></mat-icon>
+        </button>
+        <mat-menu #languageMenu="matMenu" panelClass="filter-menu">
+          <button
+            mat-menu-item
+            *ngFor="let option of filters.language"
+            (click)="onFilterChange('language', option)"
+          >
+            {{ option }}
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+</form>

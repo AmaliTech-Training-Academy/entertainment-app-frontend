@@ -1,18 +1,1 @@
-<nav style="margin-bottom: 2rem;">
-  <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a> |
-  <a routerLink="/about" routerLinkActive="active">About</a>
-</nav>
-<app-hero-carousel/>
-<section class="trending-section">
-  <h2 class="trending-section__title">Trending Now</h2>
-  <div class="trending-section__list">
-    <app-trending-movie-card
-      *ngFor="let movie of trendingMovies"
-      [rank]="movie.rank"
-      [image]="movie.image"
-      [alt]="movie.alt"
-    />
-  </div>
-</section>
 <router-outlet></router-outlet>
-
