@@ -2,7 +2,6 @@
 @use "../../../styles/spacing" as *;
 @use "sass:map";
 
-// Helpers
 @function color($palette, $shade) {
   @return map.get($palette, $shade);
 }
@@ -99,7 +98,6 @@ h2 {
     }
   }
 
-  // Tablet
   @media (min-width: 768px) {
     padding: space(2) space(6);
 
@@ -120,7 +118,6 @@ h2 {
     }
   }
 
-  // Desktop
   @media (min-width: 1024px) {
     padding: space(2) space(8);
 

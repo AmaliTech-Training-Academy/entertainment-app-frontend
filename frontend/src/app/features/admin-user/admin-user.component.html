@@ -1,0 +1,35 @@
+<div class="user-management">
+    <h2>Users</h2>
+    <p>Manage user accounts, roles, and permissions.</p>
+  
+    <input class="search-input" type="text" placeholder="Search users" />
+  
+    <div class="bulk-actions">
+      <button class="btn">Change Roles</button>
+      <button class="btn">Ban Users</button>
+    </div>
+  
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th>Last Active</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td>{{ user.name }}</td>
+          <td>{{ user.role }}</td>
+          <td [ngClass]="user.status.toLowerCase()">{{ user.status }}</td>
+          <td>{{ user.joined }}</td>
+          <td>{{ user.lastActive }}</td>
+          <td><a href="#" class="view-link">View</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

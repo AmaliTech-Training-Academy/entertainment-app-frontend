@@ -1,19 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Home, LayoutDashboard, LucideAngularModule, Settings, Users } from 'lucide-angular';
+import { RouterLink } from '@angular/router';
+import { Home, LucideAngularModule, Settings, Users, MoveLeft } from 'lucide-angular';
 
 @Component({
-  selector: 'app-admin-sidebar',
-  imports: [ LucideAngularModule, CommonModule],
+  selector: 'app-sidebar',
+  imports: [ LucideAngularModule, CommonModule, RouterLink ],
   templateUrl: './side-bar.component.html',
   styleUrls: ['./side-bar.component.scss'],
 })
 export class SidebarComponent {
-  topItems = [
-    { label: 'Dashboard', icon: LayoutDashboard },
-    { label: 'Users', icon: Users },
-    { label: 'Settings', icon: Settings },
-  ];
 
-  bottomItem = { label: 'Back to Home', icon: Home };
+  bottomItem = { label: 'Back to Home', icon: MoveLeft };
+
+  topItems = [
+  { label: 'Dashboard', icon: Home, route: '/admin/dashboard' },
+  { label: 'Users', icon: Users, route: '/admin/users' }, // Placeholder
+];
+
 }

@@ -26,5 +26,19 @@ export const routes: Routes = [
       import('./pages/admin-layout/admin-layout.component').then(
         (m) => m.AdminLayoutComponent
       ),
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/admin-dashboard/admin-dashboard.component').then(
+            (m) => m.AdminDashboardComponent
+          ),
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+    ],
   },
 ];
