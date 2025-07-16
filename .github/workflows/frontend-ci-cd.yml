@@ -30,25 +30,41 @@ jobs:
         id: config
         run: |
           BRANCH="${{ github.ref_name }}"
+          EVENT_NAME="${{ github.event_name }}"
+          
+          echo "🔍 Environment Detection:"
+          echo "Branch: $BRANCH"
+          echo "Event: $EVENT_NAME"
           
           # Set environment based on branch
           if [[ "$BRANCH" == "prod" ]]; then
             echo "environment=prod" >> $GITHUB_OUTPUT
             echo "is_production=true" >> $GITHUB_OUTPUT
+            echo "✅ Environment set to: prod (production)"
           elif [[ "$BRANCH" == "staging" ]]; then
             echo "environment=staging" >> $GITHUB_OUTPUT
             echo "is_production=false" >> $GITHUB_OUTPUT
+            echo "✅ Environment set to: staging"
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
             echo "is_production=false" >> $GITHUB_OUTPUT
+            echo "✅ Environment set to: dev (default)"
           fi
           
           # Only deploy on push to main branches
-          if [[ "${{ github.event_name }}" == "push" && "$BRANCH" =~ ^(dev|staging|prod)$ ]]; then
+          if [[ "$EVENT_NAME" == "push" && "$BRANCH" =~ ^(dev|staging|prod)$ ]]; then
             echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "✅ Deployment enabled for push to $BRANCH"
           else
             echo "should_deploy=false" >> $GITHUB_OUTPUT
+            echo "ℹ️  Deployment disabled (event: $EVENT_NAME, branch: $BRANCH)"
           fi
+          
+          echo ""
+          echo "📋 Final Configuration:"
+          echo "Environment: $([ "$BRANCH" == "prod" ] && echo "prod" || [ "$BRANCH" == "staging" ] && echo "staging" || echo "dev")"
+          echo "Should Deploy: $([ "$EVENT_NAME" == "push" ] && [ "$BRANCH" =~ ^(dev|staging|prod)$ ] && echo "true" || echo "false")"
+          echo "Is Production: $([ "$BRANCH" == "prod" ] && echo "true" || echo "false")"
 
   # =============================================================================
   # Security Scanning
@@ -214,6 +230,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Debug Environment
+        run: |
+          echo "🔍 Plan Job Environment Debug:"
+          echo "ENVIRONMENT (from env): $ENVIRONMENT"
+          echo "setup.outputs.environment: ${{ needs.setup.outputs.environment }}"
+          echo "github.ref_name: ${{ github.ref_name }}"
+          echo "should_deploy: ${{ needs.setup.outputs.should_deploy }}"
+          echo "is_production: ${{ needs.setup.outputs.is_production }}"
+      
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -229,6 +254,7 @@ jobs:
       - name: Create Environment Configuration
         working-directory: terraform
         run: |
+          echo "🔧 Creating configuration for environment: $ENVIRONMENT"
           mkdir -p environments/$ENVIRONMENT
           
           # Create backend configuration
@@ -240,16 +266,28 @@ jobs:
           dynamodb_table = "cineverse-terraform-locks"
           EOF
           
-          # Create terraform variables with existing resource support
+          # Determine WAF setting based on environment
+          if [[ "$ENVIRONMENT" == "dev" ]]; then
+            WAF_ENABLED="false"
+            DOMAIN_NAME='""'
+          else
+            WAF_ENABLED="true"
+            DOMAIN_NAME='"'$ENVIRONMENT'.cineverse.com"'
+          fi
+          
+          echo "WAF Enabled: $WAF_ENABLED"
+          echo "Domain Name: $DOMAIN_NAME"
+          
+          # Create terraform variables
           cat > environments/$ENVIRONMENT/terraform.tfvars << EOF
           environment      = "$ENVIRONMENT"
           project_name     = "cineverse"
           aws_region       = "${{ env.AWS_REGION }}"
-          enable_waf       = $([ "$ENVIRONMENT" = "dev" ] && echo "false" || echo "true")
+          enable_waf       = $WAF_ENABLED
           enable_monitoring = true
           
           # Domain configuration
-          domain_name = $([ "$ENVIRONMENT" = "dev" ] && echo '""' || echo '"'"$ENVIRONMENT.cineverse.com"'"')
+          domain_name = $DOMAIN_NAME
           
           # API endpoint
           api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
@@ -265,21 +303,39 @@ jobs:
             DeployedAt  = "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           }
           EOF
+          
+          echo "📄 Created terraform.tfvars:"
+          cat environments/$ENVIRONMENT/terraform.tfvars
+          
+          echo ""
+          echo "📄 Created backend.hcl:"
+          cat environments/$ENVIRONMENT/backend.hcl
 
       - name: Terraform Init & Validate
         working-directory: terraform
         run: |
+          echo "🚀 Initializing Terraform for environment: $ENVIRONMENT"
+          
           terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl"
           terraform validate
           
           # Show current state summary
           RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l)
           echo "Current state contains $RESOURCE_COUNT resources"
+          
+          if [[ $RESOURCE_COUNT -gt 0 ]]; then
+            echo "📋 Current resources in state:"
+            terraform state list | head -10
+            if [[ $RESOURCE_COUNT -gt 10 ]]; then
+              echo "... and $((RESOURCE_COUNT - 10)) more"
+            fi
+          fi
 
       - name: Import Existing Resources
         working-directory: terraform
         run: |
           echo "🔍 Checking for existing resources to import..."
+          echo "Environment: $ENVIRONMENT"
           
           # Function to import if not in state
           import_if_needed() {
@@ -289,7 +345,10 @@ jobs:
             
             if ! terraform state show "$resource_address" >/dev/null 2>&1; then
               echo "📥 Importing $resource_name: $resource_address"
-              if terraform import "$resource_address" "$resource_id" 2>/dev/null; then
+              echo "Resource ID: $resource_id"
+              
+              # FIXED: Include var-file for terraform import
+              if terraform import -var-file="environments/$ENVIRONMENT/terraform.tfvars" "$resource_address" "$resource_id" 2>/dev/null; then
                 echo "✅ Successfully imported $resource_name"
               else
                 echo "ℹ️  $resource_name not found or already managed - will be created if needed"
@@ -300,47 +359,91 @@ jobs:
           }
           
           # Try to import existing CloudFront policies
+          echo "🔍 Looking for CloudFront policies..."
+          
           SPA_POLICY_ID=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?Name=='${ENVIRONMENT}-spa-cache-policy'].Id" --output text 2>/dev/null || echo "")
-          if [[ -n "$SPA_POLICY_ID" && "$SPA_POLICY_ID" != "None" ]]; then
+          if [[ -n "$SPA_POLICY_ID" && "$SPA_POLICY_ID" != "None" && "$SPA_POLICY_ID" != "" ]]; then
+            echo "Found SPA Cache Policy: $SPA_POLICY_ID"
             import_if_needed "module.cloudfront.aws_cloudfront_cache_policy.spa" "$SPA_POLICY_ID" "SPA Cache Policy"
+          else
+            echo "SPA Cache Policy not found - will be created"
           fi
           
           STATIC_POLICY_ID=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?Name=='${ENVIRONMENT}-static-assets-cache-policy'].Id" --output text 2>/dev/null || echo "")
-          if [[ -n "$STATIC_POLICY_ID" && "$STATIC_POLICY_ID" != "None" ]]; then
+          if [[ -n "$STATIC_POLICY_ID" && "$STATIC_POLICY_ID" != "None" && "$STATIC_POLICY_ID" != "" ]]; then
+            echo "Found Static Assets Cache Policy: $STATIC_POLICY_ID"
             import_if_needed "module.cloudfront.aws_cloudfront_cache_policy.static_assets" "$STATIC_POLICY_ID" "Static Assets Cache Policy"
+          else
+            echo "Static Assets Cache Policy not found - will be created"
           fi
           
           ORIGIN_POLICY_ID=$(aws cloudfront list-origin-request-policies --type custom --query "OriginRequestPolicyList.Items[?Name=='${ENVIRONMENT}-s3-origin-request-policy'].Id" --output text 2>/dev/null || echo "")
-          if [[ -n "$ORIGIN_POLICY_ID" && "$ORIGIN_POLICY_ID" != "None" ]]; then
+          if [[ -n "$ORIGIN_POLICY_ID" && "$ORIGIN_POLICY_ID" != "None" && "$ORIGIN_POLICY_ID" != "" ]]; then
+            echo "Found Origin Request Policy: $ORIGIN_POLICY_ID"
             import_if_needed "module.cloudfront.aws_cloudfront_origin_request_policy.s3_origin" "$ORIGIN_POLICY_ID" "Origin Request Policy"
+          else
+            echo "Origin Request Policy not found - will be created"
           fi
           
           HEADERS_POLICY_ID=$(aws cloudfront list-response-headers-policies --type custom --query "ResponseHeadersPolicyList.Items[?Name=='${ENVIRONMENT}-security-headers'].Id" --output text 2>/dev/null || echo "")
-          if [[ -n "$HEADERS_POLICY_ID" && "$HEADERS_POLICY_ID" != "None" ]]; then
+          if [[ -n "$HEADERS_POLICY_ID" && "$HEADERS_POLICY_ID" != "None" && "$HEADERS_POLICY_ID" != "" ]]; then
+            echo "Found Response Headers Policy: $HEADERS_POLICY_ID"
             import_if_needed "module.cloudfront.aws_cloudfront_response_headers_policy.security" "$HEADERS_POLICY_ID" "Response Headers Policy"
+          else
+            echo "Response Headers Policy not found - will be created"
           fi
           
-          # Try to import existing WAF resources
-          WAF_ID=$(aws wafv2 list-web-acls --scope CLOUDFRONT --region us-east-1 --query "WebACLs[?Name=='cineverse-${ENVIRONMENT}-waf'].Id" --output text 2>/dev/null || echo "")
-          if [[ -n "$WAF_ID" && "$WAF_ID" != "None" ]]; then
-            import_if_needed "module.waf[0].aws_wafv2_web_acl.main[0]" "$WAF_ID/CLOUDFRONT/us-east-1" "WAF Web ACL"
+          # Try to import existing WAF resources (only if WAF is enabled)
+          if [[ "$ENVIRONMENT" != "dev" ]]; then
+            echo "🔍 Looking for WAF resources (WAF enabled for $ENVIRONMENT)..."
+            
+            WAF_ID=$(aws wafv2 list-web-acls --scope CLOUDFRONT --region us-east-1 --query "WebACLs[?Name=='cineverse-${ENVIRONMENT}-waf'].Id" --output text 2>/dev/null || echo "")
+            if [[ -n "$WAF_ID" && "$WAF_ID" != "None" && "$WAF_ID" != "" ]]; then
+              echo "Found WAF Web ACL: $WAF_ID"
+              import_if_needed "module.waf[0].aws_wafv2_web_acl.main[0]" "$WAF_ID/CLOUDFRONT/us-east-1" "WAF Web ACL"
+            else
+              echo "WAF Web ACL not found - will be created"
+            fi
+            
+            # Try to import CloudWatch Log Group
+            LOG_GROUP_NAME="/aws/wafv2/cineverse-${ENVIRONMENT}"
+            if aws logs describe-log-groups --log-group-name-prefix "$LOG_GROUP_NAME" --region us-east-1 --query "logGroups[?logGroupName=='$LOG_GROUP_NAME']" --output text >/dev/null 2>&1; then
+              echo "Found CloudWatch Log Group: $LOG_GROUP_NAME"
+              import_if_needed "module.waf[0].aws_cloudwatch_log_group.waf[0]" "$LOG_GROUP_NAME" "CloudWatch Log Group"
+            else
+              echo "CloudWatch Log Group not found - will be created"
+            fi
+          else
+            echo "ℹ️  WAF disabled for dev environment - skipping WAF resource import"
           fi
           
-          # Try to import CloudWatch Log Group
-          LOG_GROUP_NAME="/aws/wafv2/cineverse-${ENVIRONMENT}"
-          if aws logs describe-log-groups --log-group-name-prefix "$LOG_GROUP_NAME" --region us-east-1 --query "logGroups[?logGroupName=='$LOG_GROUP_NAME']" --output text >/dev/null 2>&1; then
-            import_if_needed "module.waf[0].aws_cloudwatch_log_group.waf[0]" "$LOG_GROUP_NAME" "CloudWatch Log Group"
-          fi
+          echo "🎉 Import process completed!"
 
       - name: Terraform Plan
         working-directory: terraform
         run: |
+          echo "📊 Creating Terraform plan for environment: $ENVIRONMENT"
+          
           terraform plan \
             -var-file="environments/$ENVIRONMENT/terraform.tfvars" \
             -out="$ENVIRONMENT.tfplan" \
             -detailed-exitcode
           
-          echo "PLAN_EXIT_CODE=$?" >> $GITHUB_ENV
+          PLAN_EXIT_CODE=$?
+          echo "PLAN_EXIT_CODE=$PLAN_EXIT_CODE" >> $GITHUB_ENV
+          
+          case $PLAN_EXIT_CODE in
+            0)
+              echo "✅ No changes needed - infrastructure is up to date"
+              ;;
+            1)
+              echo "❌ Terraform plan failed"
+              exit 1
+              ;;
+            2)
+              echo "📝 Changes detected - plan created successfully"
+              ;;
+          esac
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
@@ -379,6 +482,7 @@ jobs:
       - name: Recreate Environment Configuration
         working-directory: terraform
         run: |
+          echo "🔧 Recreating configuration for environment: $ENVIRONMENT"
           mkdir -p environments/$ENVIRONMENT
           
           # Recreate backend configuration
@@ -390,16 +494,25 @@ jobs:
           dynamodb_table = "cineverse-terraform-locks"
           EOF
           
-          # Recreate terraform variables with existing resource support
+          # Determine WAF setting based on environment
+          if [[ "$ENVIRONMENT" == "dev" ]]; then
+            WAF_ENABLED="false"
+            DOMAIN_NAME='""'
+          else
+            WAF_ENABLED="true"
+            DOMAIN_NAME='"'$ENVIRONMENT'.cineverse.com"'
+          fi
+          
+          # Recreate terraform variables
           cat > environments/$ENVIRONMENT/terraform.tfvars << EOF
           environment      = "$ENVIRONMENT"
           project_name     = "cineverse"
           aws_region       = "${{ env.AWS_REGION }}"
-          enable_waf       = $([ "$ENVIRONMENT" = "dev" ] && echo "false" || echo "true")
+          enable_waf       = $WAF_ENABLED
           enable_monitoring = true
           
           # Domain configuration
-          domain_name = $([ "$ENVIRONMENT" = "dev" ] && echo '""' || echo '"'"$ENVIRONMENT.cineverse.com"'"')
+          domain_name = $DOMAIN_NAME
           
           # API endpoint
           api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
