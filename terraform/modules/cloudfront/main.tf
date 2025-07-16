@@ -4,7 +4,8 @@ resource "aws_cloudfront_distribution" "website" {
   comment             = "CineVerse ${var.environment} Frontend Distribution"
   default_root_object = "index.html"
   price_class         = var.price_class
-  web_acl_id          = var.waf_web_acl_id
+  # FIXED: Only set web_acl_id if it's not empty (WAF is optional for dev)
+  web_acl_id          = var.waf_web_acl_id != "" ? var.waf_web_acl_id : null
 
   aliases = var.domain_aliases
 
@@ -66,7 +67,7 @@ resource "aws_cloudfront_distribution" "website" {
   tags = var.tags
 }
 
-# FIXED: Cache Policy for SPA with environment-specific unique name
+# Cache Policy for SPA with environment-specific unique name
 resource "aws_cloudfront_cache_policy" "spa" {
   name        = "cineverse-${var.environment}-spa-cache-policy"
   comment     = "Cache policy for SPA applications - ${var.environment}"
@@ -92,7 +93,7 @@ resource "aws_cloudfront_cache_policy" "spa" {
   }
 }
 
-# FIXED: Cache Policy for Static Assets with environment-specific unique name
+# Cache Policy for Static Assets with environment-specific unique name
 resource "aws_cloudfront_cache_policy" "static_assets" {
   name        = "cineverse-${var.environment}-static-assets-cache-policy"
   comment     = "Cache policy for static assets (CSS, JS, images) - ${var.environment}"
@@ -118,7 +119,7 @@ resource "aws_cloudfront_cache_policy" "static_assets" {
   }
 }
 
-# FIXED: Origin Request Policy for S3 with environment-specific unique name
+# Origin Request Policy for S3 with environment-specific unique name
 resource "aws_cloudfront_origin_request_policy" "s3_origin" {
   name    = "cineverse-${var.environment}-s3-origin-request-policy"
   comment = "Origin request policy for S3 static website - ${var.environment}"
@@ -143,7 +144,7 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
   }
 }
 
-# FIXED: Response Headers Policy for Security with environment-specific unique name
+# Response Headers Policy for Security with environment-specific unique name
 resource "aws_cloudfront_response_headers_policy" "security" {
   name    = "cineverse-${var.environment}-security-headers"
   comment = "Security headers for CineVerse frontend - ${var.environment}"

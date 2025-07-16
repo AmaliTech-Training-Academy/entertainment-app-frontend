@@ -41,7 +41,7 @@ provider "aws" {
   }
 }
 
-# FIXED: Create S3 bucket first (without CloudFront dependency)
+# Create S3 bucket first
 module "s3_website" {
   source = "./modules/s3-website"
 
@@ -52,7 +52,23 @@ module "s3_website" {
   tags = local.common_tags
 }
 
-# FIXED: Create CloudFront distribution after S3 bucket
+# FIXED: Create WAF before CloudFront to ensure proper dependency
+module "waf" {
+  count  = var.enable_waf ? 1 : 0
+  source = "./modules/waf"
+
+  project_name = var.project_name
+  environment  = var.environment
+  rate_limit   = local.env_config[var.environment].waf_rate_limit
+
+  tags = local.common_tags
+
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
+}
+
+# FIXED: Create CloudFront distribution after S3 and WAF
 module "cloudfront" {
   source = "./modules/cloudfront"
 
@@ -61,15 +77,19 @@ module "cloudfront" {
   s3_bucket_domain_name    = module.s3_website.bucket_domain_name
   origin_access_control_id = module.s3_website.origin_access_control_id
   price_class              = local.env_config[var.environment].cloudfront_price_class
-  waf_web_acl_id           = var.enable_waf ? module.waf[0].web_acl_id : ""
+  # FIXED: Conditional WAF Web ACL ID reference with proper dependency
+  waf_web_acl_id           = var.enable_waf && length(module.waf) > 0 ? module.waf[0].web_acl_id : ""
   api_endpoint             = var.domain_name != "" ? "https://api.${var.domain_name}" : ""
 
   tags = local.common_tags
 
-  depends_on = [module.s3_website]
+  depends_on = [
+    module.s3_website,
+    module.waf
+  ]
 }
 
-# FIXED: Create S3 bucket policy after CloudFront distribution
+# Create S3 bucket policy after CloudFront distribution
 resource "aws_s3_bucket_policy" "website" {
   bucket = module.s3_website.bucket_id
   policy = jsonencode({
@@ -93,22 +113,6 @@ resource "aws_s3_bucket_policy" "website" {
   })
 
   depends_on = [module.cloudfront]
-}
-
-# WAF with us-east-1 provider
-module "waf" {
-  count  = var.enable_waf ? 1 : 0
-  source = "./modules/waf"
-
-  project_name = var.project_name
-  environment  = var.environment
-  rate_limit   = local.env_config[var.environment].waf_rate_limit
-
-  tags = local.common_tags
-
-  providers = {
-    aws.us_east_1 = aws.us_east_1
-  }
 }
 
 # Monitoring

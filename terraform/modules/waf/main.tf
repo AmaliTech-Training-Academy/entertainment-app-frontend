@@ -8,7 +8,7 @@ terraform {
   }
 }
 
-# FIXED: WAF Web ACL with environment-specific unique name
+# WAF Web ACL with environment-specific unique name
 resource "aws_wafv2_web_acl" "main" {
   name        = "cineverse-${var.project_name}-${var.environment}-waf"
   description = "WAF for CineVerse ${var.environment} frontend"
@@ -123,9 +123,9 @@ resource "aws_wafv2_web_acl" "main" {
   }
 }
 
-# FIXED: CloudWatch Log Group for WAF with environment-specific unique name
+# FIXED: CloudWatch Log Group with corrected naming (single cineverse)
 resource "aws_cloudwatch_log_group" "waf" {
-  name              = "/aws/wafv2/cineverse-${var.project_name}-${var.environment}-waf"
+  name              = "/aws/wafv2/cineverse-${var.environment}-waf"
   retention_in_days = var.log_retention_days
   
   provider = aws.us_east_1
@@ -133,12 +133,18 @@ resource "aws_cloudwatch_log_group" "waf" {
   tags = var.tags
 }
 
-# FIXED: WAF Logging Configuration
+# OPTION 1: WAF Logging Configuration (Simple - recommended)
+# Comment this out if it continues to fail
 resource "aws_wafv2_web_acl_logging_configuration" "main" {
   resource_arn            = aws_wafv2_web_acl.main.arn
   log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
 
   provider = aws.us_east_1
+
+  depends_on = [
+    aws_wafv2_web_acl.main,
+    aws_cloudwatch_log_group.waf
+  ]
 
   redacted_fields {
     single_header {
@@ -151,4 +157,18 @@ resource "aws_wafv2_web_acl_logging_configuration" "main" {
       name = "cookie"
     }
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
+
+# OPTION 2: Skip WAF logging (uncomment if Option 1 fails)
+# If WAF logging continues to fail, you can skip it entirely.
+# The WAF will still work for protection, just without logging.
+# 
+# resource "null_resource" "skip_waf_logging" {
+#   provisioner "local-exec" {
+#     command = "echo 'WAF logging disabled - WAF protection still active'"
+#   }
+# }
