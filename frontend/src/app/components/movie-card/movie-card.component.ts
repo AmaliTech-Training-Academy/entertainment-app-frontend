@@ -9,16 +9,19 @@ import { MatIcon } from '@angular/material/icon';
   styleUrl: './movie-card.component.scss',
 })
 export class MovieCardComponent {
-  @Input() title = 'The Great Lands';
-  @Input() year = '2019';
-  @Input() type: 'Movie' | 'Series' | 'Both' = 'Movie';
-  @Input() rating = 9;
-  @Input() genres: string[] = ['Action', 'Adventure', 'Thriller'];
-  @Input() imageUrl = 'movie.png';
-  @Input() isBookmarked = false;
+  @Input() movie = {
+    title: 'The Great Lands',
+    year: '2019',
+    type: 'Movie',
+    rating: '9/10',
+    genres: ['Action', 'Adventure', 'Thriller'],
+    imageUrl:
+      'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+    isBookmarked: false,
+  };
 
   toggleBookmark() {
-    this.isBookmarked = !this.isBookmarked;
+    this.movie.isBookmarked = !this.movie.isBookmarked;
   }
 
   getTypeIcon(type: string): string {
