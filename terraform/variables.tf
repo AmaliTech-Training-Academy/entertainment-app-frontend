@@ -49,13 +49,6 @@ variable "api_endpoint" {
   default     = ""
 }
 
-# NEW: Control whether to use existing resources
-variable "use_existing_resources" {
-  description = "Whether to use existing CloudFront policies and WAF resources instead of creating new ones"
-  type        = bool
-  default     = true
-}
-
 variable "tags" {
   description = "Common tags to apply to all resources"
   type        = map(string)

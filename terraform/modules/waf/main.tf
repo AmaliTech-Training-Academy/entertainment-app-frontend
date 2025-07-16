@@ -8,44 +8,11 @@ terraform {
   }
 }
 
-# Data sources to check for existing WAF resources
-data "aws_wafv2_web_acl" "existing" {
-  count    = var.use_existing_waf ? 1 : 0
-  name     = "${var.project_name}-${var.environment}-waf"
-  scope    = "CLOUDFRONT"
-  provider = aws.us_east_1
-}
-
-data "aws_cloudwatch_log_group" "existing_waf_logs" {
-  count    = var.use_existing_waf ? 1 : 0
-  name     = "/aws/wafv2/${var.project_name}-${var.environment}"
-  provider = aws.us_east_1
-}
-
-# Random suffix for unique WAF resource names (only if creating new)
-resource "random_string" "waf_suffix" {
-  count   = var.use_existing_waf ? 0 : 1
-  length  = 8
-  special = false
-  upper   = false
-  lower   = true
-  numeric = true
-}
-
-locals {
-  # Use existing WAF if available, otherwise use newly created one
-  web_acl_id = var.use_existing_waf && length(data.aws_wafv2_web_acl.existing) > 0 ? data.aws_wafv2_web_acl.existing[0].id : (length(aws_wafv2_web_acl.main) > 0 ? aws_wafv2_web_acl.main[0].id : null)
-  
-  web_acl_arn = var.use_existing_waf && length(data.aws_wafv2_web_acl.existing) > 0 ? data.aws_wafv2_web_acl.existing[0].arn : (length(aws_wafv2_web_acl.main) > 0 ? aws_wafv2_web_acl.main[0].arn : null)
-  
-  log_group_arn = var.use_existing_waf && length(data.aws_cloudwatch_log_group.existing_waf_logs) > 0 ? data.aws_cloudwatch_log_group.existing_waf_logs[0].arn : (length(aws_cloudwatch_log_group.waf) > 0 ? aws_cloudwatch_log_group.waf[0].arn : null)
-}
-
-# WAF Web ACL - Only create if not using existing
+# WAF Web ACL in us-east-1 for CloudFront
 resource "aws_wafv2_web_acl" "main" {
-  count = var.enable_waf && !var.use_existing_waf ? 1 : 0
+  count = var.enable_waf ? 1 : 0
   
-  name        = "${var.project_name}-${var.environment}-waf-${random_string.waf_suffix[0].result}"
+  name        = "${var.project_name}-${var.environment}-waf"
   description = "WAF for CineVerse ${var.environment} frontend"
   scope       = "CLOUDFRONT"
 
@@ -153,7 +120,7 @@ resource "aws_wafv2_web_acl" "main" {
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name                = "${var.project_name}-${var.environment}-waf-${random_string.waf_suffix[0].result}"
+    metric_name                = "${var.project_name}-${var.environment}-waf"
     sampled_requests_enabled   = true
   }
 
@@ -162,10 +129,10 @@ resource "aws_wafv2_web_acl" "main" {
   }
 }
 
-# CloudWatch Log Group for WAF - Only create if not using existing
+# CloudWatch Log Group for WAF in us-east-1
 resource "aws_cloudwatch_log_group" "waf" {
-  count             = var.enable_waf && !var.use_existing_waf ? 1 : 0
-  name              = "/aws/wafv2/${var.project_name}-${var.environment}-${random_string.waf_suffix[0].result}"
+  count             = var.enable_waf ? 1 : 0
+  name              = "/aws/wafv2/${var.project_name}-${var.environment}"
   retention_in_days = var.log_retention_days
   
   provider = aws.us_east_1
@@ -177,12 +144,12 @@ resource "aws_cloudwatch_log_group" "waf" {
   }
 }
 
-# WAF Logging Configuration - Only create if WAF exists (existing or new)
+# WAF Logging Configuration
 resource "aws_wafv2_web_acl_logging_configuration" "main" {
-  count = var.enable_waf && local.web_acl_arn != null && local.log_group_arn != null ? 1 : 0
+  count = var.enable_waf ? 1 : 0
   
-  resource_arn            = local.web_acl_arn
-  log_destination_configs = [local.log_group_arn]
+  resource_arn            = aws_wafv2_web_acl.main[0].arn
+  log_destination_configs = [aws_cloudwatch_log_group.waf[0].arn]
 
   provider = aws.us_east_1
 
@@ -200,8 +167,6 @@ resource "aws_wafv2_web_acl_logging_configuration" "main" {
 
   depends_on = [
     aws_wafv2_web_acl.main,
-    aws_cloudwatch_log_group.waf,
-    data.aws_wafv2_web_acl.existing,
-    data.aws_cloudwatch_log_group.existing_waf_logs
+    aws_cloudwatch_log_group.waf
   ]
 }

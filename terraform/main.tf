@@ -52,10 +52,9 @@ module "waf" {
   count  = var.enable_waf ? 1 : 0
   source = "./modules/waf"
 
-  project_name      = var.project_name
-  environment       = var.environment
-  rate_limit        = local.env_config[var.environment].waf_rate_limit
-  use_existing_waf  = var.use_existing_resources
+  project_name = var.project_name
+  environment  = var.environment
+  rate_limit   = local.env_config[var.environment].waf_rate_limit
 
   tags = local.common_tags
 
@@ -75,7 +74,6 @@ module "cloudfront" {
   price_class              = local.env_config[var.environment].cloudfront_price_class
   waf_web_acl_id           = var.enable_waf ? module.waf[0].web_acl_id : ""
   api_endpoint             = var.domain_name != "" ? "https://api.${var.domain_name}" : var.api_endpoint
-  use_existing_policies    = var.use_existing_resources
 
   tags = local.common_tags
 
