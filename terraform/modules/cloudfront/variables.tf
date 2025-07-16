@@ -54,12 +54,7 @@ variable "api_endpoint" {
   default     = "https://api.example.com"
 }
 
-# api_endpoint variable
-variable "api_endpoint" {
-  description = "Backend API endpoint for CSP headers"
-  type        = string
-  default     = "https://api.example.com"
-}
+
 
 variable "tags" {
   description = "Tags to apply to resources"

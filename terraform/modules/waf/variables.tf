@@ -14,11 +14,7 @@ variable "enable_waf" {
   default     = true
 }
 
-variable "enable_waf" {
-  description = "Enable WAF"
-  type        = bool
-  default     = true
-}
+
 
 variable "rate_limit" {
   description = "Rate limit for WAF"
