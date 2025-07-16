@@ -9,7 +9,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./admin-user.component.scss'],
 })
 export class AdminUserComponent {
-  // readonly Search = Search;
 
   users = [
     { name: 'Ethan Carter', role: 'Admin', status: 'Active', joined: '2022-01-15', lastActive: '2024-03-20' },

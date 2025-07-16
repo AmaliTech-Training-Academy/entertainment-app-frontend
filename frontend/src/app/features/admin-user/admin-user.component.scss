@@ -20,6 +20,7 @@
   .search-wrapper {
   position: relative;
   margin-bottom: space(4);
+//   display: flex;
 
   .search-input {
     width: 100%;
@@ -32,13 +33,14 @@
 
   .search-icon {
     position: absolute;
-    top: 34%;
+    top: 33%;
     left: space(3);
     transform: translateY(-50%);
     color: #6B7582;
     width: 20px;
     height: 20px;
     pointer-events: none;
+    
   }
 }
 
