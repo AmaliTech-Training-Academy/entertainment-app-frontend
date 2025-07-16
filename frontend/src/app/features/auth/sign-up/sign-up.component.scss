@@ -117,7 +117,13 @@
 
 // Strong password border
 .register__input.strong {
-  border-bottom: 2px solid color($green-colors, 300);
+  border-bottom: 2px solid rgba(31, 193, 107, 1);
+}
+
+.register__success {
+  color: rgba(31, 193, 107, 1);
+  font-size: 0.75rem;
+  animation: fadeIn 0.3s ease;
 }
 
 
