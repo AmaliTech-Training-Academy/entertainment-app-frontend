@@ -858,19 +858,24 @@ jobs:
           fi
 
       - name: Invalidate CloudFront Cache
-        if: steps.outputs.outputs.cloudfront_id != ''
+        if: ${{ steps.outputs.outputs.cloudfront_id != '' && success() }}
         run: |
           CLOUDFRONT_ID="${{ steps.outputs.outputs.cloudfront_id }}"
-          echo "Invalidating CloudFront distribution: $CLOUDFRONT_ID"
           
+          if [[ -z "$CLOUDFRONT_ID" || "$CLOUDFRONT_ID" == ::error::* ]]; then
+            echo "Invalid CloudFront ID. Skipping invalidation."
+            exit 0
+          fi
+
+          echo "Invalidating CloudFront distribution: $CLOUDFRONT_ID"
+
           INVALIDATION_ID=$(aws cloudfront create-invalidation \
-            --distribution-id $CLOUDFRONT_ID \
+            --distribution-id "$CLOUDFRONT_ID" \
             --paths "/*" \
             --query 'Invalidation.Id' \
             --output text)
-          
-          echo "Cache invalidation created: $INVALIDATION_ID"
 
+          echo "Cache invalidation created: $INVALIDATION_ID"
       - name: Verify Deployment
         run: |
           echo "Waiting for deployment to propagate..."
