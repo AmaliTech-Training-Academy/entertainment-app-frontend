@@ -23,9 +23,7 @@ resource "aws_cloudfront_cache_policy" "spa" {
     }
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # REMOVED: lifecycle block for destruction
 }
 
 # CloudFront Cache Policy for Static Assets
@@ -53,9 +51,7 @@ resource "aws_cloudfront_cache_policy" "static_assets" {
     }
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # REMOVED: lifecycle block for destruction
 }
 
 # CloudFront Origin Request Policy for S3
@@ -82,9 +78,7 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
     query_string_behavior = "none"
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # REMOVED: lifecycle block for destruction
 }
 
 # CloudFront Response Headers Policy for Security
@@ -137,9 +131,7 @@ resource "aws_cloudfront_response_headers_policy" "security" {
     }
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # REMOVED: lifecycle block for destruction
 }
 
 # CloudFront Distribution
@@ -210,7 +202,5 @@ resource "aws_cloudfront_distribution" "website" {
 
   tags = var.tags
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # REMOVED: lifecycle block for destruction
 }
