@@ -7,36 +7,37 @@
 @use "../../../styles/stroke" as *;
 @use "sass:map";
 
+/* Main container styles */
 .container {
-  max-width: 768px;
-  margin: 0 auto;
   display: flex;
-  gap: spacing(3);
-  align-items: center;
   justify-content: center;
-  padding: spacing(4);
+  width: 100%;
+  max-width: 600px; /* Consistent max-width for both containers */
+  margin: 0 auto;
+  padding: map.get($spacing, 4) map.get($spacing, 3);
+  flex-wrap: wrap;
+  gap: map.get($spacing, 3);
 
+  /* Search field styles */
   mat-form-field {
     flex-grow: 1;
-    height: 48px;
+    min-width: 250px;
+    height: 0.4em;
+
     .mat-mdc-text-field-wrapper {
       background-color: map.get($primary-colors, 400);
-      border-radius: map.get($radius, 2);
     }
 
     .mat-mdc-form-field-infix {
-      padding-top: spacing(2);
-      padding-bottom: spacing(2);
-      height: 48px;
+      padding-top: map.get($spacing, 2);
+      padding-bottom: map.get($spacing, 2);
     }
 
     .mat-mdc-input-element {
-      border-radius: map.get($radius, 2);
-      height: 48px;
-
+      height: 0.4em;
       @include typography(body, b1);
       color: map.get($neutral-colors, 100);
-      padding: spacing(2);
+      padding: map.get($spacing, 2);
 
       &::placeholder {
         color: map.get($neutral-colors, 300);
@@ -49,11 +50,14 @@
     }
   }
 
+  /* Search button styles */
   .search-button {
+    align-items: center;
+
     &.mat-mdc-raised-button {
       @include typography(body, b1);
       height: 48px;
-      padding: 0 spacing(6);
+      padding: 0 map.get($spacing, 6);
       background-color: map.get($secondary-colors, 200);
       color: map.get($neutral-colors, 100);
       border-radius: map.get($radius, 4);
@@ -64,75 +68,111 @@
       }
 
       .mat-icon {
-        margin-right: spacing(2);
+        margin-right: map.get($spacing, 2);
       }
     }
   }
 }
 
-.container {
+/* Search container specific styles */
+.search-container {
   max-width: 960px;
-  margin: 24px auto;
-  padding: 0 16px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px 48px;
-}
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 map.get($spacing, 4);
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.filter-label {
-  font-weight: 400;
-}
-
-.filter-button {
-  width: 80px;
-  height: 36px;
-  background-color: #2c3a5d !important;
-  color: white !important;
-  font-size: 14px;
-  font-weight: 400;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 8px;
-
-  mat-icon {
-    font-size: 18px;
-    margin-left: 6px;
-    color: white;
+  .container {
+    margin-bottom: map.get($spacing, 3);
   }
 }
 
-.search-container {
-  max-width: 960px;
+/* Filters container styles */
+.filters-container {
+  width: 100%;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 map.get($spacing, 4);
+
+  .container {
+    /* Override justify-content for filters */
+    justify-content: center;
+    padding-bottom: map.get($spacing, 3);
+
+    /* Filter group styles */
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: map.get($spacing, 1);
+      align-items: center;
+      flex: 0 1 auto; /* Allow natural width */
+
+      filter-menu {
+        background-color: red;
+      }
+
+      .filter-label {
+        font-weight: 400;
+        width: 100%;
+        text-align: start;
+      }
+
+      .filter-button {
+        width: 100px; /* Slightly wider for better appearance */
+        height: 36px;
+        background-color: map.get($primary-colors, 800) !important;
+        color: map.get($neutral-colors, 100) !important;
+        @include typography(body, b1);
+        border-radius: map.get($radius, 2);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0 map.get($spacing, 3);
+
+        mat-icon {
+          font-size: 18px;
+          margin-left: map.get($spacing, 1);
+          color: map.get($neutral-colors, 100);
+        }
+      }
+    }
+  }
 }
 
-.filters-container {
-  display: flex;
-  max-width: 960px;
-  margin: 0;
-  padding: 0;
-  align-items: start;
-  justify-content: start;
-  flex-wrap: wrap;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: map.get($spacing, 3);
+  }
+
+  .filters-container .container {
+    .filter-group {
+      flex: 1 1 40%; /* Two columns on medium screens */
+      max-width: 140px;
+    }
+  }
 }
 
 @media (max-width: 600px) {
   .container {
-    gap: 16px 24px;
+    gap: map.get($spacing, 2) map.get($spacing, 3);
+    flex-direction: column;
+    align-items: stretch;
+
+    mat-form-field {
+      min-width: 100%;
+    }
   }
 
-  .filter-button {
-    width: 72px;
-    height: 32px;
-    font-size: 13px;
+  .filters-container .container {
+    .filter-group {
+      flex: 1 1 100%; /* Full width on small screens */
+      max-width: 100%;
+
+      .filter-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
   }
 }
