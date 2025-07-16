@@ -233,6 +233,9 @@ jobs:
     if: always() && needs.build.result == 'success'
     env:
       ENVIRONMENT: ${{ needs.setup.outputs.environment }}
+    outputs:
+      plan_changes: ${{ steps.plan.outputs.plan_changes }}
+      plan_exitcode: ${{ steps.plan.outputs.plan_exitcode }}
     steps:
       - uses: actions/checkout@v4
       
@@ -298,16 +301,7 @@ jobs:
           # API endpoint
           api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
           
-          # Tags
-          tags = {
-            Environment = "$ENVIRONMENT"
-            Project     = "CineVerse"
-            ManagedBy   = "Terraform"
-            Branch      = "${{ github.ref_name }}"
-            CommitSHA   = "${{ github.sha }}"
-            DeployedBy  = "${{ github.actor }}"
-            DeployedAt  = "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          }
+          # FIXED: Remove tags from terraform.tfvars - they're passed via variables
           EOF
           
           echo "Created terraform.tfvars:"
@@ -358,9 +352,21 @@ jobs:
           fi
 
       - name: Terraform Plan
+        id: plan
         working-directory: terraform
         run: |
           echo "Creating Terraform plan for environment: $ENVIRONMENT"
+          
+          # FIXED: Set tags via environment variables
+          export TF_VAR_tags='{
+            "Environment": "'$ENVIRONMENT'",
+            "Project": "CineVerse",
+            "ManagedBy": "Terraform",
+            "Branch": "${{ github.ref_name }}",
+            "CommitSHA": "${{ github.sha }}",
+            "DeployedBy": "${{ github.actor }}",
+            "DeployedAt": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+          }'
           
           terraform plan \
             -var-file="environments/$ENVIRONMENT/terraform.tfvars" \
@@ -368,24 +374,27 @@ jobs:
             -detailed-exitcode
           
           PLAN_EXIT_CODE=$?
-          echo "PLAN_EXIT_CODE=$PLAN_EXIT_CODE" >> $GITHUB_ENV
+          echo "plan_exitcode=$PLAN_EXIT_CODE" >> $GITHUB_OUTPUT
           
           case $PLAN_EXIT_CODE in
             0)
               echo "No changes needed - infrastructure is up to date"
+              echo "plan_changes=false" >> $GITHUB_OUTPUT
               ;;
             1)
               echo "Terraform plan failed"
+              echo "plan_changes=error" >> $GITHUB_OUTPUT
               exit 1
               ;;
             2)
               echo "Changes detected - plan created successfully"
+              echo "plan_changes=true" >> $GITHUB_OUTPUT
               ;;
           esac
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
-        if: env.PLAN_EXIT_CODE == '2'
+        if: steps.plan.outputs.plan_changes == 'true'
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
           path: terraform/${{ env.ENVIRONMENT }}.tfplan
@@ -455,16 +464,7 @@ jobs:
           # API endpoint
           api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
           
-          # Tags
-          tags = {
-            Environment = "$ENVIRONMENT"
-            Project     = "CineVerse"
-            ManagedBy   = "Terraform"
-            Branch      = "${{ github.ref_name }}"
-            CommitSHA   = "${{ github.sha }}"
-            DeployedBy  = "${{ github.actor }}"
-            DeployedAt  = "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          }
+          # FIXED: Remove tags from terraform.tfvars - they're passed via variables
           EOF
 
       - name: Terraform Init
@@ -473,6 +473,7 @@ jobs:
 
       - name: Download Terraform Plan
         uses: actions/download-artifact@v4
+        if: needs.plan.outputs.plan_changes == 'true'
         continue-on-error: true
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
@@ -481,9 +482,24 @@ jobs:
       - name: Apply Infrastructure Changes
         working-directory: terraform
         run: |
-          if [[ -f "$ENVIRONMENT.tfplan" ]]; then
-            echo "Applying existing plan"
+          # FIXED: Set tags via environment variables
+          export TF_VAR_tags='{
+            "Environment": "'$ENVIRONMENT'",
+            "Project": "CineVerse",
+            "ManagedBy": "Terraform",
+            "Branch": "${{ github.ref_name }}",
+            "CommitSHA": "${{ github.sha }}",
+            "DeployedBy": "${{ github.actor }}",
+            "DeployedAt": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+          }'
+          
+          # FIXED: Check if plan exists and if changes are needed
+          if [[ "${{ needs.plan.outputs.plan_changes }}" == "true" && -f "$ENVIRONMENT.tfplan" ]]; then
+            echo "Applying existing plan with changes"
             terraform apply -auto-approve "$ENVIRONMENT.tfplan"
+          elif [[ "${{ needs.plan.outputs.plan_changes }}" == "false" ]]; then
+            echo "No changes needed - infrastructure is up to date"
+            echo "Skipping terraform apply"
           else
             echo "Creating and applying new plan"
             terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
@@ -608,8 +624,4 @@ jobs:
           **Commit:** ${{ github.sha }}  
           **Deployed by:** ${{ github.actor }}
           
-          ## Resources Status
-          All resources managed by Terraform state  
-          Infrastructure deployed successfully  
-          Angular SSR build deployed from browser/ directory to S3 root
-          EOF
+         
