@@ -3,6 +3,14 @@ import { MainLayoutComponent } from './features/main-layout.component';
 import { AuthLayoutComponent } from './features/auth/auth-layout.component';
 
 export const routes: Routes = [
+ {
+    path: 'signup',
+    loadComponent: () => import('./features/auth/sign-up/sign-up.component').then(m => m.SignUpComponent)
+  },
+  {
+    path: 'detail',
+    loadComponent: () => import('./pages/home/detail-page/detail.page').then(m => m.DetailPage)
+
   {
     path: '',
     component: MainLayoutComponent,
@@ -29,9 +37,9 @@ export const routes: Routes = [
       {
         path: 'advanced-search',
         loadComponent: () =>
-          import('./pages/advanced-search.page.component').then(
-            (m) => m.AdvancedSearchComponent
-          ),
+          import(
+            './pages/advanced-search.page/advanced-search.page.component'
+          ).then((m) => m.AdvancedSearchPageComponent),
       },
       {
         path: 'for-you',
