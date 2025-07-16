@@ -78,5 +78,3 @@ resource "aws_cloudfront_origin_access_control" "website" {
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
-
-# REMOVED: S3 bucket policy (moved to main.tf to break circular dependency)

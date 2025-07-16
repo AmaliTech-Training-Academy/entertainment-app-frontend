@@ -1,21 +1,24 @@
-# modules/cloudfront/outputs.tf
-
 output "distribution_id" {
-  description = "The ID of the CloudFront distribution"
+  description = "CloudFront distribution ID"
   value       = aws_cloudfront_distribution.website.id
 }
 
-output "distribution_domain_name" {
-  description = "The domain name of the CloudFront distribution"
-  value       = aws_cloudfront_distribution.website.domain_name
-}
-
 output "distribution_arn" {
-  description = "The ARN of the CloudFront distribution"
+  description = "CloudFront distribution ARN"
   value       = aws_cloudfront_distribution.website.arn
 }
 
+output "distribution_domain_name" {
+  description = "CloudFront distribution domain name"
+  value       = aws_cloudfront_distribution.website.domain_name
+}
+
 output "distribution_hosted_zone_id" {
-  description = "The hosted zone ID of the CloudFront distribution"
+  description = "CloudFront distribution hosted zone ID"
   value       = aws_cloudfront_distribution.website.hosted_zone_id
+}
+
+output "origin_request_policy_id" {
+  description = "CloudFront origin request policy ID"
+  value       = aws_cloudfront_origin_request_policy.s3_origin.id
 }

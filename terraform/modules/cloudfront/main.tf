@@ -66,10 +66,10 @@ resource "aws_cloudfront_distribution" "website" {
   tags = var.tags
 }
 
-# Cache Policy for SPA
+# FIXED: Cache Policy for SPA with environment-specific unique name
 resource "aws_cloudfront_cache_policy" "spa" {
-  name        = "${var.environment}-spa-cache-policy"
-  comment     = "Cache policy for SPA applications"
+  name        = "cineverse-${var.environment}-spa-cache-policy"
+  comment     = "Cache policy for SPA applications - ${var.environment}"
   default_ttl = 86400
   max_ttl     = 31536000
   min_ttl     = 0
@@ -92,10 +92,10 @@ resource "aws_cloudfront_cache_policy" "spa" {
   }
 }
 
-# Cache Policy for Static Assets
+# FIXED: Cache Policy for Static Assets with environment-specific unique name
 resource "aws_cloudfront_cache_policy" "static_assets" {
-  name        = "${var.environment}-static-assets-cache-policy"
-  comment     = "Cache policy for static assets (CSS, JS, images)"
+  name        = "cineverse-${var.environment}-static-assets-cache-policy"
+  comment     = "Cache policy for static assets (CSS, JS, images) - ${var.environment}"
   default_ttl = 31536000  # 1 year
   max_ttl     = 31536000  # 1 year
   min_ttl     = 31536000  # 1 year
@@ -118,10 +118,10 @@ resource "aws_cloudfront_cache_policy" "static_assets" {
   }
 }
 
-# Origin Request Policy for S3
+# FIXED: Origin Request Policy for S3 with environment-specific unique name
 resource "aws_cloudfront_origin_request_policy" "s3_origin" {
-  name    = "${var.environment}-s3-origin-request-policy"
-  comment = "Origin request policy for S3 static website"
+  name    = "cineverse-${var.environment}-s3-origin-request-policy"
+  comment = "Origin request policy for S3 static website - ${var.environment}"
 
   cookies_config {
     cookie_behavior = "none"
@@ -143,10 +143,10 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
   }
 }
 
-# FIXED: Response Headers Policy for Security
+# FIXED: Response Headers Policy for Security with environment-specific unique name
 resource "aws_cloudfront_response_headers_policy" "security" {
-  name    = "${var.environment}-security-headers"
-  comment = "Security headers for CineVerse frontend"
+  name    = "cineverse-${var.environment}-security-headers"
+  comment = "Security headers for CineVerse frontend - ${var.environment}"
 
   cors_config {
     access_control_allow_credentials = false
@@ -187,12 +187,9 @@ resource "aws_cloudfront_response_headers_policy" "security" {
       override        = true
     }
 
-    
     content_security_policy {
       content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ${var.api_endpoint}; media-src 'self';"
       override = true
     }
   }
-
-  
 }

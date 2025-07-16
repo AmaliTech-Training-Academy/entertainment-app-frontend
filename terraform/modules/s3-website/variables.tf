@@ -14,8 +14,6 @@ variable "enable_versioning" {
   default     = false
 }
 
-# REMOVED: cloudfront_distribution_arn variable (breaks circular dependency)
-
 variable "enable_intelligent_tiering" {
   description = "Enable S3 Intelligent Tiering"
   type        = bool

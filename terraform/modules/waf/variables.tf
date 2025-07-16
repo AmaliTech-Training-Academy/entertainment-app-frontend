@@ -8,8 +8,6 @@ variable "environment" {
   type        = string
 }
 
-# REMOVED: enable_waf variable (handled in main.tf)
-
 variable "rate_limit" {
   description = "Rate limit for WAF"
   type        = number

@@ -48,7 +48,6 @@ variable "waf_web_acl_id" {
   default     = ""
 }
 
-# api_endpoint variable
 variable "api_endpoint" {
   description = "Backend API endpoint for CSP headers"
   type        = string

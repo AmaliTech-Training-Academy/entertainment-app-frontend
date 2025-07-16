@@ -13,8 +13,6 @@ variable "aws_region" {
   type        = string
 }
 
-# REMOVED: enable_monitoring variable (handled in main.tf)
-
 variable "cloudfront_distribution_id" {
   description = "CloudFront distribution ID"
   type        = string
