@@ -1,4 +1,3 @@
-# terraform/modules/s3-website/variables.tf (updated)
 variable "bucket_name" {
   description = "Name of the S3 bucket"
   type        = string
@@ -15,10 +14,7 @@ variable "enable_versioning" {
   default     = false
 }
 
-variable "cloudfront_distribution_arn" {
-  description = "CloudFront distribution ARN for bucket policy"
-  type        = string
-}
+# REMOVED: cloudfront_distribution_arn variable (breaks circular dependency)
 
 variable "enable_intelligent_tiering" {
   description = "Enable S3 Intelligent Tiering"

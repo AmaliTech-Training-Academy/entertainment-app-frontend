@@ -1,4 +1,3 @@
-
 name: CineVerse Frontend CI/CD
 
 env:
@@ -507,6 +506,103 @@ jobs:
           name: terraform-plan-${{ env.ENVIRONMENT }}
           path: terraform/
 
+      - name: Debug Infrastructure State
+        working-directory: terraform
+        run: |
+          echo "=== Comprehensive Infrastructure Debug ==="
+          
+          echo "1. Terraform version and workspace:"
+          terraform version
+          terraform workspace show
+          
+          echo ""
+          echo "2. Configuration files:"
+          ls -la *.tf
+          
+          echo ""
+          echo "3. Module directories:"
+          ls -la modules/ 2>/dev/null || echo "No modules directory found"
+          if [ -d "modules" ]; then
+            find modules/ -name "*.tf" | head -10
+          fi
+          
+          echo ""
+          echo "4. All resources in state:"
+          terraform state list
+          RESOURCE_COUNT=$(terraform state list | wc -l)
+          echo "Total resources: $RESOURCE_COUNT"
+          
+          echo ""
+          echo "5. Resources by type:"
+          terraform state list | cut -d. -f1 | sort | uniq -c
+          
+          echo ""
+          echo "6. Module resources:"
+          terraform state list | grep "^module\." | sort || echo "No module resources found"
+          
+          echo ""
+          echo "7. Check main.tf for module calls:"
+          if [ -f "main.tf" ]; then
+            echo "Module blocks in main.tf:"
+            grep -n "^module" main.tf || echo "No module blocks found"
+          else
+            echo "main.tf not found"
+          fi
+          
+          echo ""
+          echo "8. Try to get outputs:"
+          terraform output -json > outputs.json
+          cat outputs.json
+          
+          echo ""
+          echo "9. Check for terraform errors:"
+          terraform validate
+          
+          echo ""
+          echo "10. Manual resource inspection:"
+          # Check if we have any S3 buckets
+          terraform state list | grep s3_bucket | head -5 | while read resource; do
+            echo "=== Resource: $resource ==="
+            terraform state show "$resource" | grep -E "(bucket|id|arn)" | head -5
+          done
+          
+          # Check if we have any CloudFront distributions
+          terraform state list | grep cloudfront_distribution | head -5 | while read resource; do
+            echo "=== Resource: $resource ==="
+            terraform state show "$resource" | grep -E "(id|domain_name|arn)" | head -5
+          done
+
+      - name: Clean and Rebuild Infrastructure (if needed)
+        working-directory: terraform
+        run: |
+          echo "=== Checking Infrastructure State ==="
+          
+          # Check if we have a broken state with only 1 resource
+          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
+          echo "Current state contains $RESOURCE_COUNT resources"
+          
+          if [[ $RESOURCE_COUNT -eq 1 ]]; then
+            echo "WARNING: State contains only 1 resource, likely a broken deployment"
+            echo "Current resource in state:"
+            terraform state list
+            
+            # Check if this is a random_string resource (common with circular dependency issues)
+            if terraform state list | grep -q "random_string"; then
+              echo "Found random_string resource - this indicates a circular dependency issue"
+              echo "Cleaning up state to force rebuild..."
+              
+              # Remove the problematic resource from state
+              terraform state list | grep "random_string" | xargs -I {} terraform state rm {}
+              
+              echo "State after cleanup:"
+              terraform state list
+              
+              # Force a new plan and apply
+              echo "Creating fresh infrastructure..."
+              terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
+            fi
+          fi
+
       - name: Apply Infrastructure Changes
         working-directory: terraform
         run: |
@@ -529,39 +625,36 @@ jobs:
           
           if [[ $RESOURCE_COUNT -eq 0 ]]; then
             echo "State file is empty - creating new resources"
-            terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars" || {
-              echo "ERROR: Terraform apply failed"
-              terraform plan -var-file="environments/$ENVIRONMENT/terraform.tfvars" -out="$ENVIRONMENT.tfplan" -detailed-exitcode
-              echo "Plan exit code: $?"
-              exit 1
-            }
+            terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
           elif [[ "${{ needs.plan.outputs.plan_changes }}" == "true" && -f "$ENVIRONMENT.tfplan" ]]; then
             echo "Applying existing plan with changes"
-            terraform apply -auto-approve "$ENVIRONMENT.tfplan" || {
-              echo "ERROR: Terraform apply failed for plan"
-              exit 1
-            }
+            terraform apply -auto-approve "$ENVIRONMENT.tfplan"
           elif [[ "${{ needs.plan.outputs.plan_changes }}" == "false" ]]; then
             echo "No changes needed - infrastructure is up to date"
             echo "Skipping terraform apply"
           else
             echo "Unexpected state - creating and applying new plan"
-            terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars" || {
-              echo "ERROR: Terraform apply failed"
-              exit 1
-            }
+            terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
           fi
           
           # Verify state file after apply
           NEW_RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
           echo "State now contains $NEW_RESOURCE_COUNT resources"
+          
           if [[ $NEW_RESOURCE_COUNT -eq 0 ]]; then
             echo "ERROR: Terraform apply did not create any resources"
-            terraform state list 2>&1 || echo "No state file or empty state"
             exit 1
+          elif [[ $NEW_RESOURCE_COUNT -lt 5 ]]; then
+            echo "WARNING: Expected more resources. Current resources:"
+            terraform state list
+          else
+            echo "✓ Infrastructure appears to be properly deployed"
           fi
           
-          # Debug outputs
+          # Force refresh outputs
+          echo "Refreshing outputs..."
+          terraform refresh -var-file="environments/$ENVIRONMENT/terraform.tfvars"
+          
           echo "Available outputs after apply:"
           terraform output -json || echo "No outputs available"
 
@@ -569,28 +662,79 @@ jobs:
         id: outputs
         working-directory: terraform
         run: |
-          {
-            S3_OUTPUT=$(terraform output -raw s3_bucket_name 2>&1)
-            if [[ "$S3_OUTPUT" =~ "No outputs found" || -z "$S3_OUTPUT" ]]; then
-              echo "s3_bucket=ERROR: s3_bucket_name not found" >> $GITHUB_OUTPUT
+          echo "=== Extracting Infrastructure Outputs ==="
+          
+          # First try normal terraform outputs
+          echo "1. Attempting to get terraform outputs..."
+          terraform output -json > outputs.json 2>&1
+          
+          if [ -s outputs.json ] && [ "$(cat outputs.json)" != "{}" ]; then
+            echo "✓ Normal terraform outputs available"
+            S3_BUCKET=$(terraform output -raw s3_bucket_name 2>/dev/null || echo "")
+            CF_ID=$(terraform output -raw cloudfront_distribution_id 2>/dev/null || echo "")
+            CF_DOMAIN=$(terraform output -raw cloudfront_domain_name 2>/dev/null || echo "")
+          else
+            echo "✗ Normal terraform outputs not available, extracting from state..."
+            
+            # Extract S3 bucket name from state
+            S3_RESOURCE=$(terraform state list | grep "module.s3_website.aws_s3_bucket.website" | head -1)
+            if [ -n "$S3_RESOURCE" ]; then
+              S3_BUCKET=$(terraform state show "$S3_RESOURCE" | grep -E "^\s*bucket\s*=" | cut -d'"' -f2)
+              echo "✓ Found S3 bucket: $S3_BUCKET"
             else
-              echo "s3_bucket=$S3_OUTPUT" >> $GITHUB_OUTPUT
+              echo "✗ S3 bucket resource not found in state"
+              S3_BUCKET=""
             fi
             
-            CF_ID_OUTPUT=$(terraform output -raw cloudfront_distribution_id 2>&1)
-            if [[ "$CF_ID_OUTPUT" =~ "No outputs found" || -z "$CF_ID_OUTPUT" ]]; then
-              echo "cloudfront_id=ERROR: cloudfront_distribution_id not found" >> $GITHUB_OUTPUT
+            # Extract CloudFront distribution ID from state
+            CF_RESOURCE=$(terraform state list | grep "module.cloudfront.aws_cloudfront_distribution.website" | head -1)
+            if [ -n "$CF_RESOURCE" ]; then
+              CF_ID=$(terraform state show "$CF_RESOURCE" | grep -E "^\s*id\s*=" | cut -d'"' -f2)
+              CF_DOMAIN=$(terraform state show "$CF_RESOURCE" | grep -E "^\s*domain_name\s*=" | cut -d'"' -f2)
+              echo "✓ Found CloudFront distribution: $CF_ID"
+              echo "✓ Found CloudFront domain: $CF_DOMAIN"
             else
-              echo "cloudfront_id=$CF_ID_OUTPUT" >> $GITHUB_OUTPUT
+              echo "✗ CloudFront distribution resource not found in state"
+              CF_ID=""
+              CF_DOMAIN=""
             fi
-            
-            CF_DOMAIN_OUTPUT=$(terraform output -raw cloudfront_domain_name 2>&1)
-            if [[ "$CF_DOMAIN_OUTPUT" =~ "No outputs found" || -z "$CF_DOMAIN_OUTPUT" ]]; then
-              echo "cloudfront_domain=ERROR: cloudfront_domain_name not found" >> $GITHUB_OUTPUT
-            else
-              echo "cloudfront_domain=$CF_DOMAIN_OUTPUT" >> $GITHUB_OUTPUT
-            fi
-          } >> $GITHUB_OUTPUT
+          fi
+          
+          # Validate extracted values
+          echo ""
+          echo "2. Validating extracted values..."
+          
+          if [ -z "$S3_BUCKET" ]; then
+            echo "ERROR: Could not extract S3 bucket name"
+            echo "Available S3 resources:"
+            terraform state list | grep s3
+            exit 1
+          fi
+          
+          if [ -z "$CF_ID" ]; then
+            echo "ERROR: Could not extract CloudFront distribution ID"
+            echo "Available CloudFront resources:"
+            terraform state list | grep cloudfront
+            exit 1
+          fi
+          
+          if [ -z "$CF_DOMAIN" ]; then
+            echo "ERROR: Could not extract CloudFront domain name"
+            echo "Available CloudFront resources:"
+            terraform state list | grep cloudfront
+            exit 1
+          fi
+          
+          echo ""
+          echo "3. Successfully extracted all required values:"
+          echo "S3 Bucket: $S3_BUCKET"
+          echo "CloudFront ID: $CF_ID"
+          echo "CloudFront Domain: $CF_DOMAIN"
+          
+          # Set outputs for next steps
+          echo "s3_bucket=$S3_BUCKET" >> $GITHUB_OUTPUT
+          echo "cloudfront_id=$CF_ID" >> $GITHUB_OUTPUT
+          echo "cloudfront_domain=$CF_DOMAIN" >> $GITHUB_OUTPUT
 
       - name: Download Build Artifact
         uses: actions/download-artifact@v4

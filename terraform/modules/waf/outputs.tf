@@ -1,9 +1,9 @@
 output "web_acl_id" {
   description = "WAF Web ACL ID"
-  value       = var.enable_waf ? aws_wafv2_web_acl.main[0].id : ""
+  value       = aws_wafv2_web_acl.main.id
 }
 
 output "web_acl_arn" {
   description = "WAF Web ACL ARN"
-  value       = var.enable_waf ? aws_wafv2_web_acl.main[0].arn : ""
+  value       = aws_wafv2_web_acl.main.arn
 }

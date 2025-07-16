@@ -1,6 +1,5 @@
 # CloudWatch Dashboard
 resource "aws_cloudwatch_dashboard" "main" {
-  count          = var.enable_monitoring ? 1 : 0
   dashboard_name = "${var.project_name}-${var.environment}-frontend"
 
   dashboard_body = jsonencode({
@@ -50,7 +49,6 @@ resource "aws_cloudwatch_dashboard" "main" {
 
 # CloudWatch Alarms
 resource "aws_cloudwatch_metric_alarm" "high_4xx_error_rate" {
-  count               = var.enable_monitoring ? 1 : 0
   alarm_name          = "${var.project_name}-${var.environment}-high-4xx-error-rate"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "2"
@@ -70,7 +68,6 @@ resource "aws_cloudwatch_metric_alarm" "high_4xx_error_rate" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "high_5xx_error_rate" {
-  count               = var.enable_monitoring ? 1 : 0
   alarm_name          = "${var.project_name}-${var.environment}-high-5xx-error-rate"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "2"
@@ -89,14 +86,14 @@ resource "aws_cloudwatch_metric_alarm" "high_5xx_error_rate" {
   tags = var.tags
 }
 
-# S3 CloudTrail for audit logging
+# S3 CloudTrail for audit logging (only for prod)
 resource "aws_cloudtrail" "main" {
-  count                      = var.enable_monitoring && var.environment == "prod" ? 1 : 0
-  name                       = "${var.project_name}-${var.environment}-trail"
-  s3_bucket_name            = aws_s3_bucket.cloudtrail[0].bucket
+  count                         = var.environment == "prod" ? 1 : 0
+  name                          = "${var.project_name}-${var.environment}-trail"
+  s3_bucket_name               = aws_s3_bucket.cloudtrail[0].bucket
   include_global_service_events = true
-  is_multi_region_trail     = true
-  enable_logging            = true
+  is_multi_region_trail        = true
+  enable_logging               = true
 
   event_selector {
     read_write_type                 = "All"
@@ -113,20 +110,20 @@ resource "aws_cloudtrail" "main" {
 }
 
 resource "aws_s3_bucket" "cloudtrail" {
-  count  = var.enable_monitoring && var.environment == "prod" ? 1 : 0
+  count  = var.environment == "prod" ? 1 : 0
   bucket = "${var.project_name}-${var.environment}-cloudtrail-${random_string.trail_suffix[0].result}"
   tags   = var.tags
 }
 
 resource "random_string" "trail_suffix" {
-  count   = var.enable_monitoring && var.environment == "prod" ? 1 : 0
+  count   = var.environment == "prod" ? 1 : 0
   length  = 8
   special = false
   upper   = false
 }
 
 resource "aws_s3_bucket_policy" "cloudtrail" {
-  count  = var.enable_monitoring && var.environment == "prod" ? 1 : 0
+  count  = var.environment == "prod" ? 1 : 0
   bucket = aws_s3_bucket.cloudtrail[0].id
 
   policy = jsonencode({

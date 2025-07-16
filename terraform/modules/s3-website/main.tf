@@ -48,7 +48,6 @@ resource "aws_s3_bucket_public_access_block" "website" {
   restrict_public_buckets = true
 }
 
-# FIXED: S3 lifecycle configuration with proper filter
 resource "aws_s3_bucket_lifecycle_configuration" "website" {
   depends_on = [aws_s3_bucket_versioning.website]
   bucket     = aws_s3_bucket.website.id
@@ -57,7 +56,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "website" {
     id     = "delete_old_versions"
     status = "Enabled"
 
-    # FIXED: Added filter to specify which objects the rule applies to
     filter {
       prefix = ""  # Apply to all objects
     }
@@ -81,32 +79,4 @@ resource "aws_cloudfront_origin_access_control" "website" {
   signing_protocol                  = "sigv4"
 }
 
-# S3 bucket policy for CloudFront access
-resource "aws_s3_bucket_policy" "website" {
-  bucket = aws_s3_bucket.website.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "AllowCloudFrontServicePrincipal"
-        Effect = "Allow"
-        Principal = {
-          Service = "cloudfront.amazonaws.com"
-        }
-        Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.website.arn}/*"
-        Condition = {
-          StringEquals = {
-            "AWS:SourceArn" = var.cloudfront_distribution_arn
-          }
-        }
-      }
-    ]
-  })
-}
-
-
-
-
-
-
+# REMOVED: S3 bucket policy (moved to main.tf to break circular dependency)

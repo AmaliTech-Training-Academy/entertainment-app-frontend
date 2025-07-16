@@ -41,7 +41,18 @@ provider "aws" {
   }
 }
 
-# Create CloudFront distribution first to get ARN for S3 bucket policy
+# FIXED: Create S3 bucket first (without CloudFront dependency)
+module "s3_website" {
+  source = "./modules/s3-website"
+
+  bucket_name       = local.bucket_name
+  environment       = var.environment
+  enable_versioning = local.env_config[var.environment].s3_versioning
+
+  tags = local.common_tags
+}
+
+# FIXED: Create CloudFront distribution after S3 bucket
 module "cloudfront" {
   source = "./modules/cloudfront"
 
@@ -54,18 +65,34 @@ module "cloudfront" {
   api_endpoint             = var.domain_name != "" ? "https://api.${var.domain_name}" : ""
 
   tags = local.common_tags
+
+  depends_on = [module.s3_website]
 }
 
-# S3 Website bucket
-module "s3_website" {
-  source = "./modules/s3-website"
+# FIXED: Create S3 bucket policy after CloudFront distribution
+resource "aws_s3_bucket_policy" "website" {
+  bucket = module.s3_website.bucket_id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowCloudFrontServicePrincipal"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${module.s3_website.bucket_arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = module.cloudfront.distribution_arn
+          }
+        }
+      }
+    ]
+  })
 
-  bucket_name                 = local.bucket_name
-  environment                 = var.environment
-  enable_versioning           = local.env_config[var.environment].s3_versioning
-  cloudfront_distribution_arn = module.cloudfront.distribution_arn
-
-  tags = local.common_tags
+  depends_on = [module.cloudfront]
 }
 
 # WAF with us-east-1 provider
@@ -79,7 +106,6 @@ module "waf" {
 
   tags = local.common_tags
 
-  # ADDED: Provider for us-east-1
   providers = {
     aws.us_east_1 = aws.us_east_1
   }
@@ -98,4 +124,6 @@ module "monitoring" {
   monitoring_period          = local.env_config[var.environment].monitoring_period
 
   tags = local.common_tags
+
+  depends_on = [module.cloudfront]
 }

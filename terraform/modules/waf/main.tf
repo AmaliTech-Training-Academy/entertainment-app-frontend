@@ -8,15 +8,12 @@ terraform {
   }
 }
 
-# FIXED: WAF Web ACL with us-east-1 provider
+# FIXED: WAF Web ACL with us-east-1 provider (removed count, using enable_waf from main.tf)
 resource "aws_wafv2_web_acl" "main" {
-  count = var.enable_waf ? 1 : 0
-  
   name        = "${var.project_name}-${var.environment}-waf"
   description = "WAF for CineVerse ${var.environment} frontend"
   scope       = "CLOUDFRONT"
 
-  # ADDED: Provider for us-east-1
   provider = aws.us_east_1
 
   default_action {
@@ -128,23 +125,19 @@ resource "aws_wafv2_web_acl" "main" {
 
 # FIXED: CloudWatch Log Group for WAF with us-east-1 provider
 resource "aws_cloudwatch_log_group" "waf" {
-  count             = var.enable_waf ? 1 : 0
-  name      =      "/aws/wafv2/${var.project_name}-${var.environment}-waf"
+  name              = "/aws/wafv2/${var.project_name}-${var.environment}-waf"
   retention_in_days = var.log_retention_days
   
-  #  Provider for us-east-1
   provider = aws.us_east_1
   
   tags = var.tags
 }
 
-#  WAF Logging Configuration with us-east-1 provider
+# FIXED: WAF Logging Configuration with us-east-1 provider
 resource "aws_wafv2_web_acl_logging_configuration" "main" {
-  count                   = var.enable_waf ? 1 : 0
-  resource_arn            = aws_wafv2_web_acl.main[0].arn
-  log_destination_configs = [aws_cloudwatch_log_group.waf[0].arn]
+  resource_arn            = aws_wafv2_web_acl.main.arn
+  log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
 
-  # Provider for us-east-1
   provider = aws.us_east_1
 
   redacted_fields {

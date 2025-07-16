@@ -8,11 +8,7 @@ variable "environment" {
   type        = string
 }
 
-variable "enable_waf" {
-  description = "Enable WAF"
-  type        = bool
-  default     = true
-}
+# REMOVED: enable_waf variable (handled in main.tf)
 
 variable "rate_limit" {
   description = "Rate limit for WAF"
