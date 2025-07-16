@@ -11,7 +11,7 @@ variable "environment" {
 variable "enable_versioning" {
   description = "Enable S3 bucket versioning"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enable_intelligent_tiering" {

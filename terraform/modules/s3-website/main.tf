@@ -3,12 +3,16 @@ resource "aws_s3_bucket" "website" {
   tags   = var.tags
 }
 
+# Only apply versioning block if enabled
 resource "aws_s3_bucket_versioning" "website" {
+  count  = var.enable_versioning ? 1 : 0
   bucket = aws_s3_bucket.website.id
+
   versioning_configuration {
-    status = var.enable_versioning ? "Enabled" : "Disabled"
+    status = "Enabled"
   }
 }
+
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "website" {
   bucket = aws_s3_bucket.website.id
