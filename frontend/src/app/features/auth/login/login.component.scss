@@ -75,10 +75,10 @@
     color: map.get($neutral-colors, 100);
   }
 
-  /* hover state */
-  &.mat-mdc-raised-button:hover {
+  /* Hover state */
+  &:hover {
     background-color: map.get($neutral-colors, 100);
-    color: map.get($red-colors, 100);
+    color: map.get($secondary-colors, 200) !important;
   }
 }
 
@@ -163,5 +163,15 @@
   .login-button.mat-mdc-raised-button:hover {
     background-color: map.get($neutral-colors, 100) !important;
     color: map.get($red-colors, 100);
+  }
+
+  .login-button.mat-mdc-raised-button:active {
+    background-color: map.get($red-colors, 100) !important;
+    color: map.get($neutral-colors, 100);
+  }
+
+  .login-button.mat-mdc-raised-button:disabled {
+    background-color: map.get($secondary-colors, 0) !important;
+    color: map.get($secondary-colors, 100) !important;
   }
 }

@@ -33,6 +33,7 @@
           mat-raised-button
           type="submit"
           class="login-button mat-mdc-raised-button"
+          [disabled]="!loginForm.valid"
         >
           Login to your account
         </button>
