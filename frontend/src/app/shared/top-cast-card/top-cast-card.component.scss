@@ -1,33 +1,49 @@
-@use '../../../../styles/variables' as *;
-@use '../../../../styles/typography' as *;  
+@use '../../../styles/variables' as *;
+@use '../../../styles/typography' as *;  
 @use 'sass:map';
-@use '../../../../styles/mixins' as mixins;
+@use '../../../styles/mixins' as mixins;
 
 .top-cast-card {
+  width: 100%;
   display: flex;
   align-items: center;
-  width: 550px;
-  height: 90px;
-  border-bottom: 2px solid #ffffff;
-  gap: 32px;
+  gap: 12px;
   background: transparent;
-  margin-bottom: 20px;
+  padding: 8px 0;
+  border-bottom: 1px solid #ffffff;
+
+  .cast-image {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .cast-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: map.get($neutral-colors, 100);
+    @include mixins.typography('body', 'b2');
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
-.cast-image {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  object-fit: cover;
-}
+@media (min-width: 769px) {
+  .top-cast-card {
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 2px solid #ffffff;
 
-.cast-name {
-  width: 163px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  font-family: inherit;
-  @include mixins.typography(body, b2);  /* Adjust as per body/body/200 */
-  font-weight: 400;
-  color: #E0E0E0;
+    .cast-image {
+      width: 48px;
+      height: 48px;
+    }
+
+    .cast-name {
+      font-size: 16px;
+    }
+  }
 } 
