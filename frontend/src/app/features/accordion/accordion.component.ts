@@ -1,16 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { LucideAngularModule, Plus, X } from 'lucide-angular';
 
 @Component({
+  standalone: true,
   selector: 'app-accordion',
-  imports: [ CommonModule, LucideAngularModule ],
+  imports: [ CommonModule ],
   templateUrl: './accordion.component.html',
   styleUrls: ['./accordion.component.scss'],
 })
 export class AccordionComponent {
-  Plus = Plus;
-  X = X;
   activeIndex: number | null = null;
 
   accordionItems = [

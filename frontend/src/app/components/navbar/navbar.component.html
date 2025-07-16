@@ -11,7 +11,23 @@
       <span class="navbar__search-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M18.031 16.617L22.314 20.899L20.899 22.314L16.617 18.031C15.0237 19.3082 13.042 20.0029 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20.0029 13.042 19.3082 15.0237 18.031 16.617ZM16.025 15.875C17.2938 14.5697 18.0025 12.8204 18 11C18 7.133 14.867 4 11 4C7.133 4 4 7.133 4 11C4 14.867 7.133 18 11 18C12.8204 18.0025 14.5697 17.2938 15.875 16.025L16.025 15.875Z" fill="white"/>
       </svg></span>
-      <input class="navbar__search-input" type="text" placeholder="Search for movies or TV series" />
+      <input class="navbar__search-input" type="text" placeholder="Search for movies or TV series" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (input)="onSearchInput($event)" [value]="searchQuery" />
+      <div class="search-dropdown" *ngIf="showDropdown">
+        <ng-container *ngIf="searchResults.length; else noResults">
+          <div class="search-dropdown__results">
+            <div *ngFor="let movie of searchResults" class="search-dropdown__movie-card">
+              <img [src]="movie.image" [alt]="movie.alt" class="search-dropdown__movie-img" />
+              <div class="search-dropdown__movie-info">
+                <div class="search-dropdown__movie-title">{{ movie.alt }}</div>
+                <div class="search-dropdown__movie-year">{{ movie.year }}</div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #noResults>
+          <div class="search-dropdown__no-results">No results found.</div>
+        </ng-template>
+      </div>
     </div>
     <div class="navbar__actions">
       <a class="navbar__sign-in" href="#">Sign in</a>

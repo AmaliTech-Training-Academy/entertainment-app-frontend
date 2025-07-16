@@ -2,7 +2,6 @@
 @use "../../../styles/spacing" as *;
 @use "sass:map";
 
-// Helpers
 @function color($palette, $shade) {
   @return map.get($palette, $shade);
 }
@@ -12,7 +11,6 @@
 }
 
 h2 {
-  padding: space(2);
   font-size: 1.75rem;
   font-weight: 600;
   color: color($neutral-colors, 100);
@@ -20,16 +18,16 @@ h2 {
   text-align: left;
 
   @media (min-width: 768px) {
-    padding: space(2) space(6);
+  
   }
 
   @media (min-width: 1024px) {
-    padding: space(2) space(8);
+
   }
 }
 
 .accordion {
-  padding: space(2);
+  // padding: space(2);
 
   .accordion-item {
     background-color: color($primary-colors, 800);
@@ -99,14 +97,13 @@ h2 {
     }
   }
 
-  // Tablet
   @media (min-width: 768px) {
-    padding: space(2) space(6);
+    // padding: space(2) space(6);
 
     .accordion-item {
       .accordion-header {
         font-size: 1.05rem;
-        padding: space(4) space(3);
+        // padding: space(4) space(3);
       }
 
       .accordion-content {
@@ -120,9 +117,8 @@ h2 {
     }
   }
 
-  // Desktop
   @media (min-width: 1024px) {
-    padding: space(2) space(8);
+    // padding: space(2) space(8);
 
     .accordion-item {
       .accordion-header {

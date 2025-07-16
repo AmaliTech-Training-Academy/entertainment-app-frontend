@@ -1,11 +1,58 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+
+interface SearchMovie {
+  rank: number;
+  image: string;
+  alt: string;
+  year: number;
+}
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [ButtonComponent],
+  imports: [CommonModule, ButtonComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent {} 
+export class NavbarComponent {
+  searchQuery = '';
+  showDropdown = false;
+  searchResults: SearchMovie[] = [
+    // Example data; replace with real search results
+    { rank: 1, image: 'assets/images/cineverse_logo.svg', alt: 'Beyond Earth', year: 1995 },
+    { rank: 2, image: 'assets/images/cineverse_logo.svg', alt: 'Beyond Earth', year: 1995 }
+  ];
+
+  constructor(private router: Router, private eRef: ElementRef) {}
+
+  onSearchFocus() {
+    this.showDropdown = true;
+  }
+
+  onSearchBlur() {
+    // Delay to allow click events on dropdown
+    setTimeout(() => this.showDropdown = false, 150);
+  }
+
+  onSearchInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchQuery = value;
+    // TODO: Implement real search logic here
+    this.showDropdown = !!value;
+  }
+
+  goToAdvancedSearch() {
+    this.showDropdown = false;
+    this.router.navigate(['/advanced-search']);
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleClickOutside(event: Event) {
+    if (!this.eRef.nativeElement.contains(event.target)) {
+      this.showDropdown = false;
+    }
+  }
+} 
