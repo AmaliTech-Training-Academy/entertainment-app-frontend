@@ -32,7 +32,7 @@ jobs:
           BRANCH="${{ github.ref_name }}"
           EVENT_NAME="${{ github.event_name }}"
           
-          echo "🔍 Environment Detection:"
+          echo "Environment Detection:"
           echo "Branch: $BRANCH"
           echo "Event: $EVENT_NAME"
           
@@ -40,28 +40,28 @@ jobs:
           if [[ "$BRANCH" == "prod" ]]; then
             echo "environment=prod" >> $GITHUB_OUTPUT
             echo "is_production=true" >> $GITHUB_OUTPUT
-            echo "✅ Environment set to: prod (production)"
+            echo "Environment set to: prod (production)"
           elif [[ "$BRANCH" == "staging" ]]; then
             echo "environment=staging" >> $GITHUB_OUTPUT
             echo "is_production=false" >> $GITHUB_OUTPUT
-            echo "✅ Environment set to: staging"
+            echo "Environment set to: staging"
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
             echo "is_production=false" >> $GITHUB_OUTPUT
-            echo "✅ Environment set to: dev (default)"
+            echo "Environment set to: dev (default)"
           fi
           
           # Only deploy on push to main branches
           if [[ "$EVENT_NAME" == "push" && "$BRANCH" =~ ^(dev|staging|prod)$ ]]; then
             echo "should_deploy=true" >> $GITHUB_OUTPUT
-            echo "✅ Deployment enabled for push to $BRANCH"
+            echo "Deployment enabled for push to $BRANCH"
           else
             echo "should_deploy=false" >> $GITHUB_OUTPUT
-            echo "ℹ️  Deployment disabled (event: $EVENT_NAME, branch: $BRANCH)"
+            echo "Deployment disabled (event: $EVENT_NAME, branch: $BRANCH)"
           fi
           
           echo ""
-          echo "📋 Final Configuration:"
+          echo "Final Configuration:"
           echo "Environment: $([ "$BRANCH" == "prod" ] && echo "prod" || [ "$BRANCH" == "staging" ] && echo "staging" || echo "dev")"
           echo "Should Deploy: $([ "$EVENT_NAME" == "push" ] && [ "$BRANCH" =~ ^(dev|staging|prod)$ ] && echo "true" || echo "false")"
           echo "Is Production: $([ "$BRANCH" == "prod" ] && echo "true" || echo "false")"
@@ -196,10 +196,10 @@ jobs:
           
           # Verify build output
           if [ -d "dist/${{ env.APP_NAME }}" ]; then
-            echo "✅ Build output found in dist/${{ env.APP_NAME }}"
+            echo "Build output found in dist/${{ env.APP_NAME }}"
             ls -la "dist/${{ env.APP_NAME }}"
           else
-            echo "❌ Build output not found"
+            echo "Build output not found"
             ls -la dist/
             exit 1
           fi
@@ -232,7 +232,7 @@ jobs:
       
       - name: Debug Environment
         run: |
-          echo "🔍 Plan Job Environment Debug:"
+          echo "Plan Job Environment Debug:"
           echo "ENVIRONMENT (from env): $ENVIRONMENT"
           echo "setup.outputs.environment: ${{ needs.setup.outputs.environment }}"
           echo "github.ref_name: ${{ github.ref_name }}"
@@ -254,7 +254,7 @@ jobs:
       - name: Create Environment Configuration
         working-directory: terraform
         run: |
-          echo "🔧 Creating configuration for environment: $ENVIRONMENT"
+          echo "Creating configuration for environment: $ENVIRONMENT"
           mkdir -p environments/$ENVIRONMENT
           
           # Create backend configuration
@@ -304,17 +304,17 @@ jobs:
           }
           EOF
           
-          echo "📄 Created terraform.tfvars:"
+          echo "Created terraform.tfvars:"
           cat environments/$ENVIRONMENT/terraform.tfvars
           
           echo ""
-          echo "📄 Created backend.hcl:"
+          echo "Created backend.hcl:"
           cat environments/$ENVIRONMENT/backend.hcl
 
       - name: Terraform Init & Validate
         working-directory: terraform
         run: |
-          echo "🚀 Initializing Terraform for environment: $ENVIRONMENT"
+          echo "Initializing Terraform for environment: $ENVIRONMENT"
           
           terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl"
           terraform validate
@@ -324,7 +324,7 @@ jobs:
           echo "Current state contains $RESOURCE_COUNT resources"
           
           if [[ $RESOURCE_COUNT -gt 0 ]]; then
-            echo "📋 Current resources in state:"
+            echo "Current resources in state:"
             terraform state list | head -10
             if [[ $RESOURCE_COUNT -gt 10 ]]; then
               echo "... and $((RESOURCE_COUNT - 10)) more"
@@ -334,7 +334,7 @@ jobs:
       - name: Import Existing Resources
         working-directory: terraform
         run: |
-          echo "🔍 Checking for existing resources to import..."
+          echo "Checking for existing resources to import..."
           echo "Environment: $ENVIRONMENT"
           
           # Function to import if not in state
@@ -344,22 +344,21 @@ jobs:
             local resource_name="$3"
             
             if ! terraform state show "$resource_address" >/dev/null 2>&1; then
-              echo "📥 Importing $resource_name: $resource_address"
+              echo "Importing $resource_name: $resource_address"
               echo "Resource ID: $resource_id"
               
-              # FIXED: Include var-file for terraform import
               if terraform import -var-file="environments/$ENVIRONMENT/terraform.tfvars" "$resource_address" "$resource_id" 2>/dev/null; then
-                echo "✅ Successfully imported $resource_name"
+                echo "Successfully imported $resource_name"
               else
-                echo "ℹ️  $resource_name not found or already managed - will be created if needed"
+                echo "$resource_name not found or already managed - will be created if needed"
               fi
             else
-              echo "✅ $resource_name already in state"
+              echo "$resource_name already in state"
             fi
           }
           
           # Try to import existing CloudFront policies
-          echo "🔍 Looking for CloudFront policies..."
+          echo "Looking for CloudFront policies..."
           
           SPA_POLICY_ID=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?Name=='${ENVIRONMENT}-spa-cache-policy'].Id" --output text 2>/dev/null || echo "")
           if [[ -n "$SPA_POLICY_ID" && "$SPA_POLICY_ID" != "None" && "$SPA_POLICY_ID" != "" ]]; then
@@ -395,7 +394,7 @@ jobs:
           
           # Try to import existing WAF resources (only if WAF is enabled)
           if [[ "$ENVIRONMENT" != "dev" ]]; then
-            echo "🔍 Looking for WAF resources (WAF enabled for $ENVIRONMENT)..."
+            echo "Looking for WAF resources (WAF enabled for $ENVIRONMENT)..."
             
             WAF_ID=$(aws wafv2 list-web-acls --scope CLOUDFRONT --region us-east-1 --query "WebACLs[?Name=='cineverse-${ENVIRONMENT}-waf'].Id" --output text 2>/dev/null || echo "")
             if [[ -n "$WAF_ID" && "$WAF_ID" != "None" && "$WAF_ID" != "" ]]; then
@@ -414,15 +413,15 @@ jobs:
               echo "CloudWatch Log Group not found - will be created"
             fi
           else
-            echo "ℹ️  WAF disabled for dev environment - skipping WAF resource import"
+            echo "WAF disabled for dev environment - skipping WAF resource import"
           fi
           
-          echo "🎉 Import process completed!"
+          echo "Import process completed!"
 
       - name: Terraform Plan
         working-directory: terraform
         run: |
-          echo "📊 Creating Terraform plan for environment: $ENVIRONMENT"
+          echo "Creating Terraform plan for environment: $ENVIRONMENT"
           
           terraform plan \
             -var-file="environments/$ENVIRONMENT/terraform.tfvars" \
@@ -434,14 +433,14 @@ jobs:
           
           case $PLAN_EXIT_CODE in
             0)
-              echo "✅ No changes needed - infrastructure is up to date"
+              echo "No changes needed - infrastructure is up to date"
               ;;
             1)
-              echo "❌ Terraform plan failed"
+              echo "Terraform plan failed"
               exit 1
               ;;
             2)
-              echo "📝 Changes detected - plan created successfully"
+              echo "Changes detected - plan created successfully"
               ;;
           esac
 
@@ -482,7 +481,7 @@ jobs:
       - name: Recreate Environment Configuration
         working-directory: terraform
         run: |
-          echo "🔧 Recreating configuration for environment: $ENVIRONMENT"
+          echo "Recreating configuration for environment: $ENVIRONMENT"
           mkdir -p environments/$ENVIRONMENT
           
           # Recreate backend configuration
@@ -610,15 +609,15 @@ jobs:
           RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://$DOMAIN)
           
           if [[ "$RESPONSE_CODE" == "200" ]]; then
-            echo "✅ Application is responding correctly (HTTP $RESPONSE_CODE)"
+            echo "Application is responding correctly (HTTP $RESPONSE_CODE)"
           else
-            echo "⚠️  Application returned HTTP $RESPONSE_CODE (may need propagation time)"
+            echo "Application returned HTTP $RESPONSE_CODE (may need propagation time)"
           fi
 
       - name: Deployment Summary
         run: |
           cat << EOF >> $GITHUB_STEP_SUMMARY
-          # 🚀 Deployment Successful
+          # Deployment Successful
           
           **Environment:** $ENVIRONMENT  
           **Application URL:** https://${{ steps.outputs.outputs.cloudfront_domain }}  
@@ -629,7 +628,7 @@ jobs:
           **Deployed by:** ${{ github.actor }}
           
           ## Resources Status
-          ✅ Using existing CloudFront policies and WAF resources where available  
-          ✅ All resources managed by Terraform state  
-          ✅ Infrastructure deployed successfully  
+          Using existing CloudFront policies and WAF resources where available  
+          All resources managed by Terraform state  
+          Infrastructure deployed successfully  
           EOF
