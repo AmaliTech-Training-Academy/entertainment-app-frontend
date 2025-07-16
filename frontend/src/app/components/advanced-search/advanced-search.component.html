@@ -1,0 +1,23 @@
+<div class="container">
+  <mat-form-field appearance="outline" floatLabel="always">
+    <mat-label>Search for movies and tv series</mat-label>
+    <input
+      matInput
+      type="text"
+      placeholder="Search"
+      [formControl]="searchControl"
+      aria-label="Search input"
+    />
+  </mat-form-field>
+
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    aria-label="Search button"
+    class="search-button"
+  >
+    <mat-icon>search</mat-icon>
+    Search
+  </button>
+</div>
