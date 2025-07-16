@@ -37,6 +37,7 @@
         >
           Login to your account
         </button>
+        <div *ngIf="loginError" class="login-error">{{ loginError }}</div>
       </form>
     </mat-card-content>
 

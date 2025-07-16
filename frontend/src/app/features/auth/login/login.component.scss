@@ -165,13 +165,8 @@
     color: map.get($red-colors, 100);
   }
 
-  .login-button.mat-mdc-raised-button:active {
-    background-color: map.get($red-colors, 100) !important;
+  .login-button.mat-mdc-raised-button:not(:disabled) {
+    background-color: map.get($secondary-colors, 400) !important;
     color: map.get($neutral-colors, 100);
-  }
-
-  .login-button.mat-mdc-raised-button:disabled {
-    background-color: map.get($secondary-colors, 0) !important;
-    color: map.get($secondary-colors, 100) !important;
   }
 }

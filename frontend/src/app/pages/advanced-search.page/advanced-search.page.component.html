@@ -1,15 +1,27 @@
 <div class="app-container">
   <main class="main-content">
     <form class="search-section">
-      <app-advanced-search></app-advanced-search>
+      <app-advanced-search (search)="onSearch($event)"></app-advanced-search>
     </form>
 
     <section class="trending-section">
       <h3 class="section-title">Trending Now</h3>
+
       <!-- pagination -->
-      <div class="movies-grid">
+
+      <!-- Empty State -->
+      <div *ngIf="filteredMovies.length === 0" class="empty-state">
+        <mat-icon class="empty-icon">search_off</mat-icon>
+        <h3 class="empty-title">No results found</h3>
+        <p class="empty-message">Try adjusting your search or filters</p>
+        <button mat-raised-button color="primary" (click)="resetFilters()">
+          Reset Filters
+        </button>
+      </div>
+
+      <div *ngIf="filteredMovies.length > 0" class="movies-grid">
         <app-movie-card
-          *ngFor="let movie of trendingMovies"
+          *ngFor="let movie of filteredMovies"
           [movie]="movie"
         ></app-movie-card>
       </div>

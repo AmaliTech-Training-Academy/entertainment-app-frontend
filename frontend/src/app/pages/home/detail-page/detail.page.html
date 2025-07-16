@@ -33,9 +33,23 @@
           [description]="comment.text"
         ></app-comment-card>
       </div>
-      <button class="custom-leave-comment-btn">
-        Login to leave a comment
-      </button>
+
+      <ng-container *ngIf="!isLoggedIn; else commentInput">
+        <button class="custom-leave-comment-btn" (click)="login()">
+          Login to leave a comment
+        </button>
+      </ng-container>
+      <ng-template #commentInput>
+        <div class="comment-input-card">
+          <img [src]="user.avatar" alt="User avatar" class="avatar" />
+          <input
+            [(ngModel)]="commentText"
+            type="text"
+            placeholder="Write a comment..."
+          />
+          <button (click)="submitComment()">Submit</button>
+        </div>
+      </ng-template>
     </div>
 
     <div class="side-section">
@@ -70,4 +84,3 @@
   </div>
 
 </div> 
-<app-footer></app-footer>
