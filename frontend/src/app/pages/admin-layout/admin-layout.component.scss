@@ -1,0 +1,41 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/spacing" as *;
+@use "sass:map";
+
+// Helpers
+@function color($palette, $shade) {
+  @return map.get($palette, $shade);
+}
+
+@function space($size) {
+  @return map.get($spacing, $size);
+}
+
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden; // Prevent sidebar from scrolling with content
+}
+
+.admin-main {
+  
+  background-color: color($primary-colors, 1000); // optional
+
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+
+  // Hide scrollbar for WebKit browsers (Chrome, Safari, Edge)
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  // Optional: Hide scrollbar in Firefox
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE and Edge
+
+  // Prevent scrollbars from flashing on overflow
+  overscroll-behavior: contain;
+}
+

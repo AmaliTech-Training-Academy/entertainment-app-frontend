@@ -15,8 +15,8 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./pages/dashboard/dashboard.page.component').then(
-            (m) => m.DashboardPage
+          import('./features/admin-dashboard/admin-dashboard.component').then(
+            (m) => m.AdminDashboardComponent
           ),
       },
       {
@@ -41,22 +41,45 @@ export const routes: Routes = [
     ],
   },
   {
-    path: '',
-    component: AuthLayoutComponent,
+    path: 'signup',
+    loadComponent: () =>
+      import('./features/auth/sign-up/sign-up.component').then(
+        (m) => m.SignUpComponent
+      ),
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/login/login.component').then(
+        (m) => m.LoginComponent
+      ),
+  },
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./pages/admin-layout/admin-layout.component').then(
+        (m) => m.AdminLayoutComponent
+      ),
     children: [
       {
-        path: 'signup',
+        path: 'dashboard',
         loadComponent: () =>
-          import('./features/auth/sign-up/sign-up.component').then(
-            (m) => m.SignUpComponent
+          import('./features/admin-dashboard/admin-dashboard.component').then(
+            (m) => m.AdminDashboardComponent
+          ),
+      },
+
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/admin-user/admin-user.component').then(
+            (m) => m.AdminUserComponent
           ),
       },
       {
-        path: 'login',
-        loadComponent: () =>
-          import('./features/auth/login/login.component').then(
-            (m) => m.LoginComponent
-          ),
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
       },
     ],
   },
