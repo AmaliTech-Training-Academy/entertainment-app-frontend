@@ -1,0 +1,20 @@
+<nav class="sidebar">
+    <ul class="top-nav">
+      <li *ngFor="let item of topItems">
+        <div class="nav-item">
+          <lucide-icon [name]="item.icon" class="icon" />
+          <span>{{ item.label }}</span>
+        </div>
+      </li>
+    </ul>
+  
+    <ul class="bottom-nav">
+      <li>
+        <div class="nav-item">
+          <lucide-icon [name]="bottomItem.icon" class="icon" />
+          <span>{{ bottomItem.label }}</span>
+        </div>
+      </li>
+    </ul>
+  </nav>
+  
