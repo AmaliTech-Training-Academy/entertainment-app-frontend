@@ -68,7 +68,7 @@ module "waf" {
   }
 }
 
-# FIXED: Create CloudFront distribution after S3 and WAF
+# Create CloudFront distribution after S3 and WAF
 module "cloudfront" {
   source = "./modules/cloudfront"
 
@@ -77,8 +77,9 @@ module "cloudfront" {
   s3_bucket_domain_name    = module.s3_website.bucket_domain_name
   origin_access_control_id = module.s3_website.origin_access_control_id
   price_class              = local.env_config[var.environment].cloudfront_price_class
-  # FIXED: Conditional WAF Web ACL ID reference with proper dependency
-  waf_web_acl_id           = var.enable_waf && length(module.waf) > 0 ? module.waf[0].web_acl_id : ""
+  # Conditional WAF Web ACL ID reference with proper dependency
+  # waf_web_acl_id           = var.enable_waf && length(module.waf) > 0 ? module.waf[0].web_acl_id : ""
+  waf_web_acl_id = var.enable_waf && length(module.waf) > 0 ? module.waf[0].web_acl_arn : ""
   api_endpoint             = var.domain_name != "" ? "https://api.${var.domain_name}" : ""
 
   tags = local.common_tags
