@@ -11,8 +11,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: map.get($primary-colors, 1000);
+  background: transparent;
   padding: map.get($spacing, 4);
 
   .card-container {
@@ -56,9 +55,7 @@
   }
 
   .movie-title {
-    @include apply-heading-style(h1);
-    font-size: map.get(map.get($headings, h2), font-size);
-    line-height: 1.2;
+    @include apply-heading-style(h4);
   }
 
   .meta-container {

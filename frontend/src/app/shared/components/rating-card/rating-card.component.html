@@ -1,0 +1,13 @@
+<div class="rating-card">
+  <div class="rating-header">
+    <span class="reviewed-by">Reviewed by <strong>{{ reviewer }}</strong></span>
+    <span class="star-rating">
+      <span class="star">★</span>
+      <span class="rating-value">{{ rating }}/10</span>
+    </span>
+  </div>
+  <div class="rating-content">
+    {{ content }}
+  </div>
+  <a [href]="readMoreLink || '#'" class="read-more">Read More</a>
+</div> 

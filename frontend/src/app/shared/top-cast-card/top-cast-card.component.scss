@@ -1,0 +1,49 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/typography' as *;  
+@use 'sass:map';
+@use '../../../styles/mixins' as mixins;
+
+.top-cast-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  padding: 8px 0;
+  border-bottom: 1px solid #ffffff;
+
+  .cast-image {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .cast-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: map.get($neutral-colors, 100);
+    @include mixins.typography('body', 'b2');
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (min-width: 769px) {
+  .top-cast-card {
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 2px solid #ffffff;
+
+    .cast-image {
+      width: 48px;
+      height: 48px;
+    }
+
+    .cast-name {
+      font-size: 16px;
+    }
+  }
+} 
