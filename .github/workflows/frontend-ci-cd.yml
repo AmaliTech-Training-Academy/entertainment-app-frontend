@@ -1,3 +1,4 @@
+
 name: CineVerse Frontend CI/CD
 
 env:
@@ -65,7 +66,6 @@ jobs:
             SHOULD_DEPLOY="false"
           fi
           
-          # FIXED: Use variables instead of complex command substitution
           echo ""
           echo "Final Configuration:"
           echo "Environment: $ENV_NAME"
@@ -79,7 +79,7 @@ jobs:
     name: Security Scan
     runs-on: self-hosted
     needs: setup
-    if: always() # && (github.event_name == 'pull_request' || needs.setup.outputs.is_production == 'true')
+    if: always()
     steps:
       - uses: actions/checkout@v4
       
@@ -269,7 +269,7 @@ jobs:
           # Create backend configuration
           cat > environments/$ENVIRONMENT/backend.hcl << EOF
           bucket         = "cineverse-terraform-state-$ENVIRONMENT"
-          key            = "frontend/terraform.tfstate"
+          key            = "frontend/$ENVIRONMENT/terraform.tfstate"
           region         = "${{ env.AWS_REGION }}"
           encrypt        = true
           dynamodb_table = "cineverse-terraform-locks"
@@ -300,8 +300,6 @@ jobs:
           
           # API endpoint
           api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
-          
-          # FIXED: Remove tags from terraform.tfvars - they're passed via variables
           EOF
           
           echo "Created terraform.tfvars:"
@@ -343,19 +341,21 @@ jobs:
         run: |
           echo "Checking for existing state locks..."
           
-          # Try to force unlock if there's a stuck lock
-          if ! terraform plan -var-file="environments/$ENVIRONMENT/terraform.tfvars" -detailed-exitcode >/dev/null 2>&1; then
+          # Capture plan output to check for lock
+          PLAN_OUTPUT=$(terraform plan -var-file="environments/$ENVIRONMENT/terraform.tfvars" -detailed-exitcode 2>&1 || true)
+          PLAN_EXIT_CODE=$?
+          
+          if [[ $PLAN_EXIT_CODE -eq 2 && "$PLAN_OUTPUT" =~ "Lock Info" ]]; then
             echo "State appears to be locked. Attempting to force unlock..."
-            
-            # Get the lock ID from the error (if any)
-            LOCK_ID="9cca48a0-697d-9cdc-48c3-a99d9c0d4cb0"
-            
+            LOCK_ID=$(echo "$PLAN_OUTPUT" | grep -oE 'ID:[[:space:]]*[a-f0-9-]{36}' | awk '{print $2}')
             if [[ -n "$LOCK_ID" ]]; then
               echo "Force unlocking with ID: $LOCK_ID"
               terraform force-unlock -force "$LOCK_ID" || echo "Force unlock failed or not needed"
+            else
+              echo "Could not extract lock ID"
             fi
           else
-            echo "No state lock detected"
+            echo "No state lock detected or plan failed for other reasons"
           fi
 
       - name: Terraform Plan
@@ -364,7 +364,7 @@ jobs:
         run: |
           echo "Creating Terraform plan for environment: $ENVIRONMENT"
           
-          # FIXED: Set tags via environment variables
+          # Set tags via environment variables
           export TF_VAR_tags='{
             "Environment": "'$ENVIRONMENT'",
             "Project": "CineVerse",
@@ -383,21 +383,23 @@ jobs:
           PLAN_EXIT_CODE=$?
           echo "plan_exitcode=$PLAN_EXIT_CODE" >> $GITHUB_OUTPUT
           
-          case $PLAN_EXIT_CODE in
-            0)
-              echo "No changes needed - infrastructure is up to date"
-              echo "plan_changes=false" >> $GITHUB_OUTPUT
-              ;;
-            1)
-              echo "Terraform plan failed"
-              echo "plan_changes=error" >> $GITHUB_OUTPUT
-              exit 1
-              ;;
-            2)
-              echo "Changes detected - plan created successfully"
-              echo "plan_changes=true" >> $GITHUB_OUTPUT
-              ;;
-          esac
+          # Check if state is empty
+          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
+          
+          if [[ $PLAN_EXIT_CODE -eq 0 && $RESOURCE_COUNT -eq 0 ]]; then
+            echo "State is empty - forcing plan creation for initial deployment"
+            echo "plan_changes=true" >> $GITHUB_OUTPUT
+          elif [[ $PLAN_EXIT_CODE -eq 0 ]]; then
+            echo "No changes needed - infrastructure is up to date"
+            echo "plan_changes=false" >> $GITHUB_OUTPUT
+          elif [[ $PLAN_EXIT_CODE -eq 1 ]]; then
+            echo "Terraform plan failed"
+            echo "plan_changes=error" >> $GITHUB_OUTPUT
+            exit 1
+          elif [[ $PLAN_EXIT_CODE -eq 2 ]]; then
+            echo "Changes detected - plan created successfully"
+            echo "plan_changes=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
@@ -442,7 +444,7 @@ jobs:
           # Recreate backend configuration
           cat > environments/$ENVIRONMENT/backend.hcl << EOF
           bucket         = "cineverse-terraform-state-$ENVIRONMENT"
-          key            = "frontend/terraform.tfstate"
+          key            = "frontend/$ENVIRONMENT/terraform.tfstate"
           region         = "${{ env.AWS_REGION }}"
           encrypt        = true
           dynamodb_table = "cineverse-terraform-locks"
@@ -470,8 +472,6 @@ jobs:
           
           # API endpoint
           api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
-          
-          # FIXED: Remove tags from terraform.tfvars - they're passed via variables
           EOF
       
       - name: Clean Terraform Cache for Current Environment
@@ -496,7 +496,7 @@ jobs:
       - name: Apply Infrastructure Changes
         working-directory: terraform
         run: |
-          # FIXED: Set tags via environment variables
+          # Set tags via environment variables
           export TF_VAR_tags='{
             "Environment": "'$ENVIRONMENT'",
             "Project": "CineVerse",
@@ -507,10 +507,16 @@ jobs:
             "DeployedAt": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
           }'
           
-          # FIXED: Check if plan exists and if changes are needed
+          # Check if state file exists and has resources
+          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
+          echo "Current state contains $RESOURCE_COUNT resources"
+          
           if [[ "${{ needs.plan.outputs.plan_changes }}" == "true" && -f "$ENVIRONMENT.tfplan" ]]; then
             echo "Applying existing plan with changes"
             terraform apply -auto-approve "$ENVIRONMENT.tfplan"
+          elif [[ "${{ needs.plan.outputs.plan_changes }}" == "false" && $RESOURCE_COUNT -eq 0 ]]; then
+            echo "State file is empty - creating new resources"
+            terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
           elif [[ "${{ needs.plan.outputs.plan_changes }}" == "false" ]]; then
             echo "No changes needed - infrastructure is up to date"
             echo "Skipping terraform apply"
@@ -524,9 +530,9 @@ jobs:
         working-directory: terraform
         run: |
           {
-            echo "s3_bucket=$(terraform output -raw s3_bucket_name)"
-            echo "cloudfront_id=$(terraform output -raw cloudfront_distribution_id)"
-            echo "cloudfront_domain=$(terraform output -raw cloudfront_domain_name)"
+            echo "s3_bucket=$(terraform output -raw s3_bucket_name 2>/dev/null || echo 'ERROR: s3_bucket_name not found')"
+            echo "cloudfront_id=$(terraform output -raw cloudfront_distribution_id 2>/dev/null || echo 'ERROR: cloudfront_distribution_id not found')"
+            echo "cloudfront_domain=$(terraform output -raw cloudfront_domain_name 2>/dev/null || echo 'ERROR: cloudfront_domain_name not found')"
           } >> $GITHUB_OUTPUT
 
       - name: Download Build Artifact
@@ -538,6 +544,11 @@ jobs:
       - name: Deploy to S3
         run: |
           S3_BUCKET="${{ steps.outputs.outputs.s3_bucket }}"
+          
+          if [[ "$S3_BUCKET" == "ERROR: s3_bucket_name not found" ]]; then
+            echo "ERROR: S3 bucket name not found. Cannot deploy."
+            exit 1
+          fi
           
           echo "Deploying to S3 bucket: $S3_BUCKET"
           
@@ -599,6 +610,10 @@ jobs:
       - name: Invalidate CloudFront Cache
         run: |
           CLOUDFRONT_ID="${{ steps.outputs.outputs.cloudfront_id }}"
+          if [[ "$CLOUDFRONT_ID" == "ERROR: cloudfront_distribution_id not found" ]]; then
+            echo "ERROR: CloudFront distribution ID not found. Skipping cache invalidation."
+            exit 1
+          fi
           echo "Invalidating CloudFront distribution: $CLOUDFRONT_ID"
           
           INVALIDATION_ID=$(aws cloudfront create-invalidation \
@@ -615,6 +630,11 @@ jobs:
           sleep 30
           
           DOMAIN="${{ steps.outputs.outputs.cloudfront_domain }}"
+          if [[ "$DOMAIN" == "ERROR: cloudfront_domain_name not found" ]]; then
+            echo "ERROR: CloudFront domain not found. Cannot verify deployment."
+            exit 1
+          fi
+          
           echo "Testing deployment at: https://$DOMAIN"
           
           RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://$DOMAIN)
@@ -637,5 +657,4 @@ jobs:
           **Branch:** ${{ github.ref_name }}  
           **Commit:** ${{ github.sha }}  
           **Deployed by:** ${{ github.actor }}
-          
-         
+          EOF
