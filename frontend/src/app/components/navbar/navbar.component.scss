@@ -215,3 +215,19 @@
 .search-dropdown__advanced-desc {
   display: none !important;
 }
+
+.navbar__logo--mobile {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .navbar__logo--desktop {
+    display: none !important;
+  }
+  .navbar__logo--mobile {
+    display: block !important;
+  }
+  .navbar__search {
+    display: none !important;
+  }
+}
