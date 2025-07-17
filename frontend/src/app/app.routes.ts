@@ -43,6 +43,13 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'user',
+    loadComponent: () =>
+      import('./pages/auth-user/auth-user.component').then(
+        (m) => m.AuthUserComponent,
+      ),
+  },
+  {
     path: 'recommendation',
     loadComponent: () =>
       import('./components/recommendation/recommendation.component').then(
