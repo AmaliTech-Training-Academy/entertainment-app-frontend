@@ -3,8 +3,7 @@ import {
 } from "./chunk-IBYU652R.js";
 import {
   MatCommonModule
-} from "./chunk-M6A2KY7B.js";
-import "./chunk-2QEZ2KQS.js";
+} from "./chunk-JQQTDQJL.js";
 import "./chunk-H3T65ING.js";
 import "./chunk-52SUOJDU.js";
 import "./chunk-FJ2LSRVL.js";
