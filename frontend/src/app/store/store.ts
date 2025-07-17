@@ -1,1 +1,1 @@
-const store ={}
+const store = {};

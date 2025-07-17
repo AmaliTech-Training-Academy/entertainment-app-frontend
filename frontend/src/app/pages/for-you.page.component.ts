@@ -5,6 +5,6 @@ import { CommonModule } from '@angular/common';
   selector: 'app-for-you',
   standalone: true,
   imports: [CommonModule],
-  template: `<h1>For You Page</h1>`
+  template: `<h1>For You Page</h1>`,
 })
-export class ForYouComponent {} 
+export class ForYouComponent {}

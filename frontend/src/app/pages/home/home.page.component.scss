@@ -21,7 +21,9 @@
     padding: 0 1rem 2rem 1rem;
     align-items: flex-end;
     overflow: hidden;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+      transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -43,8 +45,8 @@
 }
 
 .trending-section__arrow {
-  background: #ACB7D3;
-  color: #1F263A;
+  background: #acb7d3;
+  color: #1f263a;
   border: none;
   width: 40px;
   height: 200px;
@@ -53,8 +55,10 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition:
+    background 0.2s,
+    color 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 .trending-section__arrow:disabled {
   opacity: 0.3;
@@ -64,10 +68,9 @@
   margin-right: 0.5rem;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
-
 }
 .trending-section__arrow--right {
   margin-left: 0.5rem;
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
-} 
+}

@@ -10,33 +10,47 @@
 
     <mat-card-content>
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Username / Email address</mat-label>
-          <input matInput formControlName="username" required />
-          <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
-            Can't be empty
-          </mat-error>
-          <mat-error *ngIf="loginForm.get('username')?.hasError('email')">
-            Please enter a valid email address
-          </mat-error>
+        <mat-form-field
+          appearance="fill"
+          floatLabel="always"
+          class="full-width email-username"
+        >
+          <mat-label>Username or Email address</mat-label>
+          <input
+            matInput
+            formControlName="username"
+            placeholder="Enter your email or username"
+            required
+          />
         </mat-form-field>
 
-        <mat-form-field appearance="fill" class="full-width">
+        <mat-form-field
+          appearance="fill"
+          floatLabel="always"
+          class="full-width password"
+        >
           <mat-label>Password</mat-label>
-          <input matInput type="password" formControlName="password" required />
-          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-            Can't be empty
-          </mat-error>
+          <input
+            matInput
+            type="password"
+            placeholder="Enter password"
+            formControlName="password"
+            required
+          />
         </mat-form-field>
-
+        <div class="error-message-container">
+          <div *ngIf="!!loginError" style="display: block; white-space: normal">
+            {{ loginError }}
+          </div>
+        </div>
         <button
           mat-raised-button
           type="submit"
           class="login-button mat-mdc-raised-button"
+          [disabled]="!loginForm.valid"
         >
           Login to your account
         </button>
-        <div *ngIf="loginError" class="login-error">{{ loginError }}</div>
       </form>
     </mat-card-content>
 
