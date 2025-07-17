@@ -4,10 +4,11 @@ import { TrendingMovieCardComponent } from "../../components/trending-movie-card
 import { RecommendationComponent } from '../../components/recommendation/recommendation.component';
 import { FooterComponent } from '../../features/footer/footer.component';
 import { CommonModule } from '@angular/common';
+import { NavbarComponent } from "../../components/navbar/navbar.component";
 
 @Component({
   selector: 'app-auth-user',
-  imports: [HeroCarouselComponent,  TrendingMovieCardComponent, RecommendationComponent, FooterComponent, CommonModule],
+  imports: [HeroCarouselComponent, TrendingMovieCardComponent, RecommendationComponent, FooterComponent, CommonModule, NavbarComponent],
   templateUrl: './auth-user.component.html',
   styleUrl: './auth-user.component.scss'
 })
