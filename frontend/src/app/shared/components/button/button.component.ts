@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule],
   templateUrl: './button.component.html',
-  styleUrls: ['./button.component.scss']
+  styleUrls: ['./button.component.scss'],
 })
 export class ButtonComponent {
   @Input() type: 'primary' | 'link' = 'primary';
@@ -29,13 +29,13 @@ export class ButtonComponent {
 
   get classes(): Record<string, boolean> {
     return {
-      'button': true,
+      button: true,
       'mat-mdc-button': true,
       [this.type]: true,
       [this.size]: true,
       [`icon-${this.iconPosition}`]: !!this.icon,
       'full-width': this.fullWidth,
-      'disabled': this.disabled
+      disabled: this.disabled,
     };
   }
 }

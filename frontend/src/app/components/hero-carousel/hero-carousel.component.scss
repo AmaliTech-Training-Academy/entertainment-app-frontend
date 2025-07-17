@@ -1,8 +1,8 @@
-@use '../../../styles/variables' as *;
-@use '../../../styles/spacing' as *;
-@use '../../../styles/radius' as *;
-@use '../../../styles/typography' as *;
-@use 'sass:map';
+@use "../../../styles/variables" as *;
+@use "../../../styles/spacing" as *;
+@use "../../../styles/radius" as *;
+@use "../../../styles/typography" as *;
+@use "sass:map";
 
 .hero-carousel {
   position: relative;
@@ -96,7 +96,7 @@
 }
 
 .info-btn {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   color: map.get($neutral-colors, 100);
   border: 1px solid map.get($neutral-colors, 100);
   border-radius: map.get($radius, 4);
@@ -107,7 +107,9 @@
   display: flex;
   align-items: center;
   gap: map.get($spacing, 1);
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 .info-btn:hover {
   background: map.get($neutral-colors, 100);
@@ -124,7 +126,7 @@
   gap: map.get($spacing, 4);
 }
 .hero-carousel-controls button {
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   color: map.get($neutral-colors, 100);
   border: none;
   border-radius: 50%;
@@ -154,7 +156,9 @@
   border-radius: 50%;
   background: map.get($neutral-colors, 700);
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.2s;
 }
 .hero-carousel-indicators span.active {
   background: map.get($neutral-colors, 100);
@@ -267,7 +271,7 @@
 }
 
 .info-btn {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
   border: 1px solid #fff;
   border-radius: 8px;
@@ -278,7 +282,9 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 .info-btn:hover {
   background: #fff;
@@ -299,10 +305,12 @@
   border-radius: 50%;
   background: #5470a7;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.2s;
 }
 .hero-carousel-indicators span.active {
-  background: #C8CFE2;
+  background: #c8cfe2;
   transform: scale(1.1);
 }
 

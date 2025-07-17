@@ -11,6 +11,6 @@ import { FooterComponent } from '../features/footer/footer.component';
     <app-navbar></app-navbar>
     <router-outlet></router-outlet>
     <app-footer></app-footer>
-  `
+  `,
 })
-export class MainLayoutComponent {} 
+export class MainLayoutComponent {}
