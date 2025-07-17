@@ -4,13 +4,15 @@
   justify-content: center;
   border-radius: 50%;
   overflow: hidden;
-  background: #bdbdbd;
+  background: #5a70a7; // theme primary 500
   color: #fff;
   font-weight: 500;
   text-transform: uppercase;
   box-shadow: 0 2px 8px rgba(60, 60, 60, 0.08);
   border: 2px solid #fff;
   transition: box-shadow 0.2s;
+  position: relative;
+  user-select: none;
 }
 
 .avatar img {
@@ -19,3 +21,19 @@
   object-fit: cover;
   display: block;
 }
+
+.avatar {
+  font-size: 1em;
+}
+
+.avatar ng-template, .avatar > *:not(img) {
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+} 

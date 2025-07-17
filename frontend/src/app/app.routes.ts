@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
-import { MainLayoutComponent } from './features/main-layout.component';
-import { AuthLayoutComponent } from './features/auth/auth-layout.component';
+import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
 
 export const routes: Routes = [
   {
@@ -11,6 +10,13 @@ export const routes: Routes = [
         path: '',
         loadComponent: () =>
           import('./pages/home/home.page.component').then((m) => m.HomePage),
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/admin-dashboard/admin-dashboard.component').then(
+            (m) => m.AdminDashboardComponent,
+          ),
       },
       {
         path: 'movie/:id',
@@ -33,9 +39,15 @@ export const routes: Routes = [
             (m) => m.ForYouComponent,
           ),
       },
-
       // Add other main routes here
     ],
+  },
+  {
+    path: 'recommendation',
+    loadComponent: () =>
+      import('./components/recommendation/recommendation.component').then(
+        (m) => m.RecommendationComponent,
+      ),
   },
   {
     path: 'signup',

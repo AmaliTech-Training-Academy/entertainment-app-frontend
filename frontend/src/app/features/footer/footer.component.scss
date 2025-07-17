@@ -5,9 +5,15 @@
 @use "sass:map";
 
 .footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
   color: map.get($neutral-colors, 100);
   width: 100%;
+  
   overflow-x: hidden;
+  
 
   .footer-links {
     display: grid;
@@ -60,10 +66,9 @@
     }
   }
   @media (min-width: 768px) {
-    height: 483px;
-    .footer-links {
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: 1fr;
+        .footer-links {
+      grid-template-columns: repeat(4, 1fr); 
+      grid-template-rows: 1fr; 
       gap: 32px 80px;
       justify-items: start;
       .footer-column {
@@ -94,10 +99,6 @@
   }
 
   @media (min-width: 1025px) {
-    .footer-content {
-      height: 259px;
-      margin: 0 auto;
-    }
     .footer-links {
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: 1fr;

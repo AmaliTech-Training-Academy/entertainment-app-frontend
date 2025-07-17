@@ -22,7 +22,7 @@
         />
       </svg>
     </div>
-    <a routerLink="/signup" class="signup-link">Home</a>
+    <!-- <a routerLink="/signup" class="signup-link">Home</a> -->
     <div class="navbar__search">
       <span class="navbar__search-icon"
         ><svg
@@ -49,20 +49,16 @@
       <div class="search-dropdown" *ngIf="showDropdown">
         <ng-container *ngIf="searchResults.length; else noResults">
           <div class="search-dropdown__results">
-            <div
-              *ngFor="let movie of searchResults"
-              class="search-dropdown__movie-card"
-            >
-              <img
-                [src]="movie.image"
-                [alt]="movie.alt"
-                class="search-dropdown__movie-img"
-              />
-              <div class="search-dropdown__movie-info">
-                <div class="search-dropdown__movie-title">{{ movie.alt }}</div>
-                <div class="search-dropdown__movie-year">{{ movie.year }}</div>
+            <ng-container *ngFor="let movie of searchResults; let last = last">
+              <div class="search-dropdown__movie-card">
+                <img [src]="movie.image" [alt]="movie.alt" class="search-dropdown__movie-img" />
+                <div class="search-dropdown__movie-info">
+                  <div class="search-dropdown__movie-title">{{ movie.alt }}</div>
+                  <div class="search-dropdown__movie-year">{{ movie.year }}</div>
+                </div>
               </div>
-            </div>
+              <div *ngIf="!last" class="search-dropdown__divider"></div>
+            </ng-container>
           </div>
         </ng-container>
         <ng-template #noResults>
@@ -72,31 +68,14 @@
     </div>
     <div class="navbar__actions">
       <ng-container *ngIf="!isAuthenticated; else userMenu">
-        <a
-          class="navbar__sign-in"
-          href="#"
-          (click)="goToLogin(); $event.preventDefault()"
-          >Sign in</a
-        >
-        <app-button
-          type="primary"
-          size="medium"
-          icon="search"
-          iconPosition="right"
-          (buttonClick)="goToSignUp()"
-          >Sign up</app-button
-        >
+        <a class="navbar__sign-in" href="#" (click)="goToLogin(); $event.preventDefault()">Sign In</a>
+        <app-button type="primary" size="medium" (buttonClick)="goToSignUp()">Sign Up</app-button>
       </ng-container>
       <ng-template #userMenu>
         <div class="navbar__user" (click)="toggleUserDropdown()">
-          <app-avatar
-            [src]="user?.avatar || ''"
-            [name]="user?.name || ''"
-            [size]="40"
-            class="navbar__avatar"
-          ></app-avatar>
-          <span class="navbar__username">{{ user?.name }}</span>
-          <div class="navbar__user-dropdown" *ngIf="showUserDropdown">
+          <app-avatar [src]="user?.avatar || ''" [name]="user?.name || ''" [size]="50" class="navbar__avatar"></app-avatar>
+          <div class="navbar__user-dropdown" *ngIf="showUserDropdown" (click)="$event.stopPropagation()">
+            <div class="navbar__user-dropdown-username">{{ user?.name }}</div>
             <a class="navbar__user-option" href="#">Profile</a>
             <a
               class="navbar__user-option"

@@ -32,7 +32,10 @@ export class LoginComponent implements OnInit {
     avatar: 'assets/images/cineverse_logo.svg', // You can use any avatar image
     name: 'Test User',
   };
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+  ) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.email]],
       password: [
@@ -40,7 +43,7 @@ export class LoginComponent implements OnInit {
         [
           Validators.required,
           Validators.pattern(
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/,
           ),
         ],
       ],
@@ -95,7 +98,7 @@ export class LoginComponent implements OnInit {
             email: this.sampleUser.email,
             name: this.sampleUser.name,
             avatar: this.sampleUser.avatar,
-          })
+          }),
         );
         this.router.navigate(['']);
       } else {
