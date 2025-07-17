@@ -135,33 +135,33 @@ resource "aws_cloudwatch_log_group" "waf" {
 
 # OPTION 1: WAF Logging Configuration (Simple - recommended)
 # Comment this out if it continues to fail
-# resource "aws_wafv2_web_acl_logging_configuration" "main" {
-#   resource_arn            = aws_wafv2_web_acl.main.arn
-#   log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
+resource "aws_wafv2_web_acl_logging_configuration" "main" {
+  resource_arn            = aws_wafv2_web_acl.main.arn
+  log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
 
-#   provider = aws.us_east_1
+  provider = aws.us_east_1
 
-#   depends_on = [
-#     aws_wafv2_web_acl.main,
-#     aws_cloudwatch_log_group.waf
-#   ]
+  depends_on = [
+    aws_wafv2_web_acl.main,
+    aws_cloudwatch_log_group.waf
+  ]
 
-#   redacted_fields {
-#     single_header {
-#       name = "authorization"
-#     }
-#   }
+  redacted_fields {
+    single_header {
+      name = "authorization"
+    }
+  }
 
-#   redacted_fields {
-#     single_header {
-#       name = "cookie"
-#     }
-#   }
+  redacted_fields {
+    single_header {
+      name = "cookie"
+    }
+  }
 
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-# }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 
 
 
@@ -170,8 +170,8 @@ resource "aws_cloudwatch_log_group" "waf" {
 # If WAF logging continues to fail, you can skip it entirely.
 # The WAF will still work for protection, just without logging.
 # 
-resource "null_resource" "skip_waf_logging" {
-  provisioner "local-exec" {
-    command = "echo 'WAF logging disabled - WAF protection still active'"
-  }
-}
+# resource "null_resource" "skip_waf_logging" {
+#   provisioner "local-exec" {
+#     command = "echo 'WAF logging disabled - WAF protection still active'"
+#   }
+# }
