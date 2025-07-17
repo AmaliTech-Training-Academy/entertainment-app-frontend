@@ -1,0 +1,181 @@
+// Typography Styles - Outfit Font Family
+// Based on design system for Desktop, Tablet, and Mobile
+
+// Font Family
+$font-family-primary: 'Outfit', sans-serif;
+
+// Heading Styles
+.heading-1 {
+  font-family: $font-family-primary;
+  font-weight: 700;
+  
+  // Desktop
+  font-size: 36px;
+  
+  // Tablet
+  @media (max-width: 1024px) {
+    font-size: 32px;
+  }
+  
+  // Mobile
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
+}
+
+.heading-2 {
+  font-family: $font-family-primary;
+  font-weight: 700;
+  
+  // Desktop
+  font-size: 32px;
+  
+  // Tablet
+  @media (max-width: 1024px) {
+    font-size: 28px;
+  }
+  
+  // Mobile
+  @media (max-width: 768px) {
+    font-size: 20px;
+  }
+}
+
+.heading-3 {
+  font-family: $font-family-primary;
+  font-weight: 600;
+  
+  // Desktop
+  font-size: 28px;
+  
+  // Tablet & Mobile - becomes sub-heading
+  @media (max-width: 1024px) {
+    font-size: 24px;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 18px;
+  }
+}
+
+.sub-heading {
+  font-family: $font-family-primary;
+  font-weight: 600;
+  
+  // Desktop
+  font-size: 24px;
+  
+  // Tablet
+  @media (max-width: 1024px) {
+    font-size: 24px;
+  }
+  
+  // Mobile
+  @media (max-width: 768px) {
+    font-size: 18px;
+  }
+}
+
+// Body Text Styles
+.body-base {
+  font-family: $font-family-primary;
+  font-weight: 400;
+  
+  // Desktop
+  font-size: 18px;
+  
+  // Tablet
+  @media (max-width: 1024px) {
+    font-size: 18px;
+  }
+  
+  // Mobile
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+}
+
+.body-medium {
+  font-family: $font-family-primary;
+  font-weight: 400;
+  
+  // Desktop
+  font-size: 16px;
+  
+  // Tablet
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+  
+  // Mobile
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+}
+
+.body-small {
+  font-family: $font-family-primary;
+  font-weight: 400;
+  
+  // Desktop
+  font-size: 14px;
+  
+  // Tablet
+  @media (max-width: 1024px) {
+    font-size: 14px;
+  }
+  
+  // Mobile
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+}
+
+// Footnote Styles
+.footnote {
+  font-family: $font-family-primary;
+  font-weight: 400;
+  
+  // Desktop
+  font-size: 12px;
+  
+  // Tablet
+  @media (max-width: 1024px) {
+    font-size: 12px;
+  }
+  
+  // Mobile
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
+}
+
+// Caption Styles
+.caption {
+  font-family: $font-family-primary;
+  font-weight: 400;
+  
+  // Desktop
+  font-size: 10px;
+  
+  // Tablet
+  @media (max-width: 1024px) {
+    font-size: 10px;
+  }
+  
+  // Mobile
+  @media (max-width: 768px) {
+    font-size: 10px;
+  }
+}
+
+// Utility Classes for Typography
+.text-heading-1 { @extend .heading-1; }
+.text-heading-2 { @extend .heading-2; }
+.text-heading-3 { @extend .heading-3; }
+.text-sub-heading { @extend .sub-heading; }
+.text-body-base { @extend .body-base; }
+.text-body-medium { @extend .body-medium; }
+.text-body-small { @extend .body-small; }
+.text-footnote { @extend .footnote; }
+.text-caption { @extend .caption; }
