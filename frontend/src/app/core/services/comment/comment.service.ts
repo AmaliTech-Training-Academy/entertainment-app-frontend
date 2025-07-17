@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { Comment } from '../../../app/shared/components/comments';
+import { environment } from '../../../../environments/environment';
+import { Comment } from '../../../shared/components/comments';
 import { ErrorHandlerService } from '../error-handler/error-handler.service';
 
 interface CommentApiResponse {
@@ -26,9 +26,10 @@ export class CommentService {
   ) {}
 
   getCommentsByMediaId(mediaId: number): Observable<CommentApiResponse> {
-    return this.http.get<CommentApiResponse>(`${this.apiUrl}/api/v1/comments/media/${mediaId}`)
-      .pipe(
-        catchError((error) => this.errorHandler.handleHttpError(error))
-      );
+    return this.http
+      .get<CommentApiResponse>(
+        `${this.apiUrl}/api/v1/comments/media/${mediaId}`
+      )
+      .pipe(catchError((error) => this.errorHandler.handleHttpError(error)));
   }
 }

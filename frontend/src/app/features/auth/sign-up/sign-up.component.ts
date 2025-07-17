@@ -12,7 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
@@ -38,7 +38,7 @@ export class SignUpComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
+    private router: Router
   ) {
     this.registerForm = this.fb.group(
       {
@@ -62,7 +62,7 @@ export class SignUpComponent {
       },
       {
         validators: this.passwordMatchValidator,
-      },
+      }
     );
   }
 
@@ -173,7 +173,7 @@ export class SignUpComponent {
   }
 
   private strongPasswordValidator(
-    control: AbstractControl,
+    control: AbstractControl
   ): ValidationErrors | null {
     const value = control.value;
     const strongPasswordRegex =
@@ -182,7 +182,7 @@ export class SignUpComponent {
   }
 
   emailTakenValidator = (
-    control: AbstractControl,
+    control: AbstractControl
   ): Promise<ValidationErrors | null> => {
     return new Promise((resolve) => {
       const fakeEmails = ['ernesto@example.com', 'fan@cineverse.com'];
