@@ -20,7 +20,7 @@
     .footer-column {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       gap: 6px;
       .footer-link {
         color: map.get($neutral-colors, 400);
