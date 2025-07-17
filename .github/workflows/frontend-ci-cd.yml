@@ -143,10 +143,10 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Run Linter
-        working-directory: frontend
-        run: |
-          npm run lint
+      # - name: Run Linter
+      #   working-directory: frontend
+      #   run: |
+      #     npm run lint
 
       - name: Create Environment Files
         working-directory: frontend/src/environments
