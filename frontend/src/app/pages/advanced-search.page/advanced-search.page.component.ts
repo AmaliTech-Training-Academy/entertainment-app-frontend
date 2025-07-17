@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,7 +7,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { FormsModule } from '@angular/forms';
-import { AdvancedSearchComponent as AdvancedSearch } from '../../components/advanced-search/advanced-search.component';
+import {
+  AdvancedSearchComponent as AdvancedSearch,
+  AdvancedSearchComponent,
+} from '../../components/advanced-search/advanced-search.component';
 import { MovieCardComponent } from '../../components/movie-card/movie-card.component';
 
 @Component({
@@ -28,7 +31,20 @@ import { MovieCardComponent } from '../../components/movie-card/movie-card.compo
   styleUrl: './advanced-search.page.component.scss',
 })
 export class AdvancedSearchPageComponent implements OnInit {
-  constructor() {}
+  @ViewChild(AdvancedSearchComponent)
+  advancedSearchComponent?: AdvancedSearchComponent;
+  constructor() {
+    this.searchQuery == '' &&
+      this.onSearch({
+        query: '',
+        filters: {
+          type: 'All',
+          genre: 'All',
+          rating: 'All',
+          year: 'All',
+        },
+      });
+  }
   filteredMovies: Array<{
     title: string;
     year: string;
@@ -42,6 +58,7 @@ export class AdvancedSearchPageComponent implements OnInit {
   ngOnInit(): void {
     this.filteredMovies = this.allMovies;
   }
+  search_filter_state = false;
   searchQuery = '';
   currentPage = 1;
   totalPages = 7;
@@ -122,7 +139,20 @@ export class AdvancedSearchPageComponent implements OnInit {
     // fetch data for the new page here
   }
 
+  isSearchActive(): boolean {
+    return (
+      this.search_filter_state ||
+      this.searchQuery !== '' ||
+      this.selectedType !== 'All' ||
+      this.selectedGenre !== 'All' ||
+      this.selectedRating !== 'All' ||
+      this.selectedYear !== 'All' ||
+      this.selectedLanguage !== 'All'
+    );
+  }
+
   onSearch(event: { query: string; filters: any }) {
+    this.search_filter_state = true;
     if (!this.allMovies || this.allMovies.length === 0) return;
 
     this.filteredMovies = this.allMovies.filter((movie) => {
@@ -153,8 +183,18 @@ export class AdvancedSearchPageComponent implements OnInit {
 
   resetFilters() {
     this.filteredMovies = [...this.allMovies];
-    // If you need to reset the search component's state:
-    // You'll need to use @ViewChild to access the child component
-    // or emit an event from the child when reset is clicked
+    this.search_filter_state = false;
+    this.searchQuery = '';
+
+    // Reset local filter selections
+    this.selectedType = 'All';
+    this.selectedGenre = 'All';
+    this.selectedRating = 'All';
+    this.selectedYear = 'All';
+    this.selectedLanguage = 'All';
+
+    if (this.advancedSearchComponent) {
+      this.advancedSearchComponent.resetFilters();
+    }
   }
 }

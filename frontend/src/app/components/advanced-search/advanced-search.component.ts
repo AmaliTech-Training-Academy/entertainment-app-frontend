@@ -3,7 +3,6 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
-
 import { debounceTime, distinctUntilChanged, filter, tap } from 'rxjs';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { CommonModule } from '@angular/common';
@@ -51,6 +50,17 @@ export class AdvancedSearchComponent {
       });
   }
 
+  hasActiveFilters(): boolean {
+    return (
+      this.searchControl.value !== '' ||
+      this.selectedFilters.type !== 'All' ||
+      this.selectedFilters.genre !== 'All' ||
+      this.selectedFilters.rating !== 'All' ||
+      this.selectedFilters.year !== 'All' ||
+      this.selectedFilters.language !== 'All'
+    );
+  }
+
   onFilterChange(name: string, value: string) {
     this.selectedFilters[name as keyof typeof this.selectedFilters] = value;
     this.emitSearchEvent();
@@ -61,5 +71,17 @@ export class AdvancedSearchComponent {
       query: this.searchControl.value || '',
       filters: { ...this.selectedFilters },
     });
+  }
+
+  resetFilters() {
+    this.searchControl.setValue('');
+    this.selectedFilters = {
+      type: 'All',
+      genre: 'All',
+      rating: 'All',
+      year: 'All',
+      language: 'All',
+    };
+    this.emitSearchEvent();
   }
 }

@@ -6,16 +6,24 @@
 
     <section class="trending-section">
       <h3 class="section-title">
-        {{ searchQuery ? "Search Results" : "Trending Now" }}
+        {{
+          advancedSearchComponent?.hasActiveFilters()
+            ? "Search Results"
+            : "Trending Now"
+        }}
       </h3>
 
       <!-- pagination -->
 
       <!-- Empty State -->
       <div *ngIf="filteredMovies.length === 0" class="empty-state">
-        <h3 class="empty-title">No Results Found For::</h3>
-        <p class="empty-message">{{ searchQuery }}</p>
-        <button mat-raised-button color="primary" (click)="resetFilters()">
+        <h3 class="empty-title">No Results Found</h3>
+        <button
+          mat-raised-button
+          color="primary"
+          *ngIf="search_filter_state"
+          (click)="resetFilters()"
+        >
           Reset Filters
         </button>
       </div>
