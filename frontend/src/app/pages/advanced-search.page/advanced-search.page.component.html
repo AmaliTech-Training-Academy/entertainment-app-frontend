@@ -13,9 +13,14 @@
         }}
       </h3>
 
-      <!-- pagination -->
+      <app-pagination
+        *ngIf="filteredMovies.length > 0"
+        [currentPage]="currentPage"
+        [totalItems]="filteredMovies.length"
+        [itemsPerPage]="6"
+        (pageChange)="onPageChange($event)"
+      ></app-pagination>
 
-      <!-- Empty State -->
       <div *ngIf="filteredMovies.length === 0" class="empty-state">
         <h3 class="empty-title">No Results Found</h3>
         <button
@@ -35,7 +40,13 @@
         ></app-movie-card>
       </div>
 
-      <!-- pagination -->
+      <app-pagination
+        [currentPage]="currentPage"
+        [totalItems]="filteredMovies.length"
+        [itemsPerPage]="6"
+        (pageChange)="onPageChange($event)"
+        *ngIf="filteredMovies.length > 0"
+      ></app-pagination>
     </section>
   </main>
 </div>

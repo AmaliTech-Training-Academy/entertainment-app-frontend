@@ -1,0 +1,36 @@
+<section class="pagination">
+  <button
+    class="previous-page"
+    (click)="changePage(currentPage - 1)"
+    [disabled]="currentPage === 1"
+    aria-label="Previous page"
+  >
+    <span class="mobile-hidden">Prev</span>
+    <svg class="mobile-only" width="16" height="16" viewBox="0 0 24 24">
+      <path d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
+
+  <button
+    *ngFor="let page of getVisiblePages()"
+    class="page-numbers"
+    (click)="changePage(+page)"
+    [class.active]="page === currentPage"
+    [class.ellipsis]="page === '...'"
+    [disabled]="page === '...'"
+  >
+    {{ page }}
+  </button>
+
+  <button
+    class="next-page"
+    (click)="changePage(currentPage + 1)"
+    [disabled]="currentPage === totalPages"
+    aria-label="Next page"
+  >
+    <span class="mobile-hidden">Next</span>
+    <svg class="mobile-only" width="16" height="16" viewBox="0 0 24 24">
+      <path d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
+</section>
