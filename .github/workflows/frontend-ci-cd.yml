@@ -916,3 +916,49 @@ jobs:
           **Deployed by:** ${{ github.actor }}
           **Deployment Type:** ${{ steps.strategy.outputs.deployment_type }}
           EOF
+
+
+  # =============================================================================
+  # Auto-Merge Staging to Prod (with Manual Approval)
+  # =============================================================================
+  merge-staging-to-prod:
+    name: Auto-Merge Staging to Prod
+    runs-on: self-hosted
+    needs: [deploy] 
+    # Only run this job if the 'deploy' job was for the 'staging' environment and was successful
+    if: github.ref == 'refs/heads/staging' && needs.deploy.result == 'success'
+    
+    permissions:
+      contents: write # Required to push changes
+      pull-requests: write # Required to create and merge pull requests
+
+    steps:
+      - name: Checkout Staging Branch
+        uses: actions/checkout@v4
+        with:
+          ref: staging # Checkout the staging branch
+          token: ${{ secrets.GITHUB_TOKEN }} # Use default GITHUB_TOKEN for repo write access
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+      - name: Create Pull Request to Prod
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Merge staging into prod after successful staging deployment"
+          title: "Release: Merge Staging to Production"
+          body: |
+            This pull request automatically merges the `staging` branch into `prod`
+            after a successful deployment to the staging environment.
+            
+            **Reviewers: Please approve this PR to initiate the production deployment.**
+          branch: auto-merge/staging-to-prod-${{ github.run_id }} # Unique branch name for the PR
+          base: prod # Target branch for the PR
+          delete-branch: true # Delete the temporary branch after merge
+          auto-merge: true # Enable auto-merge
+
+      - name: Notify Auto-Merge PR Created
+        run: echo "Successfully created auto-merge PR from staging to prod. Awaiting manual approval on prod environment."
