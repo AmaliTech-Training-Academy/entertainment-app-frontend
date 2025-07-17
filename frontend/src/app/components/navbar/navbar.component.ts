@@ -22,7 +22,6 @@ export class NavbarComponent {
   searchQuery = '';
   showDropdown = false;
   searchResults: SearchMovie[] = [
-    
     {
       rank: 1,
       image: 'assets/images/cineverse_logo.svg',

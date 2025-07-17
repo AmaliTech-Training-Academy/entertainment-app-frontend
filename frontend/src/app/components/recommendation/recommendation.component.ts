@@ -1,14 +1,13 @@
 import { Component } from '@angular/core';
-import { MovieCardComponent } from "../movie-card/movie-card.component";
+import { MovieCardComponent } from '../movie-card/movie-card.component';
 import { CommonModule } from '@angular/common';
-
 
 @Component({
   selector: 'app-recommendation-page',
   standalone: true,
-  imports: [ MovieCardComponent, CommonModule ],
+  imports: [MovieCardComponent, CommonModule],
   templateUrl: './recommendation.component.html',
-  styleUrl: './recommendation.component.scss'
+  styleUrl: './recommendation.component.scss',
 })
 export class RecommendationComponent {
   movies = [
