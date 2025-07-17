@@ -77,7 +77,7 @@
   border: none;
   padding: 0;
   font-size: 1rem;
-} 
+}
 
 .navbar__user {
   position: relative;
@@ -218,6 +218,19 @@
 
 .navbar__logo--mobile {
   display: none;
+}
+
+.navbar__link {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  margin-left: 2rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  &:hover {
+    color: #fc4747;
+  }
 }
 
 @media (max-width: 900px) {
