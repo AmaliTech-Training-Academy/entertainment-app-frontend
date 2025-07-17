@@ -12,6 +12,13 @@ export const routes: Routes = [
           import('./pages/home/home.page.component').then((m) => m.HomePage),
       },
       {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/admin-dashboard/admin-dashboard.component').then(
+            (m) => m.AdminDashboardComponent,
+          ),
+      },
+      {
         path: 'movie/:id',
         loadComponent: () =>
           import('./pages/home/detail-page/detail.page').then(
@@ -32,9 +39,15 @@ export const routes: Routes = [
             (m) => m.ForYouComponent,
           ),
       },
-
       // Add other main routes here
     ],
+  },
+  {
+    path: 'recommendation',
+    loadComponent: () =>
+      import('./components/recommendation/recommendation.component').then(
+        (m) => m.RecommendationComponent,
+      ),
   },
   {
     path: 'signup',

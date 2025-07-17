@@ -22,7 +22,6 @@ export class NavbarComponent {
   searchQuery = '';
   showDropdown = false;
   searchResults: SearchMovie[] = [
-    // Example data; replace with real search results
     {
       rank: 1,
       image: 'assets/images/cineverse_logo.svg',
