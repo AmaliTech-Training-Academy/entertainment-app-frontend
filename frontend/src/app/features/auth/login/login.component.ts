@@ -31,7 +31,6 @@ export class LoginComponent implements OnInit {
     password: 'password123',
     avatar: 'assets/images/cineverse_logo.svg', // You can use any avatar image
     name: 'Test User',
-    name: 'Test User',
   };
   constructor(private fb: FormBuilder, private router: Router) {
     this.loginForm = this.fb.group({
