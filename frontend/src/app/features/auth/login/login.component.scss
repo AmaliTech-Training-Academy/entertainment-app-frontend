@@ -132,21 +132,16 @@
     }
   }
 
-  .mat-mdc-form-field-error-wrapper {
-    padding: 0 !important;
-    position: absolute !important;
-    width: auto !important;
-  }
-
   .error-message-container {
     margin-bottom: map.get($spacing, 2);
-  }
-
-  .mat-mdc-form-field-error {
     color: map.get($red-colors, 100) !important;
     font-size: map.get(map.get($body, b2), font-size) !important;
     white-space: nowrap !important;
     text-align: left !important;
+    display: block;
+    width: 100%;
+    white-space: normal;
+    text-wrap: wrap;
   }
 
   .mat-mdc-form-field-subscript-wrapper {
