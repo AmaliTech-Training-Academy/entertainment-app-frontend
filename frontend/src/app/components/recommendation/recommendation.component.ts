@@ -3,7 +3,7 @@ import { MovieCardComponent } from '../movie-card/movie-card.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-recommendation-page',
+  selector: 'app-recommendation',
   standalone: true,
   imports: [MovieCardComponent, CommonModule],
   templateUrl: './recommendation.component.html',
