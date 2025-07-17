@@ -98,7 +98,7 @@ jobs:
         run: |
           npm audit --audit-level=moderate --json > npm-audit-report.json || true
           npm audit --audit-level=moderate
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Terraform Security Scan
         uses: aquasecurity/tfsec-action@v1.0.0
@@ -142,6 +142,11 @@ jobs:
       - name: Install Dependencies
         working-directory: frontend
         run: npm ci
+
+      - name: Run Linter
+        working-directory: frontend
+        run: |
+          npm run lint
 
       - name: Create Environment Files
         working-directory: frontend/src/environments
@@ -213,7 +218,7 @@ jobs:
         working-directory: frontend
         run: |
           npm test -- --watch=false --browsers=ChromeHeadless
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -501,7 +506,7 @@ jobs:
       - name: Download Terraform Plan
         uses: actions/download-artifact@v4
         if: needs.plan.outputs.plan_changes == 'true'
-        continue-on-error: true
+        continue-on-error: false
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
           path: terraform/
