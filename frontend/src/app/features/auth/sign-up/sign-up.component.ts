@@ -12,9 +12,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../../core/services/auth.service';
 import { of } from 'rxjs';
 import { delay } from 'rxjs/operators';
+import { AuthService } from '../../../core/services/sign-up/auth.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -34,6 +34,8 @@ export class SignUpComponent {
   step = 1;
 
   registerForm: FormGroup;
+  loading = false;
+  apiError: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -68,18 +70,8 @@ export class SignUpComponent {
 
   nextStep(): void {
     if (this.firstName?.valid && this.lastName?.valid && this.email?.valid) {
-      const { firstName, lastName } = this.registerForm.value;
-
-      // Simulate backend username generation
-      this.authService.generateUsername(firstName, lastName).subscribe({
-        next: (username: string) => {
-          this.registerForm.get('username')?.setValue(username);
-          this.step = 2;
-        },
-        error: () => {
-          alert('Could not generate username');
-        },
-      });
+      // No need to generate username, just proceed
+      this.step = 2;
     } else {
       this.firstName?.markAsTouched();
       this.lastName?.markAsTouched();
@@ -140,34 +132,37 @@ export class SignUpComponent {
   // }
 
   createAccount(): void {
+    this.apiError = null;
     if (this.registerForm.valid) {
+      this.loading = true;
       const formValue = {
-        ...this.registerForm.getRawValue(),
+        firstName: this.firstName?.value,
+        lastName: this.lastName?.value,
+        email: this.email?.value,
+        password: this.password?.value,
+        // Add other fields if required by backend
       };
-
       this.authService.register(formValue).subscribe({
         next: (res) => {
-          // Save data to localStorage
-          localStorage.setItem('token', res.token);
-          localStorage.setItem('user', JSON.stringify(res.user));
-          localStorage.setItem('role', res.user.role);
-
-          console.log('User registered successfully:', res);
-
-          // Redirect to home
-          this.router.navigate(['/']);
+          this.loading = false;
+          // Store token in cookies if returned
+          if (res.token) {
+            document.cookie = `token=${res.token}; path=/;`;
+          }
+          // Optionally store user info in cookies as well if needed
+          // Redirect to home page
+          this.router.navigate(['/home']);
         },
         error: (err) => {
-          console.error('Registration failed:', err);
-          if (err.error?.message === 'Email already registered') {
-            this.email?.setErrors({ emailTaken: true });
+          this.loading = false;
+          if (err.error?.message) {
+            this.apiError = err.error.message;
+          } else {
+            this.apiError = 'Registration failed. Please try again.';
           }
         },
       });
     } else {
-      // Mark all fields as touched to trigger validation errors
-      this.password?.markAsTouched();
-      this.confirmPassword?.markAsTouched();
       this.registerForm.markAllAsTouched();
     }
   }
