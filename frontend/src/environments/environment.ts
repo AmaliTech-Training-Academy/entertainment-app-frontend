@@ -1,3 +1,3 @@
 export const environment = {
-  apiUrl: 'http://localhost:3000' 
+  apiUrl: 'http://cineverse-service-alb-staging-346786246.eu-west-1.elb.amazonaws.com' 
 };
