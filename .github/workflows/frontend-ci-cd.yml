@@ -147,6 +147,22 @@ jobs:
       #   working-directory: frontend
       #   run: |
       #     npm run lint
+  
+      # Install Chromium browser, which is necessary for Karma to run tests in a headless environment
+      - name: Install Chromium for Headless Tests
+        run: sudo apt-get update && sudo apt-get install -y chromium-browser
+
+      # Run Angular tests with a headless Chrome browser
+      # CHROME_BIN environment variable points Karma to the correct Chromium executable
+      # '--no-watch' prevents Karma from watching files for changes (not needed in CI)
+      # '--browsers=ChromeHeadless' explicitly tells Karma to use the headless Chrome browser
+      - name: Run Frontend Tests
+        working-directory: frontend
+        env:
+          CHROME_BIN: /usr/bin/chromium-browser
+        run: |
+          npm test -- --no-watch --browsers=ChromeHeadless
+        continue-on-error: false
 
       - name: Create Environment Files
         working-directory: frontend/src/environments
@@ -214,11 +230,6 @@ jobs:
             exit 1
           fi
 
-      - name: Run Tests
-        working-directory: frontend
-        run: |
-          npm test -- --watch=false --browsers=ChromeHeadless
-        continue-on-error: false
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
