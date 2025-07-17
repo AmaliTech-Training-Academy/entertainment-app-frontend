@@ -1,1 +1,55 @@
-node_modules
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+frontend/.angular/
+# System files
+.DS_Store
+Thumbs.db
+# Terraform files to ignore
+# State files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+# Plan files
+*.tfplan
+# Terraform directories
+.terraform/
+.terraform.lock.hcl
+# Variable files (may contain sensitive data)
+*.auto.tfvars
+*_override.tf
+*_override.tf.json
+# Crash log files
+crash.log
+crash.*.log
+# CLI configuration files
+.terraformrc

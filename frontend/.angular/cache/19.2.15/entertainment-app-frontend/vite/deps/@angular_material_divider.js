@@ -123,4 +123,3 @@ export {
   MatDividerModule
 };
 //# sourceMappingURL=@angular_material_divider.js.map
-

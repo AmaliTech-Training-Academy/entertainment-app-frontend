@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface ErrorInfo {
   message: string;
@@ -15,7 +16,19 @@ export interface ErrorInfo {
 })
 export class ErrorHandlerService {
 
-  constructor() { }
+  constructor(private snackBar: MatSnackBar) { }
+
+  /**
+   * Show a snackbar notification
+   */
+  showSnackBar(message: string, status: 'success' | 'error' = 'error') {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: [status === 'success' ? 'success-snackbar' : 'error-snackbar'],
+    });
+  }
 
   /**
    * Handle HTTP errors and return user-friendly messages
@@ -29,13 +42,13 @@ export class ErrorHandlerService {
     };
 
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorInfo = {
         message: error.error.message,
         code: 'CLIENT_ERROR',
         timestamp: new Date(),
         userFriendlyMessage: 'Network error. Please check your connection.'
       };
+      this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
     } else {
       // Server-side error
       switch (error.status) {
@@ -47,6 +60,7 @@ export class ErrorHandlerService {
             timestamp: new Date(),
             userFriendlyMessage: 'Invalid request. Please check your input.'
           };
+          this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
         case 401:
           errorInfo = {
@@ -55,6 +69,7 @@ export class ErrorHandlerService {
             timestamp: new Date(),
             userFriendlyMessage: 'Please log in to continue.'
           };
+          this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
         case 403:
           errorInfo = {
@@ -63,6 +78,7 @@ export class ErrorHandlerService {
             timestamp: new Date(),
             userFriendlyMessage: 'You don\'t have permission to perform this action.'
           };
+          this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
         case 404:
           errorInfo = {
@@ -71,6 +87,7 @@ export class ErrorHandlerService {
             timestamp: new Date(),
             userFriendlyMessage: 'The requested resource was not found.'
           };
+          this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
         case 422:
           errorInfo = {
@@ -80,6 +97,7 @@ export class ErrorHandlerService {
             timestamp: new Date(),
             userFriendlyMessage: 'Please check your input and try again.'
           };
+          this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
         case 429:
           errorInfo = {
@@ -88,6 +106,7 @@ export class ErrorHandlerService {
             timestamp: new Date(),
             userFriendlyMessage: 'Too many requests. Please wait a moment and try again.'
           };
+          this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
         case 500:
           errorInfo = {
@@ -96,6 +115,7 @@ export class ErrorHandlerService {
             timestamp: new Date(),
             userFriendlyMessage: 'Server error. Please try again later.'
           };
+          this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
         case 502:
         case 503:
@@ -106,6 +126,7 @@ export class ErrorHandlerService {
             timestamp: new Date(),
             userFriendlyMessage: 'Service temporarily unavailable. Please try again later.'
           };
+          this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
         default:
           errorInfo = {
@@ -115,6 +136,7 @@ export class ErrorHandlerService {
             timestamp: new Date(),
             userFriendlyMessage: 'An unexpected error occurred. Please try again.'
           };
+          this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
       }
     }
     return throwError(() => errorInfo);
