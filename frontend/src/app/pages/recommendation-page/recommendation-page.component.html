@@ -1,0 +1,12 @@
+<app-navbar></app-navbar>
+
+<main class="recommendation__main">
+    <h2>Because you watched “Brave”</h2>
+    <div class="recommendation__movies">
+        <app-movie-card *ngFor="let movie of movies" [movie]="movie"></app-movie-card>
+    </div>
+</main>
+
+<footer>
+    <app-footer></app-footer>
+</footer>
