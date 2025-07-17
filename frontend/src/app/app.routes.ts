@@ -39,6 +39,13 @@ export const routes: Routes = [
             (m) => m.ForYouComponent,
           ),
       },
+       {
+    path: 'user-test',
+    loadComponent: () =>
+      import('./pages/user-dashboard.page.component').then(
+        (m) => m.UserDashboardPageComponent,
+      ),
+  }
       // Add other main routes here
     ],
   },
@@ -49,6 +56,7 @@ export const routes: Routes = [
         (m) => m.AuthUserComponent,
       ),
   },
+ 
   {
     path: 'recommendation',
     loadComponent: () =>
