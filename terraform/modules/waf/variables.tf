@@ -31,3 +31,15 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "enable_waf" {
+  description = "Enable WAF protection"
+  type        = bool
+  default     = false
+}
+
+variable "enable_waf_logging" {
+  description = "Enable WAF logging to CloudWatch"
+  type        = bool
+  default     = true
+}

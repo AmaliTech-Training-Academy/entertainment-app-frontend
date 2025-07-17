@@ -10,6 +10,7 @@ terraform {
 
 # WAF Web ACL with environment-specific unique name
 resource "aws_wafv2_web_acl" "main" {
+  count = var.enable_waf ? 1 : 0
   name        = "cineverse-${var.project_name}-${var.environment}-waf"
   description = "WAF for CineVerse ${var.environment} frontend"
   scope       = "CLOUDFRONT"
@@ -136,6 +137,7 @@ resource "aws_cloudwatch_log_group" "waf" {
 # OPTION 1: WAF Logging Configuration (Simple - recommended)
 # Comment this out if it continues to fail
 resource "aws_wafv2_web_acl_logging_configuration" "main" {
+  count = var.enable_waf_logging ? 1 : 0
   resource_arn            = aws_wafv2_web_acl.main.arn
   log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
 
@@ -175,3 +177,30 @@ resource "aws_wafv2_web_acl_logging_configuration" "main" {
 #     command = "echo 'WAF logging disabled - WAF protection still active'"
 #   }
 # }
+
+data "aws_caller_identity" "current" {
+  provider = aws.us_east_1
+}
+
+resource "aws_cloudwatch_log_resource_policy" "waf_logging" {
+  policy_name = "AWSWAFLoggingPolicy"
+
+  policy_document = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "delivery.logs.amazonaws.com"
+        },
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/aws/wafv2/*:*"
+      }
+    ]
+  })
+
+  provider = aws.us_east_1
+}
