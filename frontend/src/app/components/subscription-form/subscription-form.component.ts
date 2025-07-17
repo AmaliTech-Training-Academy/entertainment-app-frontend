@@ -6,6 +6,6 @@ import { ButtonComponent } from '../../shared/components/button/button.component
   standalone: true,
   templateUrl: './subscription-form.component.html',
   styleUrls: ['./subscription-form.component.scss'],
-  imports: [ButtonComponent]
+  imports: [ButtonComponent],
 })
-export class SubscriptionFormComponent {} 
+export class SubscriptionFormComponent {}

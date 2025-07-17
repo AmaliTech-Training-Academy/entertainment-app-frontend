@@ -10,38 +10,36 @@
   @return map.get($spacing, $size);
 }
 
-
-
 .user-management {
   padding: space(4);
   color: color($neutral-colors, 100);
   background-color: color($primary-colors, 1000);
 
   .search-wrapper {
-  position: relative;
-  margin-bottom: space(4);
+    position: relative;
+    margin-bottom: space(4);
+    //   display: flex;
 
-  .search-input {
-    width: 100%;
-    padding: space(3) space(3) space(3) space(8); 
-    background-color: color($primary-colors, 700);
-    color: color($neutral-colors, 100);
-    border: none;
-    border-radius: 0.5rem;
+    .search-input {
+      width: 100%;
+      padding: space(3) space(3) space(3) space(8);
+      background-color: color($primary-colors, 700);
+      color: color($neutral-colors, 100);
+      border: none;
+      border-radius: 0.5rem;
+    }
+
+    .search-icon {
+      position: absolute;
+      top: 33%;
+      left: space(3);
+      transform: translateY(-50%);
+      color: #6b7582;
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+    }
   }
-
-  .search-icon {
-    position: absolute;
-    top: 34%;
-    left: space(3);
-    transform: translateY(-50%);
-    color: #6B7582;
-    width: 20px;
-    height: 20px;
-    pointer-events: none;
-  }
-}
-
 
   h2 {
     font-size: 2rem;
@@ -67,8 +65,6 @@
     border: none;
     border-radius: 0.5rem;
     outline: none;
-
-
   }
 
   .bulk-actions {
@@ -89,21 +85,20 @@
 
   .user-table {
     width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 0.875rem;
-  background-color: color($primary-colors, 700);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 1px solid color($neutral-colors, 100);
-    
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.875rem;
+    background-color: color($primary-colors, 700);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid color($neutral-colors, 100);
 
     thead {
       display: none;
     }
 
     .status {
-        color: color($primary-colors, 100);
+      color: color($primary-colors, 100);
     }
 
     tr {
@@ -147,7 +142,6 @@
         padding: 0;
         margin-bottom: 0;
         border-bottom: 1px solid color($primary-colors, 100);
-        
 
         td {
           display: table-cell;

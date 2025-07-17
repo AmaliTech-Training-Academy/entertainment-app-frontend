@@ -9,7 +9,13 @@
       <h1 class="detail-header-title">Breaking Bad</h1>
       <h6 class="detail-header-subtitle">Plot Summary</h6>
       <p class="detail-header-content">
-        Walter White, a high school chemistry teacher who, after being diagnosed with terminal lung cancer, partners with a former student, Jesse Pinkman, to manufacture and sell methamphetamine. Driven by a need to provide for his family after his death, Walter transforms from a mild-mannered teacher into a ruthless drug kingpin known as Heisenberg, navigating the dangerous criminal underworld while battling his illness and internal conflicts.
+        Walter White, a high school chemistry teacher who, after being diagnosed
+        with terminal lung cancer, partners with a former student, Jesse
+        Pinkman, to manufacture and sell methamphetamine. Driven by a need to
+        provide for his family after his death, Walter transforms from a
+        mild-mannered teacher into a ruthless drug kingpin known as Heisenberg,
+        navigating the dangerous criminal underworld while battling his illness
+        and internal conflicts.
       </p>
     </div>
   </div>
@@ -17,7 +23,10 @@
   <div class="movie-screenshot-section">
     <h2 class="screenshots-section-title">Movies Screenshot</h2>
     <div class="screenshots-list">
-      <app-screen-shot *ngFor="let img of screenshots" [imageUrl]="img"></app-screen-shot>
+      <app-screen-shot
+        *ngFor="let img of screenshots"
+        [imageUrl]="img"
+      ></app-screen-shot>
     </div>
   </div>
 
@@ -55,9 +64,13 @@
     <div class="side-section">
       <div class="director-section">
         <h3 class="comments-title">Director</h3>
-   
+
         <div class="director-card">
-          <img src="https://randomuser.me/api/portraits/men/2.jpg" alt="Vince Gilligan" class="director-avatar" />
+          <img
+            src="https://randomuser.me/api/portraits/men/2.jpg"
+            alt="Vince Gilligan"
+            class="director-avatar"
+          />
           <span class="director-name">Vince Gilligan</span>
         </div>
       </div>
@@ -82,5 +95,4 @@
       </div>
     </div>
   </div>
-
-</div> 
+</div>

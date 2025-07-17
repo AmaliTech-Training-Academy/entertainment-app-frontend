@@ -13,8 +13,7 @@ $theme: mat.define-light-theme(
       accent: mat.define-palette(vars.$material-accent, 200),
       warn: mat.define-palette(vars.$material-warn, 200),
     ),
-    typography:
-      mat.define-typography-config(
+    typography: mat.define-typography-config(
         $font-family: "Outfit, sans-serif",
       ),
     density: 0,
