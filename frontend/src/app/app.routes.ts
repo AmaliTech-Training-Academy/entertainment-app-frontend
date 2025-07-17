@@ -26,6 +26,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/profile-page/profile-page.component').then(
+            (m) => m.ProfilePageComponent,
+          ),
+      },
+      {
         path: 'advanced-search',
         loadComponent: () =>
           import(

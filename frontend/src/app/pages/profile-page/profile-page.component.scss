@@ -1,0 +1,106 @@
+@use '../../../styles/_variables.scss' as *;
+@use 'sass:map';
+@use '../../../styles/_typo.scss' as *;
+:host {
+  display: block;
+  background: map.get($primary-colors, 1000);
+  min-height: 100vh;
+  color: map.get($neutral-colors, 100);
+}
+
+// .profile-header {
+//   display: flex;
+//   justify-content: flex-end;
+//   padding: 1.5rem 1.5rem 0 0;
+// }
+
+.profile-title-group {
+    margin-top: 30px;
+  padding: 0 1.5rem 1rem 1.5rem;
+  text-align: left;
+}
+
+.profile-title {
+  @extend .heading-1;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.profile-subtitle {
+  @extend .sub-heading;
+  color: map.get($neutral-colors, 100);
+  font-weight: 400;
+}
+
+.profile-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0 1rem 2rem 1rem;
+}
+
+.profile-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: map.get($primary-colors, 700);
+  color: map.get($neutral-colors, 100);
+  border: none;
+  border-radius: 10px;
+  padding: 1.25rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  text-align: left;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  gap: 1rem;
+}
+
+// .profile-option:hover,
+// .profile-option:focus {
+//   background: map-get($primary-colors, 600);
+// }
+
+.icon-arrow {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+  svg {
+    stroke: map.get($neutral-colors, 100);
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+.icon-left {
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+  svg {
+    stroke: map.get($neutral-colors, 100);
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+// Desktop styles
+@media (min-width: 768px) {
+  .profile-header {
+    justify-content: flex-end;
+    padding: 2rem 2rem 0 0;
+  }
+  .profile-title-group {
+    padding: 0 2rem 1.5rem 2rem;
+  }
+  .profile-options {
+    padding: 0 2rem 2rem 2rem;
+    gap: 1.25rem;
+  }
+  .profile-option {
+    font-size: 1.1rem;
+    padding: 1.5rem 1.25rem;
+  }
+}
