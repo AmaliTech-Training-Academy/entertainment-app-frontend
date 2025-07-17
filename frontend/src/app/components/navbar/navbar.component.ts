@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener } from '@angular/core';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 
 interface SearchMovie {
   rank: number;
@@ -13,20 +14,58 @@ interface SearchMovie {
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule, ButtonComponent, AvatarComponent],
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.scss']
+  styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent {
   searchQuery = '';
   showDropdown = false;
   searchResults: SearchMovie[] = [
-    // Example data; replace with real search results
-    { rank: 1, image: 'assets/images/cineverse_logo.svg', alt: 'Beyond Earth', year: 1995 },
-    { rank: 2, image: 'assets/images/cineverse_logo.svg', alt: 'Beyond Earth', year: 1995 }
+    {
+      rank: 1,
+      image: 'assets/images/cineverse_logo.svg',
+      alt: 'Beyond Earth',
+      year: 1995,
+    },
+    {
+      rank: 2,
+      image: 'assets/images/cineverse_logo.svg',
+      alt: 'Beyond Earth',
+      year: 1995,
+    },
   ];
+  isAuthenticated = false;
+  user: { email: string; name: string; avatar: string } | null = null;
+  showUserDropdown = false;
 
-  constructor(private router: Router, private eRef: ElementRef) {}
+  constructor(
+    private router: Router,
+    private eRef: ElementRef,
+  ) {}
+
+  ngOnInit() {
+    this.checkAuth();
+  }
+
+  checkAuth() {
+    const token = localStorage.getItem('auth_token');
+    const user = localStorage.getItem('auth_user');
+    this.isAuthenticated = !!token && !!user;
+    this.user = user ? JSON.parse(user) : null;
+  }
+
+  toggleUserDropdown() {
+    this.showUserDropdown = !this.showUserDropdown;
+  }
+
+  logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    this.isAuthenticated = false;
+    this.user = null;
+    this.router.navigate(['/login']);
+  }
 
   onSearchFocus() {
     this.showDropdown = true;
@@ -34,7 +73,7 @@ export class NavbarComponent {
 
   onSearchBlur() {
     // Delay to allow click events on dropdown
-    setTimeout(() => this.showDropdown = false, 150);
+    setTimeout(() => (this.showDropdown = false), 150);
   }
 
   onSearchInput(event: Event) {
@@ -49,10 +88,19 @@ export class NavbarComponent {
     this.router.navigate(['/advanced-search']);
   }
 
+  goToLogin() {
+    this.router.navigate(['/login']);
+  }
+
+  goToSignUp() {
+    this.router.navigate(['/signup']);
+  }
+
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: Event) {
     if (!this.eRef.nativeElement.contains(event.target)) {
       this.showDropdown = false;
+      this.showUserDropdown = false;
     }
   }
-} 
+}

@@ -1,5 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
-@use '../src/styles/reset' as *;
-@use '../src/styles/variables' as *;
-@use '../src/styles/button' as *;
-@use '../src/styles/radius' as *;
+@use "../src/styles/reset" as *;
+@use "../src/styles/variables" as *;
+@use "../src/styles/button" as *;
+@use "../src/styles/radius" as *;
+
+.success-snackbar {
+  background-color: #43a047 !important; /* green */
+  color: #fff !important;
+}
+
+.error-snackbar {
+  background-color: #e53935 !important; /* red */
+  color: #fff !important;
+}

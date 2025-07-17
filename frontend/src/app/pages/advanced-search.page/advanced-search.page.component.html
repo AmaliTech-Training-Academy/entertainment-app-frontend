@@ -1,15 +1,28 @@
 <div class="app-container">
   <main class="main-content">
     <form class="search-section">
-      <app-advanced-search></app-advanced-search>
+      <app-advanced-search (search)="onSearch($event)"></app-advanced-search>
     </form>
 
     <section class="trending-section">
-      <h3 class="section-title">Trending Now</h3>
+      <h3 class="section-title">
+        {{ searchQuery ? "Search Results" : "Trending Now" }}
+      </h3>
+
       <!-- pagination -->
-      <div class="movies-grid">
+
+      <!-- Empty State -->
+      <div *ngIf="filteredMovies.length === 0" class="empty-state">
+        <h3 class="empty-title">No Results Found For::</h3>
+        <p class="empty-message">{{ searchQuery }}</p>
+        <button mat-raised-button color="primary" (click)="resetFilters()">
+          Reset Filters
+        </button>
+      </div>
+
+      <div *ngIf="filteredMovies.length > 0" class="movies-grid">
         <app-movie-card
-          *ngFor="let movie of trendingMovies"
+          *ngFor="let movie of filteredMovies"
           [movie]="movie"
         ></app-movie-card>
       </div>

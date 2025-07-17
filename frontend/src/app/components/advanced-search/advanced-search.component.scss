@@ -8,131 +8,229 @@
 @use "sass:map";
 
 .container {
-  max-width: 768px;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
   margin: 0 auto;
-  display: flex;
-  gap: spacing(3);
-  align-items: center;
-  justify-content: center;
-  padding: spacing(4);
+  flex-wrap: nowrap;
+  gap: map.get($spacing, 3);
 
-  mat-form-field {
+  .search-field {
     flex-grow: 1;
-    height: 48px;
-    .mat-mdc-text-field-wrapper {
-      background-color: map.get($primary-colors, 400);
+    height: 0.4em;
+
+    .search-input {
+      padding-top: map.get($spacing, 2);
+      padding-bottom: map.get($spacing, 2);
       border-radius: map.get($radius, 2);
-    }
-
-    .mat-mdc-form-field-infix {
-      padding-top: spacing(2);
-      padding-bottom: spacing(2);
-      height: 48px;
-    }
-
-    .mat-mdc-input-element {
-      border-radius: map.get($radius, 2);
-      height: 48px;
-
+      background-color: map.get($primary-colors, 800);
+      height: 3rem;
       @include typography(body, b1);
       color: map.get($neutral-colors, 100);
-      padding: spacing(2);
-
+      padding: map.get($spacing, 2);
+      border: none;
+      width: 100%;
       &::placeholder {
-        color: map.get($neutral-colors, 300);
-      }
-    }
-
-    .mat-mdc-form-field-label {
-      @include typography(body, b1);
-      color: map.get($neutral-colors, 100);
-    }
-  }
-
-  .search-button {
-    &.mat-mdc-raised-button {
-      @include typography(body, b1);
-      height: 48px;
-      padding: 0 spacing(6);
-      background-color: map.get($secondary-colors, 200);
-      color: map.get($neutral-colors, 100);
-      border-radius: map.get($radius, 4);
-      box-shadow: map.get($effects, E0);
-
-      &:hover {
-        background-color: map.get($secondary-colors, 400);
-      }
-
-      .mat-icon {
-        margin-right: spacing(2);
+        color: map.get($neutral-colors, 700);
       }
     }
   }
-}
 
-.container {
-  max-width: 960px;
-  margin: 24px auto;
-  padding: 0 16px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px 48px;
-}
+  // .search-button {
+  //   display: flex;
+  //   justify-content: space-between;
+  //   align-items: center;
+  //   flex-shrink: 1;
+  //   position: relative;
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+  //   div {
+  //     order: 1;
+  //     @include typography(heading, hh5);
+  //     color: map.get($neutral-colors, 100);
+  //     margin-right: map.get($spacing, 2);
+  //   }
 
-.filter-label {
-  font-weight: 400;
-}
+  //   // &.mat-mdc-raised-button {
+  //   @include typography(body, b1);
+  //   height: 48px;
+  //   width: 20%;
+  //   padding: 0 map.get($spacing, 6);
+  //   background-color: map.get($secondary-colors, 200);
+  //   color: map.get($neutral-colors, 100);
+  //   border-radius: map.get($radius, 4);
+  //   box-shadow: map.get($effects, E0);
 
-.filter-button {
-  width: 80px;
-  height: 36px;
-  background-color: #2c3a5d !important;
-  color: white !important;
-  font-size: 14px;
-  font-weight: 400;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 8px;
+  //   &:hover {
+  //     background-color: map.get($secondary-colors, 400);
+  //   }
 
-  mat-icon {
-    font-size: 18px;
-    margin-left: 6px;
-    color: white;
-  }
+  //   img {
+  //     order: 2;
+  //   }
+
+  //   @media (max-width: 640px) {
+  //     @include typography(body, b1);
+  //   }
+  //   // }
+  // }
 }
 
 .search-container {
-  max-width: 960px;
+  max-width: 45rem;
+  width: 100%;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 map.get($spacing, 4);
+
+  .container {
+    margin-bottom: map.get($spacing, 3);
+  }
 }
 
 .filters-container {
-  display: flex;
-  max-width: 960px;
-  margin: 0;
-  padding: 0;
-  align-items: start;
-  justify-content: start;
-  flex-wrap: wrap;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 map.get($spacing, 4);
+
+  .container {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+
+      .filter-label {
+        font-weight: 400;
+        @include typography(body, b2);
+        color: map.get($neutral-colors, 400);
+        margin-bottom: map.get($spacing, 3);
+      }
+
+      .filter-button {
+        display: flex;
+        align-items: center;
+        padding: map.get($spacing, 2);
+        justify-content: space-between;
+        gap: map.get($spacing, 1);
+        max-width: 100%;
+        width: 70px;
+        background-color: map.get($primary-colors, 800);
+        color: map.get($neutral-colors, 100);
+        border-radius: map.get($radius, 2);
+        @include typography(body, b1);
+        white-space: nowrap;
+
+        span {
+          order: 1;
+        }
+
+        mat-icon {
+          order: 2;
+          transition: transform 0.2s ease;
+        }
+
+        &[aria-expanded="true"] mat-icon {
+          transform: rotate(180deg);
+        }
+
+        @media screen and (max-width: 464px) {
+          width: 3rem;
+          @include typography(body, b2);
+        }
+
+        @media screen and (max-width: 432px) {
+          width: 2.6rem;
+          @include typography(body, b3);
+        }
+
+        @media screen and (max-width: 420px) {
+          width: 2rem;
+          // @include typography(body, b4);
+        }
+
+        @media screen and (max-width: 390px) {
+          width: 1.8rem;
+          // @include typography(body, b5);
+        }
+      }
+    }
+  }
 }
 
-@media (max-width: 600px) {
-  .container {
-    gap: 16px 24px;
+/* Dropdown menu styles (same for all screens) */
+::ng-deep .mat-mdc-menu-panel {
+  background-color: map.get($primary-colors, 800) !important;
+  max-height: 300px;
+  overflow-y: auto;
+
+  .mat-mdc-menu-item {
+    color: map.get($neutral-colors, 100);
+
+    &:hover {
+      background-color: map.get($primary-colors, 700) !important;
+    }
+  }
+}
+
+// dey  play
+
+.search-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; // Space between text and icon
+  min-width: 120px;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 4px;
+  background-color: #f44343; // Your red color
+  color: white;
+  font-size: 16px;
+  font-weight: normal; // Not bold
+  border: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden; // Keeps content contained
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #e03e3e; // Darker red on hover
   }
 
-  .filter-button {
-    width: 72px;
-    height: 32px;
-    font-size: 13px;
+  div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0; // Prevents icon from shrinking
+  }
+
+  @media (max-width: 640px) {
+    padding: 0 12px;
+    min-width: 100px;
+    gap: 6px;
+
+    img {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  @media (max-width: 440px) {
+    height: 40px;
+    font-size: 14px;
+
+    img {
+      width: 16px;
+      height: 16px;
+    }
   }
 }

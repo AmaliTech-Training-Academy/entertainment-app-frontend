@@ -9,7 +9,13 @@
       <h1 class="detail-header-title">Breaking Bad</h1>
       <h6 class="detail-header-subtitle">Plot Summary</h6>
       <p class="detail-header-content">
-        Walter White, a high school chemistry teacher who, after being diagnosed with terminal lung cancer, partners with a former student, Jesse Pinkman, to manufacture and sell methamphetamine. Driven by a need to provide for his family after his death, Walter transforms from a mild-mannered teacher into a ruthless drug kingpin known as Heisenberg, navigating the dangerous criminal underworld while battling his illness and internal conflicts.
+        Walter White, a high school chemistry teacher who, after being diagnosed
+        with terminal lung cancer, partners with a former student, Jesse
+        Pinkman, to manufacture and sell methamphetamine. Driven by a need to
+        provide for his family after his death, Walter transforms from a
+        mild-mannered teacher into a ruthless drug kingpin known as Heisenberg,
+        navigating the dangerous criminal underworld while battling his illness
+        and internal conflicts.
       </p>
     </div>
   </div>
@@ -17,13 +23,16 @@
   <div class="movie-screenshot-section">
     <h2 class="screenshots-section-title">Movies Screenshot</h2>
     <div class="screenshots-list">
-      <app-screen-shot *ngFor="let img of screenshots" [imageUrl]="img"></app-screen-shot>
+      <app-screen-shot
+        *ngFor="let img of screenshots"
+        [imageUrl]="img"
+      ></app-screen-shot>
     </div>
   </div>
 
   <div class="detail-content-section">
     <div class="comments-section">
-      <h3 class="comments-title">{{ comments.length }} comments</h3>
+      <h4>{{ comments.length }} comments</h4>
       <div class="comments-list">
         <app-comment-card
           *ngFor="let comment of comments"
@@ -33,17 +42,42 @@
           [description]="comment.text"
         ></app-comment-card>
       </div>
-      <button class="custom-leave-comment-btn">
-        Login to leave a comment
-      </button>
+
+      <ng-container *ngIf="!isLoggedIn; else commentInput">
+        <button class="custom-leave-comment-btn" (click)="login()">
+          Login to leave a comment
+        </button>
+      </ng-container>
+      <ng-template #commentInput>
+        <div class="comment-input-card">
+          <img [src]="user.avatar" alt="User avatar" class="avatar" />
+          <input
+            [(ngModel)]="commentText"
+            type="text"
+            placeholder="Write a comment..."
+          />
+          <div class="input-actions">
+            <button mat-icon-button class="cancel-btn" (click)="cancelComment()">
+              <mat-icon>cancel</mat-icon>
+            </button>
+            <button mat-icon-button class="submit-btn" (click)="submitComment()">
+              <mat-icon>check_circle</mat-icon>
+            </button>
+          </div>
+        </div>
+      </ng-template>
     </div>
 
     <div class="side-section">
       <div class="director-section">
-        <h3 class="comments-title">Director</h3>
+        <h4>Director</h4>
    
         <div class="director-card">
-          <img src="https://randomuser.me/api/portraits/men/2.jpg" alt="Vince Gilligan" class="director-avatar" />
+          <img
+            src="https://randomuser.me/api/portraits/men/2.jpg"
+            alt="Vince Gilligan"
+            class="director-avatar"
+          />
           <span class="director-name">Vince Gilligan</span>
         </div>
       </div>
@@ -68,6 +102,4 @@
       </div>
     </div>
   </div>
-
-</div> 
-<app-footer></app-footer>
+</div>

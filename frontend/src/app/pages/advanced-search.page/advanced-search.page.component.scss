@@ -63,7 +63,7 @@
       background-color: map.get($neutral-colors, 900);
       border-radius: map.get(radius.$radius, 2);
       padding: 0.5rem 0.75rem;
-      max-width: 400px;
+      // max-width: 400px;
       width: 100%;
 
       .search-icon {
@@ -128,7 +128,6 @@
   padding: 0 1.5rem;
 
   .search-section {
-    max-width: 900px;
     width: 100%;
     margin-top: 2rem;
 
@@ -210,7 +209,6 @@
     .filters-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem 1.5rem;
       margin-top: 1.5rem;
       max-width: 900px;
       width: 100%;
@@ -266,6 +264,10 @@
 
     .section-title {
       color: map.get($neutral-colors, 100);
+      @include mixins.typography(heading, h1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-weight: 700;
       font-size: 1.25rem;
       margin-bottom: 1rem;
@@ -289,59 +291,47 @@
   }
 }
 
-.footer {
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  color: map.get($neutral-colors, 300);
-  font-size: 0.875rem;
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: spacing(8);
+  margin: spacing(4) 0;
+  background-color: rgba(map.get($neutral-colors, 800), 0.5);
+  border-radius: map.get(radius.$radius, 4);
 
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .footer-column {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-
-    p {
-      cursor: pointer;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-
-  .footer-copyright {
-    grid-column: span 2;
-    margin-top: 2rem;
-    text-align: center;
-    font-size: 0.75rem;
+  .empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: spacing(3);
     color: map.get($neutral-colors, 400);
-    user-select: none;
-
-    @media (min-width: 640px) {
-      grid-column: span 4;
-    }
-
-    .recaptcha-notice {
-      max-width: 400px;
-      margin: 0.5rem auto 0;
-
-      a {
-        color: inherit;
-        text-decoration: underline;
-
-        &:hover {
-          color: map.get($neutral-colors, 100);
-        }
-      }
-    }
   }
+
+  .empty-title {
+    @include mixins.typography(heading, h4);
+    color: map.get($neutral-colors, 100);
+    margin-bottom: spacing(1);
+  }
+
+  .empty-message {
+    @include mixins.typography(body, b1);
+    color: map.get($neutral-colors, 300);
+    margin-bottom: spacing(3);
+  }
+
+  button {
+    margin-top: spacing(2);
+  }
+}
+
+.empty-state,
+.movies-grid {
+  transition: opacity 0.3s ease;
+}
+
+.movies-grid:empty + .empty-state {
+  display: flex;
 }

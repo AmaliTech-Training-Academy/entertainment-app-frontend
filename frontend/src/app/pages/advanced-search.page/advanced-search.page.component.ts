@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,14 +27,27 @@ import { MovieCardComponent } from '../../components/movie-card/movie-card.compo
   templateUrl: './advanced-search.page.component.html',
   styleUrl: './advanced-search.page.component.scss',
 })
-export class AdvancedSearchPageComponent {
+export class AdvancedSearchPageComponent implements OnInit {
   constructor() {}
+  filteredMovies: Array<{
+    title: string;
+    year: string;
+    type: string;
+    rating: string;
+    genres: string[];
+    imageUrl: string;
+    isBookmarked: boolean;
+  }> = [];
+
+  ngOnInit(): void {
+    this.filteredMovies = this.allMovies;
+  }
   searchQuery = '';
   currentPage = 1;
   totalPages = 7;
 
   // Mock data for movies
-  trendingMovies = [
+  allMovies = [
     {
       title: 'Beyond Earth',
       year: '2019',
@@ -50,8 +63,7 @@ export class AdvancedSearchPageComponent {
       type: 'Movie',
       rating: '6/10',
       genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl:
-        'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+      imageUrl: '../../../assets/images/movie.png',
       isBookmarked: false,
     },
     {
@@ -60,8 +72,7 @@ export class AdvancedSearchPageComponent {
       type: 'Series',
       rating: '8/10',
       genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl:
-        'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+      imageUrl: '../../../assets/images/movie.png',
       isBookmarked: false,
     },
     {
@@ -70,8 +81,7 @@ export class AdvancedSearchPageComponent {
       type: 'Movie',
       rating: '9/10',
       genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl:
-        'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+      imageUrl: '../../../assets/images/movie.png',
       isBookmarked: false,
     },
     {
@@ -80,8 +90,7 @@ export class AdvancedSearchPageComponent {
       type: 'Movie',
       rating: '6/10',
       genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl:
-        'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+      imageUrl: '../../../assets/images/movie.png',
       isBookmarked: false,
     },
     {
@@ -90,8 +99,7 @@ export class AdvancedSearchPageComponent {
       type: 'Series',
       rating: '8/10',
       genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl:
-        'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+      imageUrl: '../../../assets/images/movie.png',
       isBookmarked: false,
     },
   ];
@@ -111,11 +119,42 @@ export class AdvancedSearchPageComponent {
 
   onPageChange(page: number) {
     this.currentPage = page;
-    // In a real app, you would fetch data for the new page here
+    // fetch data for the new page here
   }
 
-  search() {
-    // In a real app, you would perform the search here
-    console.log('Searching for:', this.searchQuery);
+  onSearch(event: { query: string; filters: any }) {
+    if (!this.allMovies || this.allMovies.length === 0) return;
+
+    this.filteredMovies = this.allMovies.filter((movie) => {
+      const matchesQuery =
+        !event.query ||
+        movie.title.toLowerCase().includes(event.query.toLowerCase()) ||
+        movie.year.includes(event.query);
+
+      const matchesType =
+        event.filters.type === 'All' || movie.type === event.filters.type;
+      const matchesGenre =
+        event.filters.genre === 'All' ||
+        movie.genres.includes(event.filters.genre);
+      const matchesRating =
+        event.filters.rating === 'All' || movie.rating === event.filters.rating;
+      const matchesYear =
+        event.filters.year === 'All' || movie.year === event.filters.year;
+
+      return (
+        matchesQuery &&
+        matchesType &&
+        matchesGenre &&
+        matchesRating &&
+        matchesYear
+      );
+    });
+  }
+
+  resetFilters() {
+    this.filteredMovies = [...this.allMovies];
+    // If you need to reset the search component's state:
+    // You'll need to use @ViewChild to access the child component
+    // or emit an event from the child when reset is clicked
   }
 }
