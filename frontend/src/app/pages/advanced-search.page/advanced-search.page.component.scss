@@ -269,7 +269,7 @@
       align-items: center;
       justify-content: center;
       font-weight: 700;
-      font-size: 1.25rem;
+      font-size: 1.7rem;
       margin-bottom: 1rem;
       text-align: center;
 
@@ -308,9 +308,10 @@
 
   .empty-title {
     @include mixins.typography(heading, h5);
-    color: map.get($neutral-colors, 100);
+    color: map.get($neutral-colors, 300);
     margin-bottom: 3rem;
-    background-color: map.get($secondary-colors, 200);
+    margin-top: 3rem;
+    background-color: map.get($primary-colors, 800);
     padding: 1rem;
     border-radius: map.get(radius.$radius, 1);
   }
