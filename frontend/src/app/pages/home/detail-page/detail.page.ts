@@ -6,6 +6,7 @@ import { ScreenShotComponent } from '../../../shared/components/screen-shot/scre
 import { CommentCardComponent } from '../../../shared/components/comment-card/comment-card.component';
 import { TopCastCardComponent } from '../../../shared/top-cast-card/top-cast-card.component';
 import { RatingCardComponent } from '../../../shared/components/rating-card/rating-card.component';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-detail-page',
@@ -17,6 +18,7 @@ import { RatingCardComponent } from '../../../shared/components/rating-card/rati
     CommentCardComponent,
     TopCastCardComponent,
     RatingCardComponent,
+    MatIconModule
   ],
   templateUrl: './detail.page.html',
   styleUrls: ['./detail.page.scss'],
@@ -70,4 +72,8 @@ export class DetailPage implements OnInit {
       this.commentText = '';
     }
   }
-}
+
+  cancelComment() {
+    this.commentText = '';
+  }
+} 

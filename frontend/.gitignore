@@ -1,5 +1,3 @@
-node_modules
-# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 # Compiled output
 /dist
 /tmp
@@ -54,5 +52,9 @@ Thumbs.db
 crash.log
 crash.*.log
 # CLI configuration files
+<<<<<<< HEAD
 .terraformrc
 terraform.rc
+=======
+.terraformrc
+>>>>>>> a3bcb26b13c23adae40ae385cbfd0a67cd59e032
