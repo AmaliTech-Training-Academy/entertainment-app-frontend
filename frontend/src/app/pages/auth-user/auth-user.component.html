@@ -1,5 +1,18 @@
 <main>
-    <app-hero-carousel></app-hero-carousel>
-    <app-trending-movie-card></app-trending-movie-card>
-    <app-recommendation></app-recommendation>
+  <app-hero-carousel></app-hero-carousel>
+
+  <h2>Trending Now</h2>
+  <section class="trending-grid">
+    <app-trending-movie-card
+      *ngFor="let movie of visibleTrendingMovies"
+      [rank]="movie.rank"
+      [image]="movie.image"
+      [alt]="movie.alt"
+    ></app-trending-movie-card>
+  </section>
+
+  <app-recommendation></app-recommendation>
+  <div class="footer">
+    <app-footer></app-footer>
+  </div>
 </main>

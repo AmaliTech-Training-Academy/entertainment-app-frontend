@@ -42,13 +42,13 @@ export const routes: Routes = [
       // Add other main routes here
     ],
   },
-  // {
-  //   path: 'auth-user',
-  //   loadComponent: () =>
-  //     import('./pages/auth-user/auth-user.component').then(
-  //       (m) => m.AuthUserComponent,
-  //     ),
-  // },
+  {
+    path: 'user',
+    loadComponent: () =>
+      import('./pages/auth-user/auth-user.component').then(
+        (m) => m.AuthUserComponent,
+      ),
+  },
   {
     path: 'recommendation',
     loadComponent: () =>
