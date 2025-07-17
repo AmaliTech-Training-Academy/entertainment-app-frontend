@@ -7,7 +7,7 @@ describe('DetailPage', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DetailPage]
+      imports: [DetailPage],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DetailPage);
@@ -18,4 +18,4 @@ describe('DetailPage', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-}); 
+});

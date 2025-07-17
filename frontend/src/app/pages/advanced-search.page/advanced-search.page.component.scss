@@ -63,7 +63,7 @@
       background-color: map.get($neutral-colors, 900);
       border-radius: map.get(radius.$radius, 2);
       padding: 0.5rem 0.75rem;
-      max-width: 400px;
+      // max-width: 400px;
       width: 100%;
 
       .search-icon {
@@ -128,7 +128,6 @@
   padding: 0 1.5rem;
 
   .search-section {
-    max-width: 900px;
     width: 100%;
     margin-top: 2rem;
 

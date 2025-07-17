@@ -8,9 +8,8 @@ describe('TopCastCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TopCastCardComponent]
-    })
-    .compileComponents();
+      imports: [TopCastCardComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TopCastCardComponent);
     component = fixture.componentInstance;

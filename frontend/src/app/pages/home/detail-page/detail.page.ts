@@ -16,10 +16,10 @@ import { RatingCardComponent } from '../../../shared/components/rating-card/rati
     ScreenShotComponent,
     CommentCardComponent,
     TopCastCardComponent,
-    RatingCardComponent
+    RatingCardComponent,
   ],
   templateUrl: './detail.page.html',
-  styleUrls: ['./detail.page.scss']
+  styleUrls: ['./detail.page.scss'],
 })
 export class DetailPage implements OnInit {
   screenshots: string[] = [];
@@ -27,7 +27,11 @@ export class DetailPage implements OnInit {
   topCast: any[] = [];
   reviews: any[] = [];
   isLoggedIn = false;
-  user = { id: 1, name: 'John Doe', avatar: 'https://randomuser.me/api/portraits/men/1.jpg' };
+  user = {
+    id: 1,
+    name: 'John Doe',
+    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+  };
   commentText = '';
 
   constructor(private http: HttpClient) {
@@ -35,22 +39,20 @@ export class DetailPage implements OnInit {
   }
 
   ngOnInit() {
-    this.http.get<{ screenshots: string[] }>('screenshots.json')
-      .subscribe(data => {
+    this.http
+      .get<{ screenshots: string[] }>('screenshots.json')
+      .subscribe((data) => {
         this.screenshots = data.screenshots;
       });
-    this.http.get<{ comments: any[] }>('comments.json')
-      .subscribe(data => {
-        this.comments = data.comments;
-      });
-    this.http.get<{ topCast: any[] }>('top-cast.json')
-      .subscribe(data => {
-        this.topCast = data.topCast;
-      });
-    this.http.get<{ reviews: any[] }>('reviews.json')
-      .subscribe(data => {
-        this.reviews = data.reviews;
-      });
+    this.http.get<{ comments: any[] }>('comments.json').subscribe((data) => {
+      this.comments = data.comments;
+    });
+    this.http.get<{ topCast: any[] }>('top-cast.json').subscribe((data) => {
+      this.topCast = data.topCast;
+    });
+    this.http.get<{ reviews: any[] }>('reviews.json').subscribe((data) => {
+      this.reviews = data.reviews;
+    });
   }
 
   login() {
@@ -63,9 +65,9 @@ export class DetailPage implements OnInit {
         avatar: this.user.avatar,
         user: this.user.name,
         date: new Date().toLocaleString(),
-        text: this.commentText
+        text: this.commentText,
       });
       this.commentText = '';
     }
   }
-} 
+}

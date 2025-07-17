@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
 @Component({
   standalone: true,
   selector: 'app-accordion',
-  imports: [ CommonModule ],
+  imports: [CommonModule],
   templateUrl: './accordion.component.html',
   styleUrls: ['./accordion.component.scss'],
 })

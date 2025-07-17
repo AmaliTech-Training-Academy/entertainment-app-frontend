@@ -16,21 +16,33 @@ interface SearchMovie {
   standalone: true,
   imports: [CommonModule, ButtonComponent, AvatarComponent],
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.scss']
+  styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent {
   searchQuery = '';
   showDropdown = false;
   searchResults: SearchMovie[] = [
-    // Example data; replace with real search results
-    { rank: 1, image: 'assets/images/cineverse_logo.svg', alt: 'Beyond Earth', year: 1995 },
-    { rank: 2, image: 'assets/images/cineverse_logo.svg', alt: 'Beyond Earth', year: 1995 }
+    {
+      rank: 1,
+      image: 'assets/images/cineverse_logo.svg',
+      alt: 'Beyond Earth',
+      year: 1995,
+    },
+    {
+      rank: 2,
+      image: 'assets/images/cineverse_logo.svg',
+      alt: 'Beyond Earth',
+      year: 1995,
+    },
   ];
   isAuthenticated = false;
   user: { email: string; name: string; avatar: string } | null = null;
   showUserDropdown = false;
 
-  constructor(private router: Router, private eRef: ElementRef) {}
+  constructor(
+    private router: Router,
+    private eRef: ElementRef,
+  ) {}
 
   ngOnInit() {
     this.checkAuth();
@@ -61,7 +73,7 @@ export class NavbarComponent {
 
   onSearchBlur() {
     // Delay to allow click events on dropdown
-    setTimeout(() => this.showDropdown = false, 150);
+    setTimeout(() => (this.showDropdown = false), 150);
   }
 
   onSearchInput(event: Event) {
@@ -91,4 +103,4 @@ export class NavbarComponent {
       this.showUserDropdown = false;
     }
   }
-} 
+}

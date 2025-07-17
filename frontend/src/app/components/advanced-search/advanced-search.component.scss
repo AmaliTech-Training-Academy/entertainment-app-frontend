@@ -7,76 +7,77 @@
 @use "../../../styles/stroke" as *;
 @use "sass:map";
 
-/* Main container styles */
 .container {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   width: 100%;
-  max-width: 600px; /* Consistent max-width for both containers */
+  max-width: 600px;
   margin: 0 auto;
-  padding: map.get($spacing, 4) map.get($spacing, 3);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: map.get($spacing, 3);
 
-  /* Search field styles */
-  mat-form-field {
+  .search-field {
     flex-grow: 1;
-    min-width: 250px;
     height: 0.4em;
 
-    .mat-mdc-text-field-wrapper {
-      background-color: map.get($primary-colors, 400);
-    }
-
-    .mat-mdc-form-field-infix {
+    .search-input {
       padding-top: map.get($spacing, 2);
       padding-bottom: map.get($spacing, 2);
-    }
-
-    .mat-mdc-input-element {
-      height: 0.4em;
+      border-radius: map.get($radius, 2);
+      background-color: map.get($primary-colors, 800);
+      height: 3rem;
       @include typography(body, b1);
       color: map.get($neutral-colors, 100);
       padding: map.get($spacing, 2);
-
+      border: none;
+      width: 100%;
       &::placeholder {
-        color: map.get($neutral-colors, 300);
-      }
-    }
-
-    .mat-mdc-form-field-label {
-      @include typography(body, b1);
-      color: map.get($neutral-colors, 100);
-    }
-  }
-
-  /* Search button styles */
-  .search-button {
-    align-items: center;
-
-    &.mat-mdc-raised-button {
-      @include typography(body, b1);
-      height: 48px;
-      padding: 0 map.get($spacing, 6);
-      background-color: map.get($secondary-colors, 200);
-      color: map.get($neutral-colors, 100);
-      border-radius: map.get($radius, 4);
-      box-shadow: map.get($effects, E0);
-
-      &:hover {
-        background-color: map.get($secondary-colors, 400);
-      }
-
-      .mat-icon {
-        margin-right: map.get($spacing, 2);
+        color: map.get($neutral-colors, 700);
       }
     }
   }
+
+  // .search-button {
+  //   display: flex;
+  //   justify-content: space-between;
+  //   align-items: center;
+  //   flex-shrink: 1;
+  //   position: relative;
+
+  //   div {
+  //     order: 1;
+  //     @include typography(heading, hh5);
+  //     color: map.get($neutral-colors, 100);
+  //     margin-right: map.get($spacing, 2);
+  //   }
+
+  //   // &.mat-mdc-raised-button {
+  //   @include typography(body, b1);
+  //   height: 48px;
+  //   width: 20%;
+  //   padding: 0 map.get($spacing, 6);
+  //   background-color: map.get($secondary-colors, 200);
+  //   color: map.get($neutral-colors, 100);
+  //   border-radius: map.get($radius, 4);
+  //   box-shadow: map.get($effects, E0);
+
+  //   &:hover {
+  //     background-color: map.get($secondary-colors, 400);
+  //   }
+
+  //   img {
+  //     order: 2;
+  //   }
+
+  //   @media (max-width: 640px) {
+  //     @include typography(body, b1);
+  //   }
+  //   // }
+  // }
 }
 
-/* Search container specific styles */
 .search-container {
-  max-width: 960px;
+  max-width: 45rem;
   width: 100%;
   margin: 0 auto;
   padding: 0 map.get($spacing, 4);
@@ -86,93 +87,150 @@
   }
 }
 
-/* Filters container styles */
 .filters-container {
   width: 100%;
   margin: 0 auto;
   padding: 0 map.get($spacing, 4);
 
   .container {
-    /* Override justify-content for filters */
-    justify-content: center;
-    padding-bottom: map.get($spacing, 3);
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
 
-    /* Filter group styles */
     .filter-group {
       display: flex;
       flex-direction: column;
-      gap: map.get($spacing, 1);
-      align-items: center;
-      flex: 0 1 auto; /* Allow natural width */
-
-      filter-menu {
-        background-color: red;
-      }
 
       .filter-label {
         font-weight: 400;
-        width: 100%;
-        text-align: start;
+        @include typography(body, b2);
+        color: map.get($neutral-colors, 400);
+        margin-bottom: map.get($spacing, 3);
       }
 
       .filter-button {
-        width: 100px; /* Slightly wider for better appearance */
-        height: 36px;
-        background-color: map.get($primary-colors, 800) !important;
-        color: map.get($neutral-colors, 100) !important;
-        @include typography(body, b1);
-        border-radius: map.get($radius, 2);
         display: flex;
-        flex-direction: row;
         align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 0 map.get($spacing, 3);
+        padding: map.get($spacing, 2);
+        justify-content: space-between;
+        gap: map.get($spacing, 1);
+        max-width: 100%;
+        width: 70px;
+        background-color: map.get($primary-colors, 800);
+        color: map.get($neutral-colors, 100);
+        border-radius: map.get($radius, 2);
+        @include typography(body, b1);
+        white-space: nowrap;
+
+        span {
+          order: 1;
+        }
 
         mat-icon {
-          font-size: 18px;
-          margin-left: map.get($spacing, 1);
-          color: map.get($neutral-colors, 100);
+          order: 2;
+          transition: transform 0.2s ease;
+        }
+
+        &[aria-expanded="true"] mat-icon {
+          transform: rotate(180deg);
+        }
+
+        @media screen and (max-width: 464px) {
+          width: 3rem;
+          @include typography(body, b2);
+        }
+
+        @media screen and (max-width: 432px) {
+          width: 2.6rem;
+          @include typography(body, b3);
+        }
+
+        @media screen and (max-width: 420px) {
+          width: 2rem;
+          // @include typography(body, b4);
+        }
+
+        @media screen and (max-width: 390px) {
+          width: 1.8rem;
+          // @include typography(body, b5);
         }
       }
     }
   }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .container {
-    padding: map.get($spacing, 3);
-  }
+/* Dropdown menu styles (same for all screens) */
+::ng-deep .mat-mdc-menu-panel {
+  background-color: map.get($primary-colors, 800) !important;
+  max-height: 300px;
+  overflow-y: auto;
 
-  .filters-container .container {
-    .filter-group {
-      flex: 1 1 40%; /* Two columns on medium screens */
-      max-width: 140px;
+  .mat-mdc-menu-item {
+    color: map.get($neutral-colors, 100);
+
+    &:hover {
+      background-color: map.get($primary-colors, 700) !important;
     }
   }
 }
 
-@media (max-width: 600px) {
-  .container {
-    gap: map.get($spacing, 2) map.get($spacing, 3);
-    flex-direction: column;
-    align-items: stretch;
+// dey  play
 
-    mat-form-field {
-      min-width: 100%;
+.search-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; // Space between text and icon
+  min-width: 120px;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 4px;
+  background-color: #f44343; // Your red color
+  color: white;
+  font-size: 16px;
+  font-weight: normal; // Not bold
+  border: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden; // Keeps content contained
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #e03e3e; // Darker red on hover
+  }
+
+  div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0; // Prevents icon from shrinking
+  }
+
+  @media (max-width: 640px) {
+    padding: 0 12px;
+    min-width: 100px;
+    gap: 6px;
+
+    img {
+      width: 18px;
+      height: 18px;
     }
   }
 
-  .filters-container .container {
-    .filter-group {
-      flex: 1 1 100%; /* Full width on small screens */
-      max-width: 100%;
+  @media (max-width: 440px) {
+    height: 40px;
+    font-size: 14px;
 
-      .filter-button {
-        width: 100%;
-        justify-content: center;
-      }
+    img {
+      width: 16px;
+      height: 16px;
     }
   }
 }
