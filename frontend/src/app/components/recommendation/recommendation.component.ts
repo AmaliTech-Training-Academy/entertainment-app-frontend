@@ -1,17 +1,16 @@
 import { Component } from '@angular/core';
-import { NavbarComponent } from "../../components/navbar/navbar.component";
-import { MovieCardComponent } from "../../components/movie-card/movie-card.component";
+import { MovieCardComponent } from "../movie-card/movie-card.component";
 import { CommonModule } from '@angular/common';
-import { FooterComponent } from '../../features/footer/footer.component';
+
 
 @Component({
   selector: 'app-recommendation-page',
   standalone: true,
-  imports: [NavbarComponent, MovieCardComponent, CommonModule, FooterComponent],
-  templateUrl: './recommendation-page.component.html',
-  styleUrl: './recommendation-page.component.scss'
+  imports: [ MovieCardComponent, CommonModule ],
+  templateUrl: './recommendation.component.html',
+  styleUrl: './recommendation.component.scss'
 })
-export class RecommendationPageComponent {
+export class RecommendationComponent {
   movies = [
     {
       title: 'The Great Lands',

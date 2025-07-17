@@ -43,8 +43,8 @@ export const routes: Routes = [
   {
     path: 'recommendation',
     loadComponent: () =>
-      import('./pages/recommendation-page/recommendation-page.component').then(
-        (m) => m.RecommendationPageComponent
+      import('./components/recommendation/recommendation.component').then(
+        (m) => m.RecommendationComponent
       ),
   },
   {
