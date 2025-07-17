@@ -1,7 +1,16 @@
 <div class="admin-layout">
-  <app-sidebar></app-sidebar>
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="logo">AdminPanel</div>
+    <img class="avatar" src="assets/images/avatar.jpg" alt="Avatar" />
+  </header>
 
-  <main class="admin-main">
-    <router-outlet></router-outlet>
-  </main>
+  <!-- Layout container -->
+  <div class="admin-body">
+    <app-sidebar></app-sidebar>
+
+    <main class="admin-main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>
