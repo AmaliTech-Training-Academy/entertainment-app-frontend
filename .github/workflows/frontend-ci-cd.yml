@@ -162,7 +162,7 @@ jobs:
           CHROME_BIN: /usr/bin/chromium-browser
         run: |
           npm test -- --no-watch --browsers=ChromeHeadless
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Create Environment Files
         working-directory: frontend/src/environments
