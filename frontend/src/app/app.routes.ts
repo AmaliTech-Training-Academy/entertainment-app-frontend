@@ -21,7 +21,7 @@ export const routes: Routes = [
       {
         path: 'movie/:id',
         loadComponent: () =>
-          import('./pages/home/detail-page/detail.page').then(
+          import('./pages/detail-page/detail.page').then(
             (m) => m.DetailPage,
           ),
       },
