@@ -32,7 +32,7 @@
 
   <div class="detail-content-section">
     <div class="comments-section">
-      <h3 class="comments-title">{{ comments.length }} comments</h3>
+      <h4>{{ comments.length }} comments</h4>
       <div class="comments-list">
         <app-comment-card
           *ngFor="let comment of comments"
@@ -56,15 +56,22 @@
             type="text"
             placeholder="Write a comment..."
           />
-          <button (click)="submitComment()">Submit</button>
+          <div class="input-actions">
+            <button mat-icon-button class="cancel-btn" (click)="cancelComment()">
+              <mat-icon>cancel</mat-icon>
+            </button>
+            <button mat-icon-button class="submit-btn" (click)="submitComment()">
+              <mat-icon>check_circle</mat-icon>
+            </button>
+          </div>
         </div>
       </ng-template>
     </div>
 
     <div class="side-section">
       <div class="director-section">
-        <h3 class="comments-title">Director</h3>
-
+        <h4>Director</h4>
+   
         <div class="director-card">
           <img
             src="https://randomuser.me/api/portraits/men/2.jpg"

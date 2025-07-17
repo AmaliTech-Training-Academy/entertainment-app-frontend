@@ -38,6 +38,7 @@
 
 .detail-header-image {
   height: auto;
+  border-radius: 12px;
   object-fit: cover;
 }
 
@@ -115,11 +116,11 @@
   gap: 13px;
 }
 
-.comments-title {
-  @include mixins.typography(heading, h6);
-  color: map.get($neutral-colors, 100);
-  margin-bottom: 16px;
-}
+// .comments-title {
+//   @include mixins.typography(heading, h6);
+//   color: map.get($neutral-colors, 100);
+//   margin-bottom: 16px;
+// }
 
 .comments-list {
   display: flex;
@@ -283,21 +284,27 @@
   input[type="text"]:focus {
     border: 1.5px solid #fc4747;
   }
-
-  button {
-    background: #fc4747;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 18px;
-    font-weight: 600;
-    font-size: 16px;
+  .input-actions {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+    align-items: center;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: color 0.2s;
   }
-  button:hover {
-    background: #e14c4c;
+
+  .cancel-btn{
+    color: #fc4747;
   }
+  
+  .submit-btn {
+    color: green;
+   
+  }
+  mat-icon {
+    font-size: 25px;
+  }
+  
 }
 
 @media (min-width: 768px) {
@@ -315,10 +322,9 @@
   .detail-header-image {
     width: 620px;
     height: 323px;
-    border: 2px solid #ffffff;
   }
   .detail-header-text {
-    width: 433px;
+    width: 100%;
     height: 322px;
     gap: 29px;
   }
@@ -327,7 +333,6 @@
     height: 24px;
   }
   .detail-header-content {
-    width: 430px;
     height: 216px;
     text-align: left;
     @include mixins.typography(body, b1);
