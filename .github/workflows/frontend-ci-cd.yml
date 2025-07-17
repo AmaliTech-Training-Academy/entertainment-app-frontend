@@ -959,7 +959,8 @@ jobs:
           branch: auto-merge/staging-to-prod-${{ github.run_id }} # Unique branch name for the PR
           base: prod # Target branch for the PR
           delete-branch: true # Delete the temporary branch after merge
-          # Removed: auto-merge: true
+          ignore-paths: |
+            .github/workflows/frontend-ci-cd.yml
 
       - name: Enable Auto-Merge on PR
         # Only run if a PR was successfully created
