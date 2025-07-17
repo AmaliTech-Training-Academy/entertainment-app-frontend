@@ -1,1 +1,1 @@
-const ts ={}  
+const ts = {};

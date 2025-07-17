@@ -18,7 +18,6 @@
 }
 
 .admin-main {
-  
   background-color: color($primary-colors, 1000); // optional
 
   flex: 1;
@@ -38,4 +37,3 @@
   // Prevent scrollbars from flashing on overflow
   overscroll-behavior: contain;
 }
-

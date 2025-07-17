@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-root',
   imports: [CommonModule, RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {
   title = 'entertainment-app-frontend';

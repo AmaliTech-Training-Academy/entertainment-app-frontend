@@ -1,13 +1,13 @@
-@use '../../../../styles/variables' as *;
-@use '../../../../styles/typography' as *;
-@use '../../../../styles/mixins' as mixins;
-@use 'sass:map';
+@use "../../../../styles/variables" as *;
+@use "../../../../styles/typography" as *;
+@use "../../../../styles/mixins" as mixins;
+@use "sass:map";
 
 .comment-card {
   width: 100%;
   // height: 85px;
   padding: 8px;
-  background-color: map.get($primary-colors, 900);  
+  background-color: map.get($primary-colors, 900);
   gap: 13px;
   border-radius: 8px;
   display: flex;
@@ -36,7 +36,7 @@
     align-items: center;
     height: 24px;
     gap: 8px;
-    @include mixins.typography('body', 'b2');
+    @include mixins.typography("body", "b2");
     color: map.get($neutral-colors, 400);
   }
 
@@ -77,12 +77,12 @@
     &__header {
       width: 404px;
       height: 24px;
-      @include mixins.typography('body', 'b2');
+      @include mixins.typography("body", "b2");
     }
     &__description {
       width: 404px;
       height: 72px;
-      @include mixins.typography('body', 'b1');
+      @include mixins.typography("body", "b1");
     }
   }
-} 
+}
