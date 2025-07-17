@@ -1,0 +1,65 @@
+<div class="dashboard-container app-container">
+  <h1 class="dashboard-title">Welcome back, {{ user.name }}!</h1>
+  <p class="dashboard-subtitle">Discover your next favorite movie</p>
+
+  <div class="dashboard-stats">
+    <div class="stat-card">
+      <span class="stat-icon eye"></span>
+      <div class="stat-value">{{ user.moviesWatched }}</div>
+      <div class="stat-label">Movies Watched</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon clock"></span>
+      <div class="stat-value">{{ user.watchTime }}h</div>
+      <div class="stat-label">Watch Time</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon star"></span>
+      <div class="stat-value">{{ user.avgRating }}</div>
+      <div class="stat-label">Avg Rating</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon heart"></span>
+      <div class="stat-value">{{ user.favorites }}</div>
+      <div class="stat-label">Favorites</div>
+    </div>
+  </div>
+
+  <div class="dashboard-section">
+    <div class="dashboard-section-header">
+      <h2>Continue Watching</h2>
+      <a class="view-all" href="#">View All</a>
+    </div>
+    <div class="continue-watching-list">
+      <div class="movie-card" *ngFor="let movie of continueWatching">
+        <div class="movie-image-wrapper">
+          <img [src]="movie.image" [alt]="movie.title" class="movie-image" />
+          <span class="movie-rating">
+            <span class="stat-icon star"></span> {{ movie.rating }}
+          </span>
+        </div>
+        <div class="movie-info">
+          <div class="movie-title">{{ movie.title }}</div>
+          <div class="movie-meta">{{ movie.year }} · {{ movie.genre }}</div>
+          <div class="movie-duration">{{ movie.duration }}</div>
+          <div class="movie-progress">
+            <span class="progress-label">{{ movie.watched }}% watched</span>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" [style.width]="movie.watched + '%'">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-section">
+    <div class="dashboard-section-header">
+      <h2>Trending Now</h2>
+      <a class="view-all" href="#">View All</a>
+    </div>
+    <!-- Trending movies grid placeholder -->
+    <div class="trending-placeholder">Trending movies go here...</div>
+  </div>
+</div> 
