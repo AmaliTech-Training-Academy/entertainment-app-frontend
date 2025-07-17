@@ -1,27 +1,24 @@
 <form (submit)="$event.preventDefault(); emitSearchEvent()">
   <div class="search-container">
     <div class="container">
-      <mat-form-field appearance="outline" floatLabel="always">
-        <mat-label>Search for movies and tv series</mat-label>
+      <div class="search-field">
         <input
-          matInput
           type="text"
           placeholder="Search"
           [formControl]="searchControl"
           aria-label="Search input"
           class="search-input"
         />
-      </mat-form-field>
+      </div>
 
       <button
-        mat-raised-button
         color="primary"
         (click)="emitSearchEvent()"
         aria-label="Search button"
         class="search-button"
       >
-        <span>Search</span>
-        <mat-icon>search</mat-icon>
+        <p>Search</p>
+        <img src="../.././../assets/images/search.png" alt="Search Icon" />
       </button>
     </div>
   </div>
@@ -33,7 +30,7 @@
         <span class="filter-label">Type:</span>
         <button mat-button [matMenuTriggerFor]="typeMenu" class="filter-button">
           <span>{{ selectedFilters.type }}</span>
-          <mat-icon fontIcon="arrow_drop_down"></mat-icon>
+          <mat-icon fontIcon="arrow_drop_down" class="filter-icon"></mat-icon>
         </button>
         <mat-menu #typeMenu="matMenu">
           <button
