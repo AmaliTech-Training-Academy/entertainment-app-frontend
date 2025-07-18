@@ -1,7 +1,7 @@
 environment        = "staging"
 aws_region         = "eu-west-1"
 project_name       = "cineverse"
-domain_name        = "staging.cineverse.com"  # Example staging domain
+domain_name        = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"  # Example staging domain
 enable_waf         = true
 enable_monitoring  = true
 api_endpoint       = "http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"  # Staging API
