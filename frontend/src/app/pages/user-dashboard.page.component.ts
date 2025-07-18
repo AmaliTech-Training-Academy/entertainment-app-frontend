@@ -21,7 +21,7 @@ export class UserDashboardPageComponent {
 
   continueWatching = [
     {
-      title: 'The Dark Knight',
+      title: 'The Dark',
       year: 2008,
       genre: 'Action',
       duration: '2h 32m',
@@ -87,7 +87,7 @@ export class UserDashboardPageComponent {
       isBookmarked: true,
     },
     {
-      title: 'The Dark Knight',
+      title: 'The Dark',
       year: '2008',
       type: 'Movie',
       rating: '9.0/10',

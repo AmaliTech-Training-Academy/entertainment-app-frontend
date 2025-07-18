@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HeroCarouselComponent } from '../../components/hero-carousel/hero-carousel.component';
 import { TrendingMovieCardComponent } from '../../components/trending-movie-card/trending-movie-card.component';
 import { CommonModule } from '@angular/common';
@@ -18,7 +18,7 @@ import { AccordionComponent } from '../../features/accordion/accordion.component
   templateUrl: './home.page.component.html',
   styleUrl: './home.page.component.scss',
 })
-export class HomePage {
+export class HomePage implements OnInit {
   trendingMovies = [
     {
       rank: 1,
@@ -91,6 +91,26 @@ export class HomePage {
         this.currentTrendingStartIndex--;
         this.trendingSlideDirection = '';
       }, 400);
+    }
+  }
+
+  ngOnInit() {
+    console.log('Cookies on home page:', document.cookie);
+    // Parse cookies to get auth_user
+    const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
+      const [key, value] = cookie.trim().split('=');
+      acc[key] = value;
+      return acc;
+    }, {});
+    if (cookies['auth_user']) {
+      try {
+        const user = JSON.parse(decodeURIComponent(cookies['auth_user']));
+        console.log('Logged in user from cookie:', user);
+      } catch (e) {
+        console.log('Failed to parse user from cookie:', e);
+      }
+    } else {
+      console.log('No logged in user found in cookies.');
     }
   }
 }
