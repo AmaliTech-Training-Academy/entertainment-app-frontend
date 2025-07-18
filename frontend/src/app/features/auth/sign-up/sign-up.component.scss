@@ -12,8 +12,11 @@
 }
 
 // ========== BASE LAYOUT ==========
-.register__container {
+.register__main {
   min-height: 100vh;
+}
+
+.register__container {
   background-color: color($primary-colors, 1000);
   display: flex;
   flex-direction: column;
@@ -21,6 +24,17 @@
   padding: space(6);
   animation: fadeIn 0.8s ease-in;
   overflow: hidden;
+}
+
+// ========== BACK BUTTON ==========
+.register__back {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: space(5) space(4);
+  cursor: pointer;
+
+  
 }
 
 // ========== LOGO ==========
@@ -273,5 +287,11 @@
 
   .register__submit {
     font-size: 1rem;
+  }
+
+  .register__back {
+    padding: space(9);
+    gap: 28px;
+    align-items: center;
   }
 }

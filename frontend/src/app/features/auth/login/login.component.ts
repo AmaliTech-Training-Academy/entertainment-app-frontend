@@ -5,6 +5,8 @@ import { MatFormField, MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/login/auth.service';
 
@@ -19,6 +21,7 @@ import { AuthService } from '../../../core/services/login/auth.service';
     RouterModule,
     MatFormField,
     CommonModule,
+      MatSnackBarModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -37,6 +40,7 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private authService: AuthService,
+     private snackBar: MatSnackBar,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],

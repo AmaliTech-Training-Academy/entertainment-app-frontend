@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import {
   FormBuilder,
   FormGroup,
@@ -6,6 +7,7 @@ import {
   ValidationErrors,
   AbstractControl,
   ReactiveFormsModule,
+ 
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,6 +28,7 @@ import { AuthService } from '../../../core/services/sign-up/auth.service';
     MatInputModule,
     MatButtonModule,
     RouterLink,
+     MatSnackBarModule
   ],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.scss',
@@ -71,58 +74,6 @@ export class SignUpComponent {
     }
   }
 
-  // createAccount(): void {
-  //   if (this.registerForm.valid) {
-  //     const formValue = {
-  //       ...this.registerForm.getRawValue(), // includes disabled username field
-  //     };
-
-  //     this.authService.register(formValue).subscribe({
-  //       next: (res) => {
-  //         console.log('Registration successful:', res);
-  //         this.router.navigate(['/admin']);
-  //       },
-  //       error: (err) => {
-  //         console.error('Registration failed:', err);
-  //         if (err.error?.message === 'Email already registered') {
-  //           this.email?.setErrors({ emailTaken: true });
-  //         }
-  //       },
-  //     });
-  //   } else {
-  //     this.registerForm.markAllAsTouched();
-  //   }
-  // }
-
-  //   createAccount(): void {
-  //   if (this.registerForm.valid) {
-  //     const formValue = {
-  //       ...this.registerForm.getRawValue(),
-  //     };
-
-  //     this.authService.register(formValue).subscribe({
-  //       next: (res) => {
-  //         // Save to localStorage
-  //         localStorage.setItem('token', res.token);
-  //         localStorage.setItem('user', JSON.stringify(res.user));
-  //         localStorage.setItem('role', res.user.role);
-  //         console.log('User registered successfully:', res);
-
-  //         // Redirect to home
-  //         this.router.navigate(['/home']);
-  //       },
-  //       error: (err) => {
-  //         console.error('Registration failed:', err);
-  //         if (err.error?.message === 'Email already registered') {
-  //           this.email?.setErrors({ emailTaken: true });
-  //         }
-  //       },
-  //     });
-  //   } else {
-  //     this.registerForm.markAllAsTouched();
-  //   }
-  // }
-
   createAccount(): void {
     this.apiError = null;
     if (this.registerForm.valid) {
@@ -141,18 +92,45 @@ export class SignUpComponent {
           if (res.token) {
             document.cookie = `token=${res.token}; path=/;`;
           }
-          // Optionally store user info in cookies as well if needed
-          // Redirect to home page
+          
+           this.snackBar.open('Account created successfully!', 'Close', {
+    duration: 3000,
+    verticalPosition: 'top',
+    panelClass: ['success-snackbar']
+  });
+
           this.router.navigate(['/login']);
         },
         error: (err) => {
-          this.loading = false;
-          if (err.error?.message) {
-            this.apiError = err.error.message;
-          } else {
-            this.apiError = 'Registration failed. Please try again.';
-          }
-        },
+  this.loading = false;
+  if (err.error?.message) {
+    this.apiError = err.error.message;
+
+    // Check for email taken error
+    if (err.error.message.toLowerCase().includes('email')) {
+      this.snackBar.open('Email already taken ❌', 'Close', {
+        duration: 3000,
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar'],
+      });
+    } else {
+      this.snackBar.open(this.apiError ?? 'An unexpected error occurred.', 'Close', {
+  duration: 3000,
+  verticalPosition: 'top',
+  panelClass: ['error-snackbar'],
+});
+
+    }
+  } else {
+    this.apiError = 'Registration failed. Please try again.';
+    this.snackBar.open(this.apiError, 'Close', {
+      duration: 3000,
+      verticalPosition: 'top',
+      panelClass: ['error-snackbar'],
+    });
+  }
+}
+
       });
     } else {
       this.registerForm.markAllAsTouched();
