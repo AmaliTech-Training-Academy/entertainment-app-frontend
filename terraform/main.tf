@@ -74,6 +74,7 @@ module "cloudfront" {
   price_class              = local.env_config[var.environment].cloudfront_price_class
   waf_web_acl_id           = var.enable_waf ? module.waf[0].web_acl_id : ""
   api_endpoint             = var.api_endpoint
+  alb_domain_name          = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
 
   # api_endpoint             = var.domain_name != "" ? "https://api.${var.domain_name}" : var.api_endpoint
 
