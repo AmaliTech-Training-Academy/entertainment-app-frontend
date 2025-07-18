@@ -1,5 +1,6 @@
 .dashboard-container {
-  margin-top: 8rem;
+  margin-top: 2rem;
+  padding: 1rem;
  
 }
 
@@ -16,10 +17,14 @@
 
 .dashboard-stats {
   display: grid;
-  grid-template-columns: repeat(3,1fr);
+  grid-template-columns: 1fr;
   gap: 2rem;
   margin-bottom: 2.5rem;
   flex-wrap: wrap;
+
+  @media(min-width:768px){
+    grid-template-columns: repeat(3,1fr);
+  }
 }
 
 .stat-card {
@@ -30,8 +35,6 @@
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.06);
   padding: 1rem 1.5rem;
-  min-width: 320px;
-  max-width: 400px;
   gap: 1rem;
 }
 
@@ -226,8 +229,8 @@
 }
 
 .trending-section__list {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
   gap: 2rem;
   padding: 0 1rem 2rem 1rem;
   align-items: flex-end;
@@ -282,7 +285,7 @@
 
 .favorite-list--grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.5rem;
   width: 100%;
   box-sizing: border-box;
@@ -317,5 +320,61 @@
   .continue-watching-list {
     flex-direction: column;
     gap: 1rem;
+  }
+} 
+@media (max-width: 600px) {
+  .trending-section__carousel {
+    gap: 0;
+  }
+  .trending-section__arrow {
+    display: none;
+  }
+  .trending-section__list {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 1rem;
+    padding: 0 0 1.5rem 0;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .trending-section__list > * {
+    flex: 0 0 80vw;
+    max-width: 80vw;
+    min-width: 240px;
+    scroll-snap-align: start;
+  }
+} 
+@media (min-width: 901px) {
+  .trending-section__arrow {
+    display: flex;
+  }
+  .trending-section__list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    padding: 0 1rem 2rem 1rem;
+    align-items: flex-end;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+@media (max-width: 900px) {
+  .favorite-list--grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 1rem;
+    padding: 0 0 1.5rem 0;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .favorite-list--grid > * {
+    flex: 0 0 320px;
+    max-width: 320px;
+    min-width: 320px;
+    scroll-snap-align: start;
   }
 } 

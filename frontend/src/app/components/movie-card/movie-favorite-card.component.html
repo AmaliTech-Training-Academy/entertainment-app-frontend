@@ -1,0 +1,26 @@
+<div class="movie-favorite-card">
+  <div class="image-container">
+    <img [src]="movie.imageUrl" [alt]="movie.title" class="movie-image" />
+  </div>
+  <div class="content-container">
+    <div class="title-row">
+      <h2 class="movie-title">{{ movie.title }}</h2>
+      <button mat-icon-button class="bookmark-button" (click)="toggleBookmark()">
+        <mat-icon>{{ movie.isBookmarked ? 'bookmark' : 'bookmark_border' }}</mat-icon>
+      </button>
+    </div>
+    <div class="meta-row">
+      <span>{{ movie.year }}</span>
+      <mat-icon class="calendar-icon">calendar_month</mat-icon>
+      <span class="dot">•</span>
+      <span>{{ movie.type }}</span>
+      <mat-icon class="type-icon">{{ getTypeIcon(movie.type) }}</mat-icon>
+      <span class="dot">•</span>
+      <span>{{ movie.rating }}</span>
+      <mat-icon class="star-icon">star</mat-icon>
+    </div>
+    <div class="genres-row">
+      <span *ngFor="let genre of movie.genres" class="genre-tag">{{ genre }}</span>
+    </div>
+  </div>
+</div> 

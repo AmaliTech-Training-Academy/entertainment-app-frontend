@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TrendingMovieCardComponent } from '../components/trending-movie-card/trending-movie-card.component';
-import { MovieCardComponent } from '../components/movie-card/movie-card.component';
+import { MovieFavoriteCardComponent } from '../components/movie-card/movie-favorite-card.component';
 
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
-  imports: [CommonModule, TrendingMovieCardComponent, MovieCardComponent],
+  imports: [CommonModule, TrendingMovieCardComponent, MovieFavoriteCardComponent],
   templateUrl: './user-dashboard.page.component.html',
   styleUrls: ['./user-dashboard.page.component.scss']
 })
@@ -59,15 +59,15 @@ export class UserDashboardPageComponent {
   ];
 
   favorites = [
-    {
-      title: 'The Great Lands',
-      year: '2019',
-      type: 'Movie',
-      rating: '9/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: 'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
-      isBookmarked: true,
-    },
+    // {
+    //   title: 'The Great Lands',
+    //   year: '2019',
+    //   type: 'Movie',
+    //   rating: '9/10',
+    //   genres: ['Action', 'Adventure', 'Thriller'],
+    //   imageUrl: 'https://storage.googleapis.com/a1aa/image/4bf5dd9f-a940-4b9c-516e-3a6b6ca06980.jpg',
+    //   isBookmarked: true,
+    // },
     {
       title: 'Inception',
       year: '2010',
