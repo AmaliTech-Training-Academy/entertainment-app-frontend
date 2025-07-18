@@ -79,58 +79,6 @@ export class SignUpComponent {
     }
   }
 
-  // createAccount(): void {
-  //   if (this.registerForm.valid) {
-  //     const formValue = {
-  //       ...this.registerForm.getRawValue(), // includes disabled username field
-  //     };
-
-  //     this.authService.register(formValue).subscribe({
-  //       next: (res) => {
-  //         console.log('Registration successful:', res);
-  //         this.router.navigate(['/admin']);
-  //       },
-  //       error: (err) => {
-  //         console.error('Registration failed:', err);
-  //         if (err.error?.message === 'Email already registered') {
-  //           this.email?.setErrors({ emailTaken: true });
-  //         }
-  //       },
-  //     });
-  //   } else {
-  //     this.registerForm.markAllAsTouched();
-  //   }
-  // }
-
-  //   createAccount(): void {
-  //   if (this.registerForm.valid) {
-  //     const formValue = {
-  //       ...this.registerForm.getRawValue(),
-  //     };
-
-  //     this.authService.register(formValue).subscribe({
-  //       next: (res) => {
-  //         // Save to localStorage
-  //         localStorage.setItem('token', res.token);
-  //         localStorage.setItem('user', JSON.stringify(res.user));
-  //         localStorage.setItem('role', res.user.role);
-  //         console.log('User registered successfully:', res);
-
-  //         // Redirect to home
-  //         this.router.navigate(['/home']);
-  //       },
-  //       error: (err) => {
-  //         console.error('Registration failed:', err);
-  //         if (err.error?.message === 'Email already registered') {
-  //           this.email?.setErrors({ emailTaken: true });
-  //         }
-  //       },
-  //     });
-  //   } else {
-  //     this.registerForm.markAllAsTouched();
-  //   }
-  // }
-
   createAccount(): void {
     this.apiError = null;
     if (this.registerForm.valid) {
@@ -149,8 +97,7 @@ export class SignUpComponent {
           if (res.token) {
             document.cookie = `token=${res.token}; path=/;`;
           }
-          // Optionally store user info in cookies as well if needed
-          // Redirect to home page
+   
           this.router.navigate(['/login']);
         },
         error: (err) => {
