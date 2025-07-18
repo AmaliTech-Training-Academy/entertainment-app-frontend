@@ -51,7 +51,7 @@ variable "waf_web_acl_id" {
 variable "api_endpoint" {
   description = "Backend API endpoint for CSP headers"
   type        = string
-  default     = "http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
+  default     = "https://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
 }
 
 
