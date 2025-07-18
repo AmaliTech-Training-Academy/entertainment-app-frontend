@@ -946,7 +946,7 @@ jobs:
 
       - name: Create Pull Request to Prod
         id: cpr # Added ID to reference outputs
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Merge staging into prod after successful staging deployment"
@@ -991,4 +991,10 @@ jobs:
           fi
 
       - name: Notify Auto-Merge PR Created
-        run: echo "Successfully created auto-merge PR from staging to prod. Awaiting manual approval on prod environment."
+        run: |
+          if [[ "${{ steps.cpr.outputs.pull-request-number }}" != "" ]]; then
+            echo "Successfully created auto-merge PR from staging to prod: ${{ steps.cpr.outputs.pull-request-url }}"
+            echo "Awaiting manual approval on prod environment. Once approved, this PR will auto-merge."
+          else
+            echo "No new Pull Request created as staging is already up-to-date with prod."
+          fi
