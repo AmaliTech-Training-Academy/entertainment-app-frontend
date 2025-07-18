@@ -84,8 +84,7 @@
         <div class="navbar__user" (click)="toggleUserDropdown()">
           <app-avatar [src]="user?.avatar || ''" [name]="user?.name || ''" [size]="50" class="navbar__avatar"></app-avatar>
           <div class="navbar__user-dropdown" *ngIf="showUserDropdown" (click)="$event.stopPropagation()">
-            <div class="navbar__user-dropdown-username">{{ user?.name }}</div>
-            <a class="navbar__user-option" href="#">Profile</a>
+            <a class="navbar__user-option" (click)=" goToUserDashboard();$event.preventDefault()"href="#">Profile</a>
             <a
               class="navbar__user-option"
               href="#"
@@ -95,7 +94,9 @@
           </div>
         </div>
       </ng-template>
+    
     </div>
     
   </div>
+  
 </nav>
