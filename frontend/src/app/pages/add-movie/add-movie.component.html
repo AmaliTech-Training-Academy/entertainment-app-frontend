@@ -1,288 +1,245 @@
-<main>
-  <h1>Upload a Movie</h1>
+<!-- media-form.component.html -->
+<form [formGroup]="mediaForm" (ngSubmit)="onSubmit()" class="media-form">
+  <div class="form-header">
+    <h2>Create New Media</h2>
+  </div>
 
-  <form [formGroup]="movieForm" (ngSubmit)="onSubmit()" class="space-y-6">
-    <!-- Title -->
-    <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Movie Title <span class="text-[#F50404]">*</span></mat-label>
-      <input matInput formControlName="title" placeholder="Enter movie title" />
-      <mat-error *ngIf="title?.hasError('required')"
-        >Title is required</mat-error
-      >
-      <mat-error *ngIf="title?.hasError('maxlength')"
-        >Title must be less than 100 characters</mat-error
-      >
-    </mat-form-field>
-
-    <!-- Original Title -->
-    <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Original Title</mat-label>
-      <input
-        matInput
-        formControlName="original_title"
-        placeholder="Enter original title (if different)"
-      />
-      <mat-error *ngIf="movieForm.get('original_title')?.hasError('maxlength')"
-        >Original title must be less than 100 characters</mat-error
-      >
-    </mat-form-field>
-
-    <!-- Tagline -->
-    <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Tagline</mat-label>
-      <input
-        matInput
-        formControlName="tagline"
-        placeholder="Enter movie tagline"
-      />
-      <mat-error *ngIf="movieForm.get('tagline')?.hasError('maxlength')"
-        >Tagline must be less than 200 characters</mat-error
-      >
-    </mat-form-field>
-
-    <!-- Overview -->
-    <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Overview <span class="text-[#F50404]">*</span></mat-label>
-      <textarea
-        matInput
-        formControlName="overview"
-        rows="4"
-        placeholder="Write a brief summary of the movie"
-      ></textarea>
-      <mat-error *ngIf="overview?.hasError('required')"
-        >Overview is required</mat-error
-      >
-      <mat-error *ngIf="overview?.hasError('maxlength')"
-        >Overview must be less than 1000 characters</mat-error
-      >
-    </mat-form-field>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Release Date -->
-      <mat-form-field appearance="fill" class="w-full">
-        <mat-label
-          >Release Date <span class="text-[#F50404]">*</span></mat-label
-        >
-        <input
-          matInput
-          [matDatepicker]="picker"
-          formControlName="release_date"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-        <mat-error *ngIf="release_date?.hasError('required')"
-          >Release date is required</mat-error
-        >
-      </mat-form-field>
-
-      <!-- Runtime -->
-      <mat-form-field appearance="fill" class="w-full">
-        <mat-label
-          >Runtime (minutes) <span class="text-[#F50404]">*</span></mat-label
-        >
-        <input
-          matInput
-          type="number"
-          formControlName="runtime"
-          placeholder="e.g. 120"
-        />
-        <span matSuffix>min</span>
-        <mat-error *ngIf="runtime?.hasError('required')"
-          >Runtime is required</mat-error
-        >
-        <mat-error *ngIf="runtime?.hasError('min')"
-          >Runtime must be at least 1 minute</mat-error
-        >
-        <mat-error *ngIf="runtime?.hasError('max')"
-          >Runtime must be less than 600 minutes</mat-error
-        >
-      </mat-form-field>
-    </div>
-
-    <!-- Genres -->
-    <div>
-      <label>Genres <span class="text-[#F50404]">*</span></label>
-      <mat-selection-list
-        formControlName="genres"
-        class="short-select"
-        multiple
-      >
-        <mat-list-option
-          *ngFor="let genre of genres"
-          [value]="genre"
-          (click)="onGenreChange($event, genre)"
-        >
-          {{ genre }}
-        </mat-list-option>
-      </mat-selection-list>
-      <mat-error
-        *ngIf="
-          movieForm.get('genres')?.hasError('required') &&
-          movieForm.get('genres')?.touched
+  <div class="form-grid">
+    <!-- Media Type -->
+    <div class="form-group">
+      <label for="mediaType">Media Type *</label>
+      <select
+        id="mediaType"
+        formControlName="mediaType"
+        [class.invalid]="
+          mediaForm.get('mediaType')?.invalid &&
+          mediaForm.get('mediaType')?.touched
         "
       >
-        At least one genre is required
-      </mat-error>
-      <p id="genresHelp" class="help-text">Select multiple genres</p>
+        <option value="" disabled selected>Select media type</option>
+        <option *ngFor="let type of mediaTypes" [value]="type">
+          {{ type | titlecase }}
+        </option>
+      </select>
+      <div
+        *ngIf="
+          mediaForm.get('mediaType')?.invalid &&
+          mediaForm.get('mediaType')?.touched
+        "
+        class="error-message"
+      >
+        Media type is required
+      </div>
+    </div>
+
+    <!-- Title -->
+    <div class="form-group">
+      <label for="title">Title *</label>
+      <input
+        id="title"
+        type="text"
+        formControlName="title"
+        [class.invalid]="
+          mediaForm.get('title')?.invalid && mediaForm.get('title')?.touched
+        "
+      />
+      <div
+        *ngIf="mediaForm.get('title')?.errors?.['required'] && mediaForm.get('title')?.touched"
+        class="error-message"
+      >
+        Title is required
+      </div>
+      <div
+        *ngIf="mediaForm.get('title')?.errors?.['maxlength'] && mediaForm.get('title')?.touched"
+        class="error-message"
+      >
+        Title must be less than 255 characters
+      </div>
+    </div>
+
+    <!-- Release Date -->
+    <div class="form-group">
+      <label for="releaseDate">Release Date *</label>
+      <input
+        id="releaseDate"
+        type="date"
+        formControlName="releaseDate"
+        [max]="maxDate"
+        [class.invalid]="
+          mediaForm.get('releaseDate')?.invalid &&
+          mediaForm.get('releaseDate')?.touched
+        "
+      />
+      <div
+        *ngIf="
+          mediaForm.get('releaseDate')?.invalid &&
+          mediaForm.get('releaseDate')?.touched
+        "
+        class="error-message"
+      >
+        Release date is required
+      </div>
+    </div>
+
+    <!-- Duration -->
+    <div class="form-group">
+      <label for="duration">Duration (minutes) *</label>
+      <input
+        id="duration"
+        type="number"
+        formControlName="duration"
+        min="0"
+        [class.invalid]="
+          mediaForm.get('duration')?.invalid &&
+          mediaForm.get('duration')?.touched
+        "
+      />
+      <div
+        *ngIf="mediaForm.get('duration')?.errors?.['required'] && mediaForm.get('duration')?.touched"
+        class="error-message"
+      >
+        Duration is required
+      </div>
+      <div
+        *ngIf="mediaForm.get('duration')?.errors?.['min'] && mediaForm.get('duration')?.touched"
+        class="error-message"
+      >
+        Duration must be positive or zero
+      </div>
     </div>
 
     <!-- Language -->
-    <mat-form-field appearance="fill" class="w-full short-select">
-      <mat-label
-        >Original Language <span class="text-[#F50404]">*</span></mat-label
-      >
-      <mat-select formControlName="language" required>
-        <mat-option *ngFor="let lang of languages" [value]="lang.code">
-          {{ lang.name }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="language?.hasError('required')"
-        >Language is required</mat-error
-      >
-    </mat-form-field>
-
-    <!-- Production Companies -->
-    <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Production Companies</mat-label>
+    <div class="form-group">
+      <label for="language">Language *</label>
       <input
-        matInput
-        formControlName="production_companies"
-        placeholder="Separate multiple companies with commas"
+        id="language"
+        type="text"
+        formControlName="language"
+        [class.invalid]="
+          mediaForm.get('language')?.invalid &&
+          mediaForm.get('language')?.touched
+        "
       />
-    </mat-form-field>
-
-    <!-- Production Countries -->
-    <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Production Countries</mat-label>
-      <input
-        matInput
-        formControlName="production_countries"
-        placeholder="Separate multiple countries with commas"
-      />
-    </mat-form-field>
-
-    <!-- Status -->
-    <mat-form-field appearance="fill" class="w-full short-select">
-      <mat-label>Status <span class="text-[#F50404]">*</span></mat-label>
-      <mat-select formControlName="status" required>
-        <mat-option *ngFor="let status of statuses" [value]="status">
-          {{ status }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="status?.hasError('required')"
-        >Status is required</mat-error
+      <div
+        *ngIf="mediaForm.get('language')?.errors?.['required'] && mediaForm.get('language')?.touched"
+        class="error-message"
       >
-    </mat-form-field>
-
-    <!-- Vote Average -->
-    <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Vote Average (0-10)</mat-label>
-      <input
-        matInput
-        type="number"
-        formControlName="vote_average"
-        placeholder="e.g. 7.8"
-        min="0"
-        max="10"
-        step="0.1"
-      />
-      <mat-error *ngIf="vote_average?.hasError('min')"
-        >Vote average must be at least 0</mat-error
+        Language is required
+      </div>
+      <div
+        *ngIf="mediaForm.get('language')?.errors?.['maxlength'] && mediaForm.get('language')?.touched"
+        class="error-message"
       >
-      <mat-error *ngIf="vote_average?.hasError('max')"
-        >Vote average must be at most 10</mat-error
-      >
-    </mat-form-field>
-
-    <!-- Vote Count -->
-    <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Vote Count</mat-label>
-      <input
-        matInput
-        type="number"
-        formControlName="vote_count"
-        placeholder="e.g. 1500"
-        min="0"
-      />
-      <mat-error *ngIf="vote_count?.hasError('min')"
-        >Vote count must be at least 0</mat-error
-      >
-    </mat-form-field>
-
-    <!-- Poster Image -->
-    <div>
-      <label>Poster Image <span class="text-[#F50404]">*</span></label>
-      <input
-        type="file"
-        (change)="onFileChange($event, 'poster')"
-        accept="image/*"
-        class="block mt-2"
-      />
-      <mat-error *ngIf="poster?.hasError('required') && poster?.touched"
-        >Poster image is required</mat-error
-      >
-      <p class="help-text">
-        Upload a poster image (recommended size: 500x750 pixels)
-      </p>
+        Language must be less than 50 characters
+      </div>
     </div>
 
-    <!-- Backdrop Image -->
-    <div>
-      <label>Backdrop Image</label>
-      <input
-        type="file"
-        (change)="onFileChange($event, 'backdrop')"
-        accept="image/*"
-        class="block mt-2"
-      />
-      <p class="help-text">
-        Upload a backdrop image (recommended size: 1280x720 pixels)
-      </p>
-    </div>
-
-    <!-- Cast -->
-    <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Cast</mat-label>
+    <!-- Synopsis -->
+    <div class="form-group full-width">
+      <label for="synopsis">Synopsis</label>
       <textarea
-        matInput
-        formControlName="cast"
-        rows="3"
-        placeholder="List main cast members separated by commas"
+        id="synopsis"
+        formControlName="synopsis"
+        rows="4"
+        [class.invalid]="mediaForm.get('synopsis')?.errors?.['maxlength'] && mediaForm.get('synopsis')?.touched"
       ></textarea>
-    </mat-form-field>
-
-    <!-- Crew -->
-    <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Crew</mat-label>
-      <textarea
-        matInput
-        formControlName="crew"
-        rows="3"
-        placeholder="List main crew members (director, producer, etc.) separated by commas"
-      ></textarea>
-    </mat-form-field>
-
-    <!-- Keywords -->
-    <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Keywords</mat-label>
-      <input
-        matInput
-        formControlName="keywords"
-        placeholder="Separate keywords with commas"
-      />
-    </mat-form-field>
-
-    <!-- Submit Button -->
-    <div class="flex justify-center">
-      <button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        aria-label="Upload Movie"
+      <div class="character-count">
+        {{ mediaForm.get("synopsis")?.value?.length || 0 }}/2000
+      </div>
+      <div
+        *ngIf="mediaForm.get('synopsis')?.errors?.['maxlength'] && mediaForm.get('synopsis')?.touched"
+        class="error-message"
       >
-        <mat-icon>upload</mat-icon>
-        <span>Upload Movie</span>
-      </button>
+        Synopsis must be less than 2000 characters
+      </div>
     </div>
-  </form>
-</main>
+
+    <!-- Genres -->
+    <div class="form-group full-width">
+      <label>Genres *</label>
+      <div class="genre-options">
+        <button
+          type="button"
+          *ngFor="let genre of genreOptions"
+          [class.selected]="isGenreSelected(genre)"
+          (click)="toggleGenre(genre)"
+        >
+          {{ genre | titlecase }}
+        </button>
+      </div>
+      <div
+        *ngIf="
+          mediaForm.get('genres')?.invalid && mediaForm.get('genres')?.touched
+        "
+        class="error-message"
+      >
+        At least one genre is required
+      </div>
+    </div>
+
+    <!-- File Uploads -->
+    <div class="form-group">
+      <label for="trailerFile">Trailer File</label>
+      <input
+        id="trailerFile"
+        type="file"
+        (change)="onFileChange($event, 'trailerFile')"
+        accept="video/*"
+      />
+      <div *ngIf="mediaForm.get('trailerFile')?.value" class="file-info">
+        Selected: {{ mediaForm.get("trailerFile")?.value?.name }}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="thumbnailFile">Thumbnail File *</label>
+      <input
+        id="thumbnailFile"
+        type="file"
+        (change)="onFileChange($event, 'thumbnailFile')"
+        accept="image/*"
+        required
+      />
+      <div *ngIf="mediaForm.get('thumbnailFile')?.value" class="file-info">
+        Selected: {{ mediaForm.get("thumbnailFile")?.value?.name }}
+      </div>
+      <div
+        *ngIf="
+          mediaForm.get('thumbnailFile')?.invalid &&
+          mediaForm.get('thumbnailFile')?.touched
+        "
+        class="error-message"
+      >
+        Thumbnail is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="mediaFile">Media File *</label>
+      <input
+        id="mediaFile"
+        type="file"
+        (change)="onFileChange($event, 'mediaFile')"
+        accept="video/*"
+        required
+      />
+      <div *ngIf="mediaForm.get('mediaFile')?.value" class="file-info">
+        Selected: {{ mediaForm.get("mediaFile")?.value?.name }}
+      </div>
+      <div
+        *ngIf="
+          mediaForm.get('mediaFile')?.invalid &&
+          mediaForm.get('mediaFile')?.touched
+        "
+        class="error-message"
+      >
+        Media file is required
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" [disabled]="mediaForm.invalid">Submit</button>
+    <button type="button" (click)="mediaForm.reset()">Reset</button>
+  </div>
+</form>

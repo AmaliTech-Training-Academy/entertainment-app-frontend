@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import {
+  AbstractControl,
   FormArray,
   FormBuilder,
   FormControl,
@@ -19,19 +20,44 @@ import {
   provideNativeDateAdapter,
 } from '@angular/material/core';
 
+// models/media.model.ts
+export enum MediaTypeEnum {
+  MOVIE = 'MOVIE',
+  TV_SHOW = 'TV SHOW',
+  DOCUMENTARY = 'DOCUMENTARY',
+}
+
+export enum MediaGenreEnum {
+  ACTION = 'ACTION',
+  COMEDY = 'COMEDY',
+  DRAMA = 'DRAMA',
+  HORROR = 'HORROR',
+  SCI_FI = 'SCI-FI',
+  ROMANCE = 'ROMANCE',
+  THRILLER = 'THRILLER',
+  DOCUMENTARY = 'DOCUMENTARY',
+  ANIMATION = 'ANIMATION',
+}
+
+export interface MediaForm {
+  mediaType: MediaTypeEnum | null;
+  title: string;
+  synopsis: string;
+  releaseDate: string | null;
+  duration: number | null;
+  language: string;
+  genres: Set<MediaGenreEnum>;
+  trailerFile: File | null;
+  thumbnailFile: File | null;
+  mediaFile: File | null;
+}
+
 @Component({
   selector: 'app-add-movie',
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormField,
-    MatLabel,
-    MatError,
-    MatSelect,
-    MatOption,
-    MatListOption,
     MatDatepickerModule,
-    MatIcon,
     MatNativeDateModule,
   ],
   providers: [provideNativeDateAdapter()],
@@ -39,145 +65,76 @@ import {
   styleUrl: './add-movie.component.scss',
 })
 export class AddMovieComponent {
-  movieForm!: FormGroup;
-  genres = [
-    'Action',
-    'Adventure',
-    'Animation',
-    'Comedy',
-    'Crime',
-    'Documentary',
-    'Drama',
-    'Family',
-    'Fantasy',
-    'History',
-    'Horror',
-    'Music',
-    'Mystery',
-    'Romance',
-    'Science Fiction',
-    'TV Movie',
-    'Thriller',
-    'War',
-    'Western',
-  ];
-  languages = [
-    { code: 'en', name: 'English' },
-    { code: 'es', name: 'Spanish' },
-    { code: 'fr', name: 'French' },
-    { code: 'de', name: 'German' },
-    { code: 'zh', name: 'Chinese' },
-    { code: 'ja', name: 'Japanese' },
-    { code: 'ko', name: 'Korean' },
-    { code: 'hi', name: 'Hindi' },
-    { code: 'ru', name: 'Russian' },
-    { code: 'it', name: 'Italian' },
-    { code: 'pt', name: 'Portuguese' },
-    { code: 'ar', name: 'Arabic' },
-    { code: 'other', name: 'Other' },
-  ];
-  statuses = [
-    'Rumored',
-    'Planned',
-    'In Production',
-    'Post Production',
-    'Released',
-    'Canceled',
-  ];
+  mediaForm: FormGroup;
+  mediaTypes = Object.values(MediaTypeEnum);
+  genreOptions = Object.values(MediaGenreEnum);
+  maxDate = new Date().toISOString().split('T')[0];
 
-  constructor(private fb: FormBuilder, private snackBar: MatSnackBar) {
-    this.createForm();
-  }
-
-  createForm() {
-    this.movieForm = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(100)]],
-      original_title: ['', Validators.maxLength(100)],
-      tagline: ['', Validators.maxLength(200)],
-      overview: ['', [Validators.required, Validators.maxLength(1000)]],
-      release_date: ['', Validators.required],
-      runtime: [
-        '',
-        [Validators.required, Validators.min(1), Validators.max(600)],
-      ],
-      genres: this.fb.array([], Validators.required),
-      language: ['', Validators.required],
-      production_companies: [''],
-      production_countries: [''],
-      status: ['', Validators.required],
-      vote_average: ['', [Validators.min(0), Validators.max(10)]],
-      vote_count: ['', Validators.min(0)],
-      poster: [null, Validators.required],
-      backdrop: [null],
-      cast: [''],
-      crew: [''],
-      keywords: [''],
+  constructor(private fb: FormBuilder) {
+    this.mediaForm = this.fb.group({
+      mediaType: [null, Validators.required],
+      title: ['', [Validators.required, Validators.maxLength(255)]],
+      synopsis: ['', Validators.maxLength(2000)],
+      releaseDate: [null, Validators.required],
+      duration: [null, [Validators.required, Validators.min(0)]],
+      language: ['', [Validators.required, Validators.maxLength(50)]],
+      genres: [[], [this.atLeastOneGenreValidator]],
+      trailerFile: [null],
+      thumbnailFile: [null, Validators.required],
+      mediaFile: [null, Validators.required],
     });
   }
 
-  onGenreChange(event: any, genre: string) {
-    const genres = this.movieForm.get('genres') as FormArray;
-    if (event.checked) {
-      genres.push(new FormControl(genre));
+  ngOnInit(): void {}
+
+  atLeastOneGenreValidator(
+    control: AbstractControl
+  ): { [key: string]: boolean } | null {
+    return control.value && control.value.length > 0
+      ? null
+      : { required: true };
+  }
+
+  onFileChange(event: Event, controlName: string): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.mediaForm.get(controlName)?.setValue(input.files[0]);
+    }
+  }
+
+  toggleGenre(genre: MediaGenreEnum): void {
+    const genresControl = this.mediaForm.get('genres');
+    if (!genresControl) return;
+
+    const currentGenres: MediaGenreEnum[] = genresControl.value || [];
+    const index = currentGenres.indexOf(genre);
+
+    if (index === -1) {
+      currentGenres.push(genre);
     } else {
-      const index = genres.controls.findIndex((x) => x.value === genre);
-      genres.removeAt(index);
+      currentGenres.splice(index, 1);
     }
+
+    genresControl.setValue(currentGenres);
+    genresControl.markAsTouched();
   }
 
-  onFileChange(event: any, field: string) {
-    const file = event.target.files[0];
-    if (file) {
-      this.movieForm.get(field)?.setValue(file);
-    }
+  isGenreSelected(genre: MediaGenreEnum): boolean {
+    const genres = this.mediaForm.get('genres')?.value || [];
+    return genres.includes(genre);
   }
 
-  onSubmit() {
-    if (this.movieForm.valid) {
-      // Here you would typically send the form data to your backend
-      console.log('Form submitted:', this.movieForm.value);
-      this.snackBar.open('Movie uploaded successfully!', 'Close', {
-        duration: 3000,
-        panelClass: ['success-snackbar'],
-      });
+  onSubmit(): void {
+    if (this.mediaForm.valid) {
+      const formValue: MediaForm = {
+        ...this.mediaForm.value,
+        releaseDate: this.mediaForm.value.releaseDate,
+        genres: new Set(this.mediaForm.value.genres),
+      };
+      console.log('Form submitted:', formValue);
+      // Here you would typically call a service to submit the form
     } else {
-      this.movieForm.markAllAsTouched();
-      this.snackBar.open(
-        'Please fill all required fields correctly!',
-        'Close',
-        {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-        }
-      );
+      this.mediaForm.markAllAsTouched();
     }
-  }
-
-  get title() {
-    return this.movieForm.get('title');
-  }
-  get overview() {
-    return this.movieForm.get('overview');
-  }
-  get release_date() {
-    return this.movieForm.get('release_date');
-  }
-  get runtime() {
-    return this.movieForm.get('runtime');
-  }
-  get language() {
-    return this.movieForm.get('language');
-  }
-  get status() {
-    return this.movieForm.get('status');
-  }
-  get poster() {
-    return this.movieForm.get('poster');
-  }
-  get vote_average() {
-    return this.movieForm.get('vote_average');
-  }
-  get vote_count() {
-    return this.movieForm.get('vote_count');
   }
 }
