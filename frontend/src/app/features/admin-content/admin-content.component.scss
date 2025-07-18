@@ -62,16 +62,17 @@
       cursor: pointer;
       width: 100%;
       margin-bottom: 2rem;
+
+      &:hover {
+        background-color: color($secondary-colors, 300);
+      }
       
     }
 
     @media (min-width: 768px) {
-    //   flex-direction: row;
-    //   justify-content: center;
-    //   align-items: center;
 
       .upload-btn {
-        width: 250px;
+        width: 150px;
       }
 
       .search-input {
