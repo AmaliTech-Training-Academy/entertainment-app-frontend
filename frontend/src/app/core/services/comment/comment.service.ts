@@ -26,10 +26,9 @@ export class CommentService {
   ) {}
 
   getCommentsByMediaId(mediaId: number): Observable<CommentApiResponse> {
-    return this.http
-      .get<CommentApiResponse>(
-        `${this.apiUrl}/api/v1/comments/media/${mediaId}`
-      )
-      .pipe(catchError((error) => this.errorHandler.handleHttpError(error)));
+    return this.http.get<CommentApiResponse>(`${this.apiUrl}/api/v1/comments/media/${mediaId}`)
+      .pipe(
+        catchError((error) => this.errorHandler.handleHttpError(error))
+      );
   }
 }

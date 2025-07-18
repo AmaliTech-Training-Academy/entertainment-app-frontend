@@ -7,7 +7,7 @@ import { MatCardModule } from '@angular/material/card';
   standalone: true,
   imports: [CommonModule, MatCardModule],
   templateUrl: './trending-movie-card.component.html',
-  styleUrl: './trending-movie-card.component.scss',
+  styleUrls: ['./trending-movie-card.component.scss'],
 })
 export class TrendingMovieCardComponent {
   @Input() rank!: number;

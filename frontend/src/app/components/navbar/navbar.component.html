@@ -76,7 +76,6 @@
     <div class="navbar__actions">
       <ng-container *ngIf="!isAuthenticated; else userMenu">
         <a class="navbar__sign-in" href="#" (click)="goToLogin(); $event.preventDefault()">Sign In</a>
-        <a routerLink="/user-test" class="navbar__link">User Dashboard</a>
         <app-button type="primary" size="medium" (buttonClick)="goToSignUp()">Sign Up</app-button>
       </ng-container>
       <ng-template #userMenu>

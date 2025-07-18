@@ -14,8 +14,6 @@ export interface RegisterPayload {
   providedIn: 'root',
 })
 export class AuthService {
-  // private baseUrl = 'http://cineverse-service-alb-staging-346786246.eu-west-1.elb.amazonaws.com/api/v1';
-
   constructor(private http: HttpClient) {}
 
 

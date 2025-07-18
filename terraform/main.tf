@@ -73,7 +73,9 @@ module "cloudfront" {
   origin_access_control_id = module.s3_website.origin_access_control_id
   price_class              = local.env_config[var.environment].cloudfront_price_class
   waf_web_acl_id           = var.enable_waf ? module.waf[0].web_acl_id : ""
-  api_endpoint             = var.domain_name != "" ? "https://api.${var.domain_name}" : var.api_endpoint
+  api_endpoint             = var.api_endpoint
+
+  # api_endpoint             = var.domain_name != "" ? "https://api.${var.domain_name}" : var.api_endpoint
 
   tags = local.common_tags
 
