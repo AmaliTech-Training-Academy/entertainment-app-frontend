@@ -1,3 +1,3 @@
 export const environment = {
-  apiBaseUrl: 'https://jsonfakery.com/movies/random/',
+  apiBaseUrl: 'https://jsonfakery.com/movies/random',
 };

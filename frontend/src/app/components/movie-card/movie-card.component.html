@@ -1,48 +1,53 @@
 <div class="movie-card">
   <div class="card-container">
     <div class="image-container">
-      <img [src]="movie.imageUrl" [alt]="movie.title" class="movie-image" />
+      <img
+        [src]="movie.poster_path"
+        [alt]="movie.original_title"
+        class="movie-image"
+      />
     </div>
 
     <div class="content-container">
       <div class="title-container">
-        <h1 class="movie-title">{{ movie.title }}</h1>
+        <h1 class="movie-title">{{ movie.original_title }}</h1>
 
         <button
           mat-icon-button
           class="bookmark-button"
           (click)="toggleBookmark()"
         >
-          <mat-icon>{{
+          <!-- <mat-icon>{{
             movie.isBookmarked ? "bookmark" : "bookmark_border"
-          }}</mat-icon>
+            "bookmark_border"
+          }}</mat-icon> -->
         </button>
       </div>
       <div class="meta-container">
         <div class="meta-item">
-          <span>{{ movie.year }}</span>
+          <span>{{ movie.release_date }}</span>
           <mat-icon class="calendar-icon">calendar_month</mat-icon>
         </div>
 
         <span class="separator">•</span>
 
         <div class="meta-item">
-          <span>{{ movie.type }}</span>
-          <mat-icon class="meta-icon">{{ getTypeIcon(movie.type) }}</mat-icon>
+          <span>{{ movie.adult }}</span>
+          <mat-icon class="meta-icon">{{ getTypeIcon("movie") }}</mat-icon>
         </div>
 
         <span class="separator">•</span>
 
         <div class="meta-item">
-          <span>{{ movie.rating }}</span>
+          <span>{{ movie.vote_average }}</span>
           <mat-icon class="outlined-star">star</mat-icon>
         </div>
       </div>
 
       <div class="genres-container">
-        <span *ngFor="let genre of movie.genres" class="genre-tag">
+        <!-- <span *ngFor="let genre of movie." class="genre-tag">
           {{ genre }}
-        </span>
+        </span> -->
       </div>
     </div>
   </div>

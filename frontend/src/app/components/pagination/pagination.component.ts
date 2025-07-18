@@ -24,14 +24,6 @@ export class PaginationComponent {
     }
   }
 
-  get Pages(): number[] {
-    const pages: number[] = [];
-    for (let i = 1; i <= this.totalPages; i++) {
-      pages.push(i);
-    }
-    return pages;
-  }
-
   getVisiblePages(): (number | string)[] {
     const visiblePages: (number | string)[] = [];
     const maxVisible = 5;

@@ -13,6 +13,20 @@ import {
 } from '../../components/advanced-search/advanced-search.component';
 import { MovieCardComponent } from '../../components/movie-card/movie-card.component';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
+import {
+  AdvancedSearchService,
+  Movie,
+  MoviesApiResponse,
+} from '../../core/services/advanced-search.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+export interface MovieFilters {
+  query?: string;
+  genre?: string;
+  year?: string;
+  language?: string;
+  page?: number;
+  sort_by?: 'popularity' | 'release_date' | 'vote_average';
+}
 
 @Component({
   selector: 'app-advanced-search.page',
@@ -28,6 +42,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
     AdvancedSearch,
     MovieCardComponent,
     PaginationComponent,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './advanced-search.page.component.html',
   styleUrl: './advanced-search.page.component.scss',
@@ -35,7 +50,8 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
 export class AdvancedSearchPageComponent implements OnInit {
   @ViewChild(AdvancedSearchComponent)
   advancedSearchComponent?: AdvancedSearchComponent;
-  constructor() {
+  itemsPerPage: number = 12;
+  constructor(private advSearchService: AdvancedSearchService) {
     this.searchQuery == '' &&
       this.onSearch({
         query: '',
@@ -47,216 +63,43 @@ export class AdvancedSearchPageComponent implements OnInit {
         },
       });
   }
-  filteredMovies: Array<{
-    title: string;
-    year: string;
-    type: string;
-    rating: string;
-    genres: string[];
-    imageUrl: string;
-    isBookmarked: boolean;
-  }> = [];
+  filteredMovies: any[] = [];
 
   ngOnInit(): void {
-    this.filteredMovies = this.allMovies;
+    this.fetchMovies({});
   }
+
+  isLoading = false;
+
+  fetchMovies(filters: MovieFilters) {
+    this.isLoading = true;
+    // setTimeout(() => {
+    this.advSearchService.searchMovies(filters).subscribe({
+      next: (response) => {
+        this.allMovies = response.results;
+        this.filteredMovies = response.results;
+        this.totalPages =
+          Math.ceil(response.total_results / this.itemsPerPage) || 1; // Fixed
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to fetch movies:', err);
+        this.isLoading = false;
+      },
+      complete: () => {
+        this.isLoading = false;
+      },
+    });
+    // }, 5000);
+  }
+
   search_filter_state = false;
   searchQuery = '';
   currentPage = 1;
   totalPages = 7;
 
   // Mock data for movies
-  allMovies = [
-    {
-      title: 'Beyond Earth',
-      year: '2019',
-      type: 'Movie',
-      rating: '9/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: 'Beylife',
-      year: '2023',
-      type: 'Movie',
-      rating: '6/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: 'Beyond Earth',
-      year: '2019',
-      type: 'Movie',
-      rating: '9/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: 'Beylife',
-      year: '2023',
-      type: 'Movie',
-      rating: '6/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-    {
-      title: "Ann's Bey",
-      year: '2025',
-      type: 'Series',
-      rating: '8/10',
-      genres: ['Action', 'Adventure', 'Thriller'],
-      imageUrl: '../../../assets/images/movie.png',
-      isBookmarked: false,
-    },
-  ];
+  allMovies: Movie[] = [];
 
   // Filter options
   types = ['All', 'Movie', 'Series'];
@@ -273,7 +116,19 @@ export class AdvancedSearchPageComponent implements OnInit {
 
   onPageChange(page: number) {
     this.currentPage = page;
-    // fetch data for the new page here
+
+    // Re-use current filter state if needed
+    const filters: MovieFilters = {
+      query: this.searchQuery,
+      genre: this.selectedGenre !== 'All' ? this.selectedGenre : undefined,
+      year: this.selectedYear !== 'All' ? this.selectedYear : undefined,
+      language:
+        this.selectedLanguage !== 'All' ? this.selectedLanguage : undefined,
+      sort_by: 'popularity',
+      page: this.currentPage,
+    };
+
+    this.fetchMovies(filters);
   }
 
   isSearchActive(): boolean {
@@ -289,33 +144,20 @@ export class AdvancedSearchPageComponent implements OnInit {
   }
 
   onSearch(event: { query: string; filters: any }) {
+    this.isLoading = true;
     this.search_filter_state = true;
-    if (!this.allMovies || this.allMovies.length === 0) return;
+    this.currentPage = 1;
+    const filters: MovieFilters = {
+      query: event.query,
+      genre: event.filters.genre !== 'All' ? event.filters.genre : undefined,
+      year: event.filters.year !== 'All' ? event.filters.year : undefined,
+      language:
+        this.selectedLanguage !== 'All' ? this.selectedLanguage : undefined,
+      sort_by: 'popularity',
+      page: this.currentPage,
+    };
 
-    this.filteredMovies = this.allMovies.filter((movie) => {
-      const matchesQuery =
-        !event.query ||
-        movie.title.toLowerCase().includes(event.query.toLowerCase()) ||
-        movie.year.includes(event.query);
-
-      const matchesType =
-        event.filters.type === 'All' || movie.type === event.filters.type;
-      const matchesGenre =
-        event.filters.genre === 'All' ||
-        movie.genres.includes(event.filters.genre);
-      const matchesRating =
-        event.filters.rating === 'All' || movie.rating === event.filters.rating;
-      const matchesYear =
-        event.filters.year === 'All' || movie.year === event.filters.year;
-
-      return (
-        matchesQuery &&
-        matchesType &&
-        matchesGenre &&
-        matchesRating &&
-        matchesYear
-      );
-    });
+    this.fetchMovies(filters);
   }
 
   resetFilters() {
@@ -333,5 +175,6 @@ export class AdvancedSearchPageComponent implements OnInit {
     if (this.advancedSearchComponent) {
       this.advancedSearchComponent.resetFilters();
     }
+    this.fetchMovies({});
   }
 }

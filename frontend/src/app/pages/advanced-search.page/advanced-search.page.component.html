@@ -9,6 +9,8 @@
         {{
           advancedSearchComponent?.hasActiveFilters()
             ? "Search Results"
+            : isLoading
+            ? "Loading..."
             : "Trending Now"
         }}
       </h3>
@@ -21,19 +23,29 @@
         (pageChange)="onPageChange($event)"
       ></app-pagination>
 
-      <div *ngIf="filteredMovies.length === 0" class="empty-state">
+      <div
+        *ngIf="!isLoading && filteredMovies.length === 0"
+        class="empty-state"
+      >
         <h3 class="empty-title">No Results Found</h3>
         <button
           mat-raised-button
           color="primary"
-          *ngIf="search_filter_state"
+          *ngIf="search_filter_state && !isLoading"
           (click)="resetFilters()"
         >
           Reset Filters
         </button>
       </div>
 
-      <div *ngIf="filteredMovies.length > 0" class="movies-grid">
+      <div class="spinner-container" *ngIf="isLoading">
+        <mat-progress-spinner
+          mode="indeterminate"
+          color="accent"
+          diameter="40"
+        ></mat-progress-spinner>
+      </div>
+      <div *ngIf="filteredMovies.length > 0 && !isLoading" class="movies-grid">
         <app-movie-card
           *ngFor="let movie of filteredMovies"
           [movie]="movie"

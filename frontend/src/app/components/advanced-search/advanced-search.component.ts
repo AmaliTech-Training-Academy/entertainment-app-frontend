@@ -61,11 +61,16 @@ export class AdvancedSearchComponent {
     );
   }
 
-  onFilterChange(name: string, value: string) {
-    this.selectedFilters[name as keyof typeof this.selectedFilters] = value;
+  onFilterSelected(name: keyof typeof this.selectedFilters, value: string) {
+    if (this.selectedFilters[name] === value) return;
+
+    this.selectedFilters[name] = value;
     this.emitSearchEvent();
   }
 
+  trackByOption(index: number, option: string): string {
+    return option;
+  }
   emitSearchEvent() {
     this.search.emit({
       query: this.searchControl.value || '',

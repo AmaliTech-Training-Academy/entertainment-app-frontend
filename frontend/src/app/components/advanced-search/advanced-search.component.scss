@@ -7,6 +7,14 @@
 @use "../../../styles/stroke" as *;
 @use "sass:map";
 
+.search-container,
+.filters-container {
+  max-width: 45rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 map.get($spacing, 4);
+}
+
 .container {
   display: flex;
   justify-content: space-between;
@@ -19,19 +27,18 @@
 
   .search-field {
     flex-grow: 1;
-    height: 0.4em;
+    min-width: 0;
 
     .search-input {
-      padding-top: map.get($spacing, 2);
-      padding-bottom: map.get($spacing, 2);
-      border-radius: map.get($radius, 2);
-      background-color: map.get($primary-colors, 800);
-      height: 3rem;
-      @include typography(body, b1);
-      color: map.get($neutral-colors, 100);
       padding: map.get($spacing, 2);
-      border: none;
+      height: 3rem;
       width: 100%;
+      @include typography(body, b1);
+      background-color: map.get($primary-colors, 800);
+      color: map.get($neutral-colors, 100);
+      border: none;
+      border-radius: map.get($radius, 2);
+
       &::placeholder {
         color: map.get($neutral-colors, 700);
       }
@@ -39,45 +46,35 @@
   }
 
   .search-button {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px; // Space between text and icon
+    gap: 8px;
     min-width: 120px;
     height: 48px;
     padding: 0 16px;
-    border-radius: 4px;
-    background-color: #f44343; // Your red color
+    @include typography(body, b1);
+    background-color: #f44343;
     color: white;
-    font-size: 16px;
-    font-weight: normal; // Not bold
     border: none;
+    border-radius: 4px;
     cursor: pointer;
-    box-sizing: border-box;
-    position: relative;
-    overflow: hidden; // Keeps content contained
     transition: all 0.2s ease;
 
     &:hover {
-      background-color: #e03e3e; // Darker red on hover
-    }
-
-    div {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      background-color: #e03e3e;
     }
 
     img {
       width: 20px;
       height: 20px;
       object-fit: contain;
-      flex-shrink: 0; // Prevents icon from shrinking
     }
 
     @media (max-width: 640px) {
-      padding: 0 12px;
       min-width: 100px;
+      padding: 0 12px;
       gap: 6px;
 
       img {
@@ -88,6 +85,7 @@
 
     @media (max-width: 440px) {
       height: 40px;
+      min-width: 80px;
       font-size: 14px;
 
       img {
@@ -98,58 +96,48 @@
   }
 }
 
-.search-container {
-  max-width: 45rem;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 map.get($spacing, 4);
-
-  .container {
-    margin-bottom: map.get($spacing, 3);
-  }
-}
-
 .filters-container {
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 map.get($spacing, 4);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   .container {
     display: flex;
     flex-wrap: nowrap;
-    align-items: center;
+    gap: map.get($spacing, 2);
+    padding-bottom: 4px;
 
     .filter-group {
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
 
       .filter-label {
-        font-weight: 400;
         @include typography(body, b2);
         color: map.get($neutral-colors, 400);
-        margin-bottom: map.get($spacing, 3);
+        margin-bottom: map.get($spacing, 1);
+        white-space: nowrap;
       }
 
       .filter-button {
         display: flex;
         align-items: center;
-        padding: map.get($spacing, 2);
-        justify-content: space-between;
         gap: map.get($spacing, 1);
-        max-width: 100%;
-        width: 70px;
+        padding: map.get($spacing, 1) map.get($spacing, 2);
+        min-width: 80px;
         background-color: map.get($primary-colors, 800);
         color: map.get($neutral-colors, 100);
         border-radius: map.get($radius, 2);
         @include typography(body, b1);
         white-space: nowrap;
 
-        span {
-          order: 1;
-        }
-
         mat-icon {
-          order: 2;
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
           transition: transform 0.2s ease;
         }
 
@@ -157,41 +145,89 @@
           transform: rotate(180deg);
         }
 
-        @media screen and (max-width: 464px) {
-          width: 3rem;
+        @media (max-width: 768px) {
+          min-width: 70px;
+          padding: map.get($spacing, 1) map.get($spacing, 1.5);
           @include typography(body, b2);
         }
 
-        @media screen and (max-width: 432px) {
-          width: 2.6rem;
+        @media (max-width: 480px) {
+          min-width: 60px;
+          padding: map.get($spacing, 0.75) map.get($spacing, 1);
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+
+        @media (max-width: 409px) {
+          min-width: 50px;
+          padding: map.get($spacing, 0.5) map.get($spacing, 0.75);
           @include typography(body, b3);
+
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            margin-left: map.get($spacing, 0.5);
+          }
         }
 
-        @media screen and (max-width: 420px) {
-          width: 2rem;
-          // @include typography(body, b4);
-        }
+        @media (max-width: 360px) {
+          min-width: 40px;
+          padding: map.get($spacing, 0.5);
 
-        @media screen and (max-width: 390px) {
-          width: 1.8rem;
-          // @include typography(body, b5);
+          span {
+            display: none; // Hide text on smallest screens
+          }
+
+          mat-icon {
+            margin-left: 0;
+          }
         }
       }
+    }
+
+    @media (max-width: 409px) {
+      gap: map.get($spacing, 0.5);
+      padding-bottom: 6px;
     }
   }
 }
 
-/* Dropdown menu styles (same for all screens) */
 ::ng-deep .mat-mdc-menu-panel {
+  min-width: auto !important;
+  width: auto !important;
+  max-width: 100vw;
   background-color: map.get($primary-colors, 800) !important;
-  max-height: 300px;
-  overflow-y: auto;
+
+  .mat-mdc-menu-content {
+    padding: map.get($spacing, 1) 0;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
 
   .mat-mdc-menu-item {
+    @include typography(body, b1);
     color: map.get($neutral-colors, 100);
+    white-space: nowrap;
+    min-height: 36px;
+    padding: 0 map.get($spacing, 2);
 
     &:hover {
       background-color: map.get($primary-colors, 700) !important;
+    }
+
+    @media (max-width: 480px) {
+      @include typography(body, b2);
+      min-height: 32px;
+    }
+
+    @media (max-width: 360px) {
+      @include typography(body, b3);
+      padding: 0 map.get($spacing, 1.5);
     }
   }
 }

@@ -28,15 +28,20 @@
       <!-- Type -->
       <div class="filter-group">
         <span class="filter-label">Type:</span>
-        <button mat-button [matMenuTriggerFor]="typeMenu" class="filter-button">
+        <button
+          mat-button
+          [matMenuTriggerFor]="typeMenu"
+          class="filter-button"
+          (click)="$event.stopImmediatePropagation(); $event.preventDefault()"
+        >
           <span>{{ selectedFilters.type }}</span>
           <mat-icon fontIcon="arrow_drop_down" class="filter-icon"></mat-icon>
         </button>
-        <mat-menu #typeMenu="matMenu">
+        <mat-menu #typeMenu="matMenu" panelClass="filter-menu">
           <button
             mat-menu-item
-            *ngFor="let option of filters.type"
-            (click)="onFilterChange('type', option)"
+            *ngFor="let option of filters.type; trackBy: trackByOption"
+            (click)="onFilterSelected('type', option)"
           >
             {{ option }}
           </button>
@@ -50,15 +55,16 @@
           mat-button
           [matMenuTriggerFor]="genreMenu"
           class="filter-button"
+          (click)="$event.stopImmediatePropagation(); $event.preventDefault()"
         >
           {{ selectedFilters.genre }}
           <mat-icon fontIcon="arrow_drop_down"></mat-icon>
         </button>
-        <mat-menu #genreMenu="matMenu">
+        <mat-menu #genreMenu="matMenu" panelClass="filter-menu">
           <button
             mat-menu-item
             *ngFor="let option of filters.genre"
-            (click)="onFilterChange('genre', option)"
+            (click)="onFilterSelected('genre', option)"
           >
             {{ option }}
           </button>
@@ -72,15 +78,16 @@
           mat-button
           [matMenuTriggerFor]="ratingMenu"
           class="filter-button"
+          (click)="$event.stopImmediatePropagation(); $event.preventDefault()"
         >
           {{ selectedFilters.rating }}
           <mat-icon fontIcon="arrow_drop_down"></mat-icon>
         </button>
-        <mat-menu #ratingMenu="matMenu">
+        <mat-menu #ratingMenu="matMenu" panelClass="filter-menu">
           <button
             mat-menu-item
             *ngFor="let option of filters.rating"
-            (click)="onFilterChange('rating', option)"
+            (click)="onFilterSelected('rating', option)"
           >
             {{ option }}
           </button>
@@ -90,15 +97,20 @@
       <!-- Year -->
       <div class="filter-group">
         <span class="filter-label">Year:</span>
-        <button mat-button [matMenuTriggerFor]="yearMenu" class="filter-button">
+        <button
+          mat-button
+          [matMenuTriggerFor]="yearMenu"
+          class="filter-button"
+          (click)="$event.stopImmediatePropagation(); $event.preventDefault()"
+        >
           {{ selectedFilters.year }}
           <mat-icon fontIcon="arrow_drop_down"></mat-icon>
         </button>
-        <mat-menu #yearMenu="matMenu">
+        <mat-menu #yearMenu="matMenu" panelClass="filter-menu">
           <button
             mat-menu-item
             *ngFor="let option of filters.year"
-            (click)="onFilterChange('year', option)"
+            (click)="onFilterSelected('year', option)"
           >
             {{ option }}
           </button>
@@ -112,6 +124,7 @@
           mat-button
           [matMenuTriggerFor]="languageMenu"
           class="filter-button"
+          (click)="$event.stopImmediatePropagation(); $event.preventDefault()"
         >
           {{ selectedFilters.language
           }}<mat-icon fontIcon="arrow_drop_down"></mat-icon>
@@ -120,7 +133,7 @@
           <button
             mat-menu-item
             *ngFor="let option of filters.language"
-            (click)="onFilterChange('language', option)"
+            (click)="onFilterSelected('language', option)"
           >
             {{ option }}
           </button>
