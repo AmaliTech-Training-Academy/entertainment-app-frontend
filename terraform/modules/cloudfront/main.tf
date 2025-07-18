@@ -23,7 +23,6 @@ resource "aws_cloudfront_cache_policy" "spa" {
     }
   }
 
-  # REMOVED: lifecycle block for destruction
 }
 
 # CloudFront Cache Policy for Static Assets
@@ -51,7 +50,6 @@ resource "aws_cloudfront_cache_policy" "static_assets" {
     }
   }
 
-  # REMOVED: lifecycle block for destruction
 }
 
 # CloudFront Origin Request Policy for S3
@@ -78,7 +76,6 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
     query_string_behavior = "none"
   }
 
-  # REMOVED: lifecycle block for destruction
 }
 
 # CloudFront Response Headers Policy for Security
@@ -126,17 +123,13 @@ resource "aws_cloudfront_response_headers_policy" "security" {
     }
 
     content_security_policy {
-      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' ${var.api_endpoint}; media-src 'self';"
+      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' ${var.api_endpoint} ${replace(var.api_endpoint, "https://", "http://")}; media-src 'self';"
       override = true
     }
-
-    
-}
-
   }
 
-  # REMOVED: lifecycle block for destruction
 
+}
 
 # CloudFront Distribution
 resource "aws_cloudfront_distribution" "website" {
@@ -206,5 +199,5 @@ resource "aws_cloudfront_distribution" "website" {
 
   tags = var.tags
 
-  # REMOVED: lifecycle block for destruction
+ 
 }
