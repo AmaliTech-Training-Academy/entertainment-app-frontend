@@ -1,133 +1,3 @@
-# Cache policy for SPA
-resource "aws_cloudfront_cache_policy" "spa" {
-  name        = "${var.environment}-spa-cache-policy"
-  comment     = "Cache policy for SPA applications - ${var.environment}"
-  default_ttl = 86400
-  max_ttl     = 31536000
-  min_ttl     = 0
-
-  parameters_in_cache_key_and_forwarded_to_origin {
-    enable_accept_encoding_brotli = true
-    enable_accept_encoding_gzip   = true
-
-    query_strings_config {
-      query_string_behavior = "none"
-    }
-
-    headers_config {
-      header_behavior = "none"
-    }
-
-    cookies_config {
-      cookie_behavior = "none"
-    }
-  }
-}
-
-# Cache policy for static assets
-resource "aws_cloudfront_cache_policy" "static_assets" {
-  name        = "${var.environment}-static-assets-cache-policy"
-  comment     = "Cache policy for static assets (CSS, JS, images) - ${var.environment}"
-  default_ttl = 31536000
-  max_ttl     = 31536000
-  min_ttl     = 31536000
-
-  parameters_in_cache_key_and_forwarded_to_origin {
-    enable_accept_encoding_brotli = true
-    enable_accept_encoding_gzip   = true
-
-    query_strings_config {
-      query_string_behavior = "none"
-    }
-
-    headers_config {
-      header_behavior = "none"
-    }
-
-    cookies_config {
-      cookie_behavior = "none"
-    }
-  }
-}
-
-# Origin request policy for S3
-resource "aws_cloudfront_origin_request_policy" "s3_origin" {
-  name    = "${var.environment}-s3-origin-request-policy"
-  comment = "Origin request policy for S3 static website - ${var.environment}"
-
-  cookies_config {
-    cookie_behavior = "none"
-  }
-
-  headers_config {
-    header_behavior = "whitelist"
-    headers {
-      items = [
-        "Access-Control-Request-Headers",
-        "Access-Control-Request-Method",
-        "Origin"
-      ]
-    }
-  }
-
-  query_strings_config {
-    query_string_behavior = "none"
-  }
-}
-
-# Response headers policy
-resource "aws_cloudfront_response_headers_policy" "security" {
-  name    = "${var.environment}-security-headers"
-  comment = "Security headers for CineVerse frontend - ${var.environment}"
-
-  cors_config {
-    access_control_allow_credentials = false
-
-    access_control_allow_headers {
-      items = ["*"]
-    }
-
-    access_control_allow_methods {
-      items = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "DELETE"]
-    }
-
-    access_control_allow_origins {
-      items = ["*"]
-    }
-
-    origin_override = true
-  }
-
-  security_headers_config {
-    strict_transport_security {
-      access_control_max_age_sec = 31536000
-      include_subdomains         = true
-      override                   = true
-    }
-
-    content_type_options {
-      override = true
-    }
-
-    frame_options {
-      frame_option = "DENY"
-      override     = true
-    }
-
-    referrer_policy {
-      referrer_policy = "strict-origin-when-cross-origin"
-      override        = true
-    }
-
-    content_security_policy {
-      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' ${var.api_endpoint} ${replace(var.api_endpoint, "https://", "http://")}; media-src 'self';"
-      override = true
-}
-
-    
-  }
-}
-
 # CloudFront distribution
 resource "aws_cloudfront_distribution" "website" {
   enabled             = true
@@ -146,7 +16,7 @@ resource "aws_cloudfront_distribution" "website" {
     origin_access_control_id = var.origin_access_control_id
   }
 
-  # Origin for API (ALB)
+  # Origin for API (ALB) - FIXED
   origin {
     domain_name = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
     origin_id   = "API-ALB"
@@ -154,7 +24,7 @@ resource "aws_cloudfront_distribution" "website" {
     custom_origin_config {
       http_port              = 80
       https_port             = 443
-      origin_protocol_policy = "http-only"
+      origin_protocol_policy = "http-only"  # CHANGED: This allows both HTTP and HTTPS
       origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
@@ -164,10 +34,11 @@ resource "aws_cloudfront_distribution" "website" {
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"
     cache_policy_id            = aws_cloudfront_cache_policy.spa.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+    # OPTION: Remove security headers for development
+    response_headers_policy_id = var.environment == "development" ? null : aws_cloudfront_response_headers_policy.security.id
   }
 
   # Static assets behavior
@@ -177,23 +48,25 @@ resource "aws_cloudfront_distribution" "website" {
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"
     cache_policy_id            = aws_cloudfront_cache_policy.static_assets.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+    # OPTION: Remove security headers for development
+    response_headers_policy_id = var.environment == "development" ? null : aws_cloudfront_response_headers_policy.security.id
   }
 
-  # API behavior
+  # API behavior - FIXED
   ordered_cache_behavior {
     path_pattern               = "/api/*"
     allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "API-ALB"
     compress                   = true
-    viewer_protocol_policy     = "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"  # CHANGED: Force HTTPS for API calls
     cache_policy_id            = aws_cloudfront_cache_policy.spa.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+    # OPTION: Remove this line to disable security headers for development
+    response_headers_policy_id = var.environment == "development" ? null : aws_cloudfront_response_headers_policy.security.id
   }
 
   restrictions {
