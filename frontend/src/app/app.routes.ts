@@ -38,9 +38,9 @@ export const routes: Routes = [
       {
         path: 'advanced-search',
         loadComponent: () =>
-          import(
-            './pages/advanced-search.page/advanced-search.page.component'
-          ).then((m) => m.AdvancedSearchPageComponent),
+          import('./pages/advanced-search/advanced-search.component').then(
+            (m) => m.AdvancedSearchPageComponent
+          ),
         canActivate: [AuthGuard],
       },
       {
