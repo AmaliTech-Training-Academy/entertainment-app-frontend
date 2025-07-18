@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import {
   FormBuilder,
   FormGroup,
@@ -6,6 +7,7 @@ import {
   ValidationErrors,
   AbstractControl,
   ReactiveFormsModule,
+ 
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,6 +28,7 @@ import { AuthService } from '../../../core/services/sign-up/auth.service';
     MatInputModule,
     MatButtonModule,
     RouterLink,
+     MatSnackBarModule
   ],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.scss',
@@ -40,7 +43,8 @@ export class SignUpComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar
   ) {
     this.registerForm = this.fb.group(
       {
@@ -97,17 +101,45 @@ export class SignUpComponent {
           if (res.token) {
             document.cookie = `token=${res.token}; path=/;`;
           }
-   
+          
+           this.snackBar.open('Account created successfully!', 'Close', {
+    duration: 3000,
+    verticalPosition: 'top',
+    panelClass: ['success-snackbar']
+  });
+
           this.router.navigate(['/login']);
         },
         error: (err) => {
-          this.loading = false;
-          if (err.error?.message) {
-            this.apiError = err.error.message;
-          } else {
-            this.apiError = 'Registration failed. Please try again.';
-          }
-        },
+  this.loading = false;
+  if (err.error?.message) {
+    this.apiError = err.error.message;
+
+    // Check for email taken error
+    if (err.error.message.toLowerCase().includes('email')) {
+      this.snackBar.open('Email already taken ❌', 'Close', {
+        duration: 3000,
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar'],
+      });
+    } else {
+      this.snackBar.open(this.apiError ?? 'An unexpected error occurred.', 'Close', {
+  duration: 3000,
+  verticalPosition: 'top',
+  panelClass: ['error-snackbar'],
+});
+
+    }
+  } else {
+    this.apiError = 'Registration failed. Please try again.';
+    this.snackBar.open(this.apiError, 'Close', {
+      duration: 3000,
+      verticalPosition: 'top',
+      panelClass: ['error-snackbar'],
+    });
+  }
+}
+
       });
     } else {
       this.registerForm.markAllAsTouched();
