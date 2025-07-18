@@ -23,7 +23,7 @@ onLogoutClick() {
 
 confirmLogout() {
   this.showLogoutModal = false;
-  this.router.navigate(['/']); // or authService.logout() if using auth logic
+  this.router.navigate(['/']); 
 }
 
 

@@ -32,17 +32,24 @@
   }
 
   .top-bar {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: space(3);
+    flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+
+    @media (min-width: 768px) {
+      display: flex;
+        gap: 1rem;
+        margin-bottom: space(3);
+    }
 
     .search-input {
       background: color($primary-colors, 700);
       border: none;
       border-radius: 0.5rem;
       padding: 1rem 1rem;
-      width: 60%;
+      width: 100%;
       color: color($neutral-colors, 100);
+      margin-bottom: 1rem;
     }
 
     .upload-btn {
@@ -54,19 +61,21 @@
       font-weight: 500;
       cursor: pointer;
       width: 100%;
+      margin-bottom: 2rem;
+      
     }
 
     @media (min-width: 768px) {
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
+    //   flex-direction: row;
+    //   justify-content: center;
+    //   align-items: center;
 
       .upload-btn {
-        width: auto;
+        width: 250px;
       }
 
       .search-input {
-        width: 300px;
+        width: 60%;
       }
     }
   }
@@ -146,7 +155,9 @@
   }
 
   .table-wrapper {
-    overflow-x: auto;
+    overflow-x: hidden;
+    border: 1px solid color($neutral-colors, 100);
+    border-radius: 0.5rem;
   }
 
   .content-table {
@@ -154,8 +165,6 @@
     border-collapse: collapse;
     min-width: 600px;
     border-radius: 0.625rem;
-    overflow: hidden;
-
     th,
     td {
       text-align: left;
@@ -164,7 +173,7 @@
     }
 
     th {
-      background-color: color($primary-colors, 800);
+      background-color: transparent;
       color: color($neutral-colors, 100);
       font-weight: 400;
       border-bottom: 1px solid color($primary-colors, 100);
@@ -174,6 +183,10 @@
       background-color: color($primary-colors, 800);
       color: color($primary-colors, 100);
       border-bottom: 1px solid color($primary-colors, 100);
+
+      &:last-child {
+        border-bottom: none;
+      }
     }
 
     .status {
@@ -194,4 +207,28 @@
   font-style: italic;
   padding: 1rem;
   color: gray;
+}
+
+.upload-form {
+  background: #f9f9f9;
+  padding: 1rem;
+  margin: 1rem 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+
+  input, select {
+    display: block;
+    margin: 0.5rem 0;
+    padding: 0.4rem;
+    width: 100%;
+  }
+
+  button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+  }
 }

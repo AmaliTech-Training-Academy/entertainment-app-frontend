@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms'; // <-- Import this
+import { FormsModule } from '@angular/forms';
+import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
+
 
 @Component({
   selector: 'app-admin-content',
   standalone: true,
-  imports: [CommonModule, FormsModule], // <-- Add FormsModule here
+  imports: [CommonModule, FormsModule, ConfirmModalComponent ], 
   templateUrl: './admin-content.component.html',
   styleUrls: ['./admin-content.component.scss']
 })
@@ -25,6 +27,26 @@ export class AdminContentComponent {
   filteredContent: any[] = [];
 
   selectAll = false;
+  showUploadForm = false;
+  showEditForm = false;
+  showConfirmModal = false;
+  editingMultiple = false;
+
+  newContent = {
+    title: '',
+    genre: '',
+    duration: '',
+    releaseDate: '',
+    status: 'Draft'
+  };
+
+  editContent = {
+    title: '',
+    genre: '',
+    duration: '',
+    releaseDate: '',
+    status: ''
+  };
 
   ngOnInit() {
     this.filteredContent = [...this.content];
@@ -37,10 +59,6 @@ export class AdminContentComponent {
       (!this.selectedGenre || item.genre === this.selectedGenre)
     );
     this.syncSelection();
-  }
-
-  get hasSelection(): boolean {
-    return this.filteredContent.some(item => item.selected);
   }
 
   selectGenre(genre: string) {
@@ -65,22 +83,70 @@ export class AdminContentComponent {
     this.selectAll = this.filteredContent.every(item => item.selected);
   }
 
+  uploadContent() {
+    this.showUploadForm = !this.showUploadForm;
+  }
+
+  addContent() {
+    const { title, genre, duration, releaseDate, status } = this.newContent;
+    if (!title || !genre || !duration || !releaseDate || !status) {
+      alert('Please fill out all fields.');
+      return;
+    }
+
+    this.content.unshift({ ...this.newContent, selected: false });
+    this.filterContent();
+    this.showUploadForm = false;
+
+    this.newContent = {
+      title: '',
+      genre: '',
+      duration: '',
+      releaseDate: '',
+      status: 'Draft'
+    };
+  }
+
   editSelected() {
     const selectedItems = this.filteredContent.filter(item => item.selected);
-    console.log('Edit:', selectedItems);
-    // Add logic to open an edit form/modal
+    if (selectedItems.length === 0) {
+      alert('Please select at least one item to edit.');
+      return;
+    }
+
+    this.editingMultiple = selectedItems.length > 1;
+    this.editContent = { ...selectedItems[0] };
+    this.showEditForm = true;
+  }
+
+  submitEdit() {
+    const selectedItems = this.filteredContent.filter(item => item.selected);
+    selectedItems.forEach(item => {
+      item.title = this.editContent.title;
+      item.genre = this.editContent.genre;
+      item.duration = this.editContent.duration;
+      item.releaseDate = this.editContent.releaseDate;
+      item.status = this.editContent.status;
+    });
+
+    this.showEditForm = false;
   }
 
   deleteSelected() {
-    const confirmed = confirm('Are you sure you want to delete the selected content?');
-    if (confirmed) {
-      this.content = this.content.filter(item => !item.selected);
-      this.filterContent(); // Refresh view
-    }
+    this.showConfirmModal = true; 
   }
 
-  uploadContent() {
-    console.log('Uploading content...');
-    // Add logic to handle file upload or open an upload modal
+  confirmDelete() {
+    this.content = this.content.filter(item => !item.selected);
+    this.filterContent();
+    this.showConfirmModal = false;
+  }
+
+  cancelDelete() {
+    this.showConfirmModal = false;
+  }
+
+  onItemSelectionChange() {
+    this.syncSelection();
   }
 }

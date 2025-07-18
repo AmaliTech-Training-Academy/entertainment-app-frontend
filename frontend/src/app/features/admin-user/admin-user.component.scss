@@ -35,6 +35,12 @@
   margin-bottom: 1.5rem;
   gap: 50px;
 
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
   .search-input {
     padding: 1rem 1rem;
     background-color: color($primary-colors, 800);
@@ -42,6 +48,10 @@
     border-radius: 6px;
     color: #f0f0f0;
     width: 60%;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
   }
 
   .dropdown {
@@ -120,10 +130,11 @@
   th, td {
     padding: 0.75rem 1rem;
     text-align: left;
+    cursor: pointer;
   }
 
   thead {
-    background-color: color($primary-colors, 800);
+    background-color: color($primary-colors, 1000);
 
     th {
       color: #bbbbbb;
