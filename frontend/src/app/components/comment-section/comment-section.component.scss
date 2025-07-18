@@ -4,7 +4,8 @@
 @use "sass:map";
 
 .comment-section {
-margin-left: 15%;
+  width: 100%;
+  margin-left: 0;
   border-radius: 8px;
   margin-top: 20px;
 }
@@ -13,7 +14,7 @@ margin-left: 15%;
 .comment-input-container {
     display: flex;
     align-items: center;
-    width: 80%;
+    width: 100%;
   gap: 12px;
   margin-bottom: 24px;
   padding: 16px;
@@ -84,6 +85,60 @@ margin-left: 15%;
   }
 }
 
+.input-actions {
+  display: flex;
+  align-items: center;
+}
+
+.cancel-btn,
+.submit-btn {
+  background: #23272f;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a0aec0;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  outline: none;
+  box-shadow: none;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+  }
+
+
+
+  &:disabled {
+    background: #4a5568;
+    color: #6c757d;
+    cursor: not-allowed;
+  }
+}
+
+.cancel-btn {
+  color: #e53e3e;
+  &:hover:not(:disabled),
+  &:focus-visible {
+    background: #2a2d35;
+    color: #c53030;
+  }
+}
+
+.submit-btn {
+  color: #38a169;
+  &:hover:not(:disabled),
+  &:focus-visible {
+    background: #2a2d35;
+    color: #2f855a;
+  }
+}
+
 // Comments List
 .comments-list {
   display: flex;
@@ -93,7 +148,7 @@ margin-left: 15%;
 }
 
 .comment-card {
-  width: 80%;
+  width: 100%;
   padding: 8px;
   background-color: map.get($primary-colors, 900);
   gap: 13px;
@@ -155,8 +210,7 @@ margin-left: 15%;
   gap: 3px;
   position: absolute;
   right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 8px;
 }
 
 .action-button {
@@ -188,8 +242,12 @@ margin-left: 15%;
 }
 
 @media (min-width: 769px) {
+  .comment-section {
+    width: 80%;
+    margin-left: 15%;
+  }
   .comment-card {
-    // width: 531px;
+    width: 80%;
     height: 125px;
     padding: 16px;
     
@@ -215,8 +273,15 @@ margin-left: 15%;
       @include mixins.typography("body", "b1");
     }
   }
+    .comment-input-container {
+    width: 80%;
+
+
+}
   
   .comment-actions {
     right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 } 

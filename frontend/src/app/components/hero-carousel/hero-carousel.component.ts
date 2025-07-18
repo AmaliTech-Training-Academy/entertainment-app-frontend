@@ -19,7 +19,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
       duration: '142m',
       genres: ['Drama'],
       image:
-        'https://images.unsplash.com/photo-1616530940355-351fabd9524b?q=80&w=1335&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', // Prison cell by Matthew Ansley
+        'assets/images/breaking-bad2.png', // Prison cell by Matthew Ansley
     },
     {
       title: 'The Godfather',
@@ -29,8 +29,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
       year: 1972,
       duration: '175m',
       genres: ['Crime', 'Drama'],
-      image:
-        'https://plus.unsplash.com/premium_photo-1710522706751-c2f0c76cc5fd?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', // Man in suit by Graphe Tween
+      image:'assets/images/Dune-2.png', // Man in suit by Graphe Tween
     },
     {
       title: 'The Dark Knight',
@@ -41,7 +40,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
       duration: '152m',
       genres: ['Action', 'Crime', 'Drama'],
       image:
-        'https://images.unsplash.com/photo-1612635466104-e3aab50680b6?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', // City at night by Denys Nevozhai
+        'assets/images/Rectangle-4.png', // City at night by Denys Nevozhai
     },
     {
       title: "Schindler's List",
@@ -52,7 +51,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
       duration: '195m',
       genres: ['Biography', 'Drama', 'History'],
       image:
-        'https://images.unsplash.com/photo-1585951237313-1979e4df7385?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', // Auschwitz by Karsten Winegeart
+        'assets/images/bts.png', // Auschwitz by Karsten Winegeart
     },
     {
       title: 'Pulp Fiction',
@@ -63,7 +62,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
       duration: '154m',
       genres: ['Crime', 'Drama'],
       image:
-        'https://images.unsplash.com/photo-1511875762315-c773eb98eec0?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', // Mel's Drive-in by Cesira Alvarado
+        'assets/images/final-destination.png', // Mel's Drive-in by Cesira Alvarado
     },
   ];
   currentIndex = 0;
