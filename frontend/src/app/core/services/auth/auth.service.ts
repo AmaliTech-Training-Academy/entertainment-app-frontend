@@ -12,6 +12,6 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(email: string, password: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/auth/login`, { email, password });
+    return this.http.post(`http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/v1/auth/login`, { email, password });
   }
 }
