@@ -1,77 +1,82 @@
 <section class="user-management">
+  <header class="page-header">
+    <h1>Users</h1>
+    <p>Manage user accounts, roles, and permissions.</p>
+  </header>
 
-      <header class="page-header">
-        <h1>Users</h1>
-        <p>Manage user accounts, roles, and permissions.</p>
-      </header>
+  <div class="top-bar">
+    <input class="search-input" type="text" [(ngModel)]="searchQuery" placeholder="Search users" />
+    <div class="dropdown">
+      <button class="dropdown-btn" (click)="toggleDropdown()">All Roles</button>
+      <ul *ngIf="dropdownOpen" class="dropdown-menu">
+        <li *ngFor="let role of roles" (click)="selectRole(role)">{{ role }}</li>
+      </ul>
+    </div>
+  </div>
 
-      <div class="top-bar">
-        <input class="search-input" type="text" placeholder="Search users" />
-        <div class="dropdown">
-          <button class="dropdown-btn" (click)="toggleDropdown()">All Roles</button>
-          <ul *ngIf="dropdownOpen" class="dropdown-menu">
-            <li *ngFor="let role of roles" (click)="selectRole(role)">{{ role }}</li>
-          </ul>
-        </div>
-      </div>
+  <div class="bulk-actions">
+    <button class="action-btn">Change Roles</button>
+    <button
+  class="action-btn ban"
+  (click)="toggleUserStatus()"
+  [disabled]="selectedUserIndex === null"
+>
+  {{ selectedUserIndex !== null && users[selectedUserIndex].status === 'Inactive' ? 'Unban User' : 'Ban User' }}
+</button>
 
-      <div class="bulk-actions">
-        <button class="action-btn">Change Roles</button>
-        <button class="action-btn ban">Ban Users</button>
-      </div>
+  </div>
 
-      <div class="create-user-container">
-        <button class="create-user-btn" (click)="openCreateUserModal()">+ Create New User</button>
-      </div>
+  <table class="user-table">
+    <thead>
+      <tr>
+        <th><input type="checkbox" /></th>
+        <th>User</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Joined</th>
+        <th>Last Active</th>
+      </tr>
+    </thead>
+    <tbody>
+  <tr *ngFor="let user of filteredUsers; let i = index">
+    <td>
+      <input type="checkbox" [checked]="selectedUserIndex === i" (change)="selectUser(i)" />
+    </td>
+    <td>{{ user.name }}</td>
+    <td>{{ user.role }}</td>
+    <td>
+      <span [ngClass]="{
+        'status-active': user.status === 'Active',
+        'status-inactive': user.status === 'Inactive'
+      }">
+        {{ user.status }}
+      </span>
+    </td>
+    <td>{{ user.joined }}</td>
+    <td>{{ user.lastActive }}</td>
+  </tr>
 
-      <table class="user-table">
-        <thead>
-          <tr>
-            <th><input type="checkbox" /></th>
-            <th>User</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Joined</th>
-            <th>Last Active</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of users">
-            <td><input type="checkbox" /></td>
-            <td>{{ user.name }}</td>
-            <td>{{ user.role }}</td>
-            <td>
-              <span [ngClass]="{
-                'status-active': user.status === 'Active',
-                'status-inactive': user.status === 'Inactive'
-              }">
-                {{ user.status }}
-              </span>
-            </td>
-            <td>{{ user.joined }}</td>
-            <td>{{ user.lastActive }}</td>
-          </tr>
-        </tbody>
-      </table>
+  <!-- Show if no users match -->
+  <tr *ngIf="filteredUsers.length === 0">
+    <td colspan="6" style="text-align: center; padding: 1rem; color: gray;">
+      No user found.
+    </td>
+  </tr>
+</tbody>
 
-      <div class="modal-backdrop" *ngIf="showCreateUserModal">
-        <div class="modal glass">
-          <h2>Create New User</h2>
-          <form (ngSubmit)="createUser()" #userForm="ngForm">
-            <div class="form-row">
-              <input type="text" name="firstName" [(ngModel)]="newUser.firstName" placeholder="First Name" required />
-              <input type="text" name="lastName" [(ngModel)]="newUser.lastName" placeholder="Last Name" required />
-            </div>
-            <input type="email" name="email" [(ngModel)]="newUser.email" placeholder="Email" required />
-            <select name="role" [(ngModel)]="newUser.role" required>
-              <option value="">Select Role</option>
-              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
-            </select>
-            <div class="modal-actions">
-              <button type="submit" [disabled]="userForm.invalid">Create</button>
-              <button type="button" (click)="closeCreateUserModal()">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </section>
+  </table>
+
+  <app-confirm-modal
+  *ngIf="showBanModal"
+  [title]="users[selectedUserIndex!].status === 'Active' ? 'Confirm Ban' : 'Confirm Unban'"
+  [message]="users[selectedUserIndex!].status === 'Active'
+    ? 'Are you sure you want to ban the selected user from the platform? This action will take effect immediately.'
+    : 'Are you sure you want to unban the selected user and allow them access again?'"
+  [confirmText]="users[selectedUserIndex!].status === 'Active' ? 'Confirm Ban' : 'Confirm Unban'"
+  [cancelText]="'Cancel'"
+  (confirm)="confirmBan()"
+  (cancel)="cancelBan()"
+/>
+
+
+</section>

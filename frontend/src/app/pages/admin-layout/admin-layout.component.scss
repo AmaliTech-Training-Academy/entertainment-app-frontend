@@ -30,6 +30,7 @@
   .logo {
     font-size: 1.5rem;
     font-weight: bold;
+    cursor: pointer;
   }
 
   .avatar {
@@ -43,11 +44,11 @@
 .admin-body {
   display: flex;
   flex: 1;
-  height: calc(100vh - 64px); // Adjust based on header height
+  height: calc(100vh - 64px); 
 }
 
 .admin-main {
-  background-color: color($primary-colors, 1000);
+  background-color: #10141e;
   flex: 1;
   overflow-y: auto;
 

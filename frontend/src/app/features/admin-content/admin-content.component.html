@@ -1,0 +1,64 @@
+<section class="content-management">
+  <header class="page-header">
+    <h1>Content Management</h1>
+    <p>Manage user accounts, roles, and permissions.</p>
+  </header>
+
+  <div class="top-bar">
+    <input
+  class="search-input"
+  type="text"
+  placeholder="Search users"
+  [(ngModel)]="searchTerm"
+  (input)="filterContent()"
+/>
+
+    <button class="upload-btn">+ Upload content</button>
+  </div>
+
+  <h3>Bulk Action</h3>
+  <div class="bulk-actions">
+    
+    <div class="bulk-buttons">
+      <button class="edit-btn">Edit</button>
+      <button class="delete-btn">Delete</button>
+    </div>
+    <div class="dropdown">
+      <button class="dropdown-btn" (click)="toggleDropdown()">All Genre</button>
+      <ul *ngIf="dropdownOpen" class="dropdown-menu">
+        <li *ngFor="let genre of genres" (click)="selectGenre(genre)">
+          {{ genre }}
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="content-table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" /></th>
+          <th>Title</th>
+          <th>Genre</th>
+          <th>Duration</th>
+          <th>Release Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredContent">
+  <td><input type="checkbox" /></td>
+  <td>{{ item.title }}</td>
+  <td>{{ item.genre }}</td>
+  <td>{{ item.duration }}</td>
+  <td>{{ item.releaseDate }}</td>
+  <td class="status">{{ item.status }}</td>
+</tr>
+<tr *ngIf="filteredContent.length === 0">
+  <td colspan="6" class="no-results">No movies found.</td>
+</tr>
+
+      </tbody>
+    </table>
+  </div>
+</section>
