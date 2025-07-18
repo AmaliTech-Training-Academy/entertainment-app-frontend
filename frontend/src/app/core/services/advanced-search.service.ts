@@ -54,7 +54,7 @@ export interface MovieFilters {
   providedIn: 'root',
 })
 export class AdvancedSearchService {
-  private apiUrl = `${environment.apiBaseUrl}`; // Adjust endpoint as needed
+  private apiUrl = `${environment.apiBaseUrl}`;
 
   constructor(private http: HttpClient) {}
 

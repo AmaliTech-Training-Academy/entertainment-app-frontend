@@ -1,0 +1,146 @@
+main {
+  border-radius: 0.75rem;
+  box-shadow: 0 0 10px rgba(245, 4, 4, 0.3), inset 0 0 8px rgba(245, 4, 4, 0.2);
+  border: 2px solid #f50404;
+  background-color: #10141e;
+  max-width: 48rem;
+  width: 100%;
+  padding: 2rem 2.5rem;
+  margin: 2rem auto;
+}
+
+h1 {
+  color: #f50404;
+  font-weight: 900;
+  font-size: 2.25rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  text-shadow: 0 0 6px #f50404;
+  user-select: none;
+}
+
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+.help-text {
+  font-size: 0.75rem;
+  color: #ffffff99;
+  margin-top: 0.25rem;
+  user-select: none;
+}
+
+.short-select {
+  max-width: 14rem;
+}
+
+@media (max-width: 768px) {
+  .short-select {
+    max-width: 100%;
+  }
+
+  main {
+    padding: 1.5rem;
+  }
+}
+
+// Custom Angular Material styles
+.mat-form-field {
+  width: 100%;
+
+  .mat-form-field-label {
+    color: #ffffff !important;
+    font-weight: 700;
+  }
+
+  .mat-form-field-underline {
+    background-color: #ffffff !important;
+  }
+
+  .mat-input-element {
+    color: #ffffff !important;
+    caret-color: #ffffff !important;
+  }
+
+  .mat-form-field-ripple {
+    background-color: #f50404 !important;
+  }
+
+  &.mat-focused {
+    .mat-form-field-label {
+      color: #f50404 !important;
+    }
+  }
+}
+
+.mat-select-value {
+  color: #ffffff !important;
+}
+
+.mat-select-arrow {
+  color: #f50404 !important;
+}
+
+.mat-selection-list {
+  background-color: transparent;
+  max-height: 10rem;
+  overflow-y: auto;
+
+  .mat-list-option {
+    color: #ffffff;
+
+    .mat-pseudo-checkbox {
+      border-color: #ffffff;
+    }
+
+    &.mat-list-item-selected {
+      .mat-pseudo-checkbox {
+        background-color: #f50404;
+        border-color: #f50404;
+      }
+    }
+  }
+}
+
+.mat-raised-button {
+  background-color: #f50404 !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 1.125rem;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 4px 8px rgba(245, 4, 4, 0.4) !important;
+
+  &:hover {
+    background-color: #d10303 !important;
+    box-shadow: 0 6px 12px rgba(245, 4, 4, 0.6) !important;
+  }
+
+  .mat-icon {
+    margin-right: 0.5rem;
+  }
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #10141e;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #f50404;
+  border-radius: 10px;
+  border: 2px solid #10141e;
+}
+
+// Snackbar styling
+.success-snackbar {
+  background-color: #4caf50 !important;
+}
+
+.error-snackbar {
+  background-color: #f44336 !important;
+}
