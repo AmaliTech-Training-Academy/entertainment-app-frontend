@@ -947,14 +947,21 @@ jobs:
       - name: Fetch prod branch
         run: git fetch origin prod
 
-      - name: Revert CI/CD workflow file to prod version
+      - name: Revert CI/CD workflow files to match prod version dynamically
         run: |
-          git checkout origin/prod -- .github/workflows/frontend-ci-cd.yml
+          # Fetch the list of workflow .yml files from prod branch
+          FILES=$(git ls-tree -r --name-only origin/prod .github/workflows | grep '\.yml$')
 
-      - name: Commit reverted file if modified
+          # Restore each .yml file from prod branch
+          if [ -n "$FILES" ]; then
+            git checkout origin/prod -- $FILES
+          fi
+
+      - name: Commit reverted workflow files (if needed)
         run: |
           if ! git diff --quiet; then
-            git commit -am "Exclude CI/CD workflow changes from PR"
+            git add .github/workflows/*.yml
+            git commit -m "Exclude production-only CI/CD workflow files from PR"
           fi
 
       - name: Create Pull Request from Staging to Prod
