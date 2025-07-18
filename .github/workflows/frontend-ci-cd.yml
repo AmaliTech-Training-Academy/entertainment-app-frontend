@@ -943,8 +943,21 @@ jobs:
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
+      
+      - name: Fetch prod branch
+        run: git fetch origin prod
 
-      - name: Create Pull Request to Prod
+      - name: Revert CI/CD workflow file to prod version
+        run: |
+          git checkout origin/prod -- .github/workflows/frontend-ci-cd.yml
+
+      - name: Commit reverted file if modified
+        run: |
+          if ! git diff --quiet; then
+            git commit -am "Exclude CI/CD workflow changes from PR"
+          fi
+
+      - name: Create Pull Request from Staging to Prod
         id: cpr # Added ID to reference outputs
         uses: peter-evans/create-pull-request@v6
         with:
@@ -959,8 +972,6 @@ jobs:
           branch: auto-merge/staging-to-prod-${{ github.run_id }} # Unique branch name for the PR
           base: prod # Target branch for the PR
           delete-branch: true # Delete the temporary branch after merge
-          ignore-paths: |
-            .github/workflows/frontend-ci-cd.yml
 
       - name: Enable Auto-Merge on PR
         # Only run if a PR was successfully created
