@@ -5,6 +5,8 @@ import { MatFormField, MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/login/auth.service';
 
@@ -19,6 +21,7 @@ import { AuthService } from '../../../core/services/login/auth.service';
     RouterModule,
     MatFormField,
     CommonModule,
+      MatSnackBarModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -36,7 +39,8 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+     private snackBar: MatSnackBar
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -90,17 +94,25 @@ export class LoginComponent implements OnInit {
       const { email, password } = this.loginForm.value;
       this.authService.login(email, password).subscribe({
         next: (response) => {
-          console.log('Login response:', response); // Log the response
-          // Extract token and user info from response.data
-          const { token, refreshToken, ...user } = response.data || {};
-          if (token) {
-            document.cookie = `auth_token=${token}; path=/;`;
-          }
-          if (Object.keys(user).length > 0) {
-            document.cookie = `auth_user=${encodeURIComponent(JSON.stringify(user))}; path=/;`;
-          }
-          this.router.navigate(['/']);
-        },
+  console.log('Login response:', response);
+  const { token, refreshToken, ...user } = response.data || {};
+  if (token) {
+    document.cookie = `auth_token=${token}; path=/;`;
+  }
+  if (Object.keys(user).length > 0) {
+    document.cookie = `auth_user=${encodeURIComponent(JSON.stringify(user))}; path=/;`;
+  }
+
+  // ✅ Show success toast
+  this.snackBar.open('Welcome back! 🎉 Login successful.', 'Close', {
+    duration: 3000,
+    verticalPosition: 'top',
+    panelClass: ['success-snackbar'],
+  });
+
+  this.router.navigate(['/']);
+},
+
         error: (err) => {
           console.log('Login error:', err);
           this.loginError = err?.error?.message || 'Invalid email or password.';

@@ -9,15 +9,16 @@
 
 
 .success-snackbar {
-  background: rgba(30, 30, 30, 0.6); // dark semi-transparent
+  background: #1f263a; 
   color: #ffffff;
   backdrop-filter: blur(10px) saturate(150%);
   -webkit-backdrop-filter: blur(10px) saturate(150%);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
 }
 
 .error-snackbar {
-  background: #1f263a; // dark semi-transparent
+  background: #1f263a; 
   color: #ffffff;
   backdrop-filter: blur(10px) saturate(150%);
   -webkit-backdrop-filter: blur(10px) saturate(150%);
