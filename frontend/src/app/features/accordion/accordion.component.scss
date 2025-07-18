@@ -15,9 +15,11 @@ h2 {
   font-weight: 600;
   color: color($neutral-colors, 100);
   margin-bottom: space(3);
+  margin-left: space(6);
   text-align: left;
 
   @media (min-width: 768px) {
+    margin-left: space(6)
   }
 
   @media (min-width: 1024px) {
@@ -25,7 +27,7 @@ h2 {
 }
 
 .accordion {
-  // padding: space(2);
+  padding: space(6);
 
   .accordion-item {
     background-color: color($primary-colors, 800);
@@ -98,12 +100,12 @@ h2 {
   }
 
   @media (min-width: 768px) {
-    // padding: space(2) space(6);
+    padding: space(2) space(6);
 
     .accordion-item {
       .accordion-header {
         font-size: 1.05rem;
-        // padding: space(4) space(3);
+        padding: space(4) space(3);
       }
 
       .accordion-content {

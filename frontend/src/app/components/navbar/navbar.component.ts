@@ -102,6 +102,9 @@ export class NavbarComponent {
   goToSignUp() {
     this.router.navigate(['/signup']);
   }
+  goToUserDashboard() {
+    this.router.navigate(['/user-test']);
+  }
 
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: Event) {
