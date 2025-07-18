@@ -13,27 +13,70 @@
 
 .admin-layout {
   display: flex;
+  flex-direction: column;
   height: 100vh;
-  overflow: hidden; // Prevent sidebar from scrolling with content
+  overflow: hidden;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: color($primary-colors, 900);
+  color: white;
+  border-bottom: 1px solid color($primary-colors, 800);
+
+  .logo img {
+    height: 32px;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+
+.admin-body {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 64px); // 64px header
 }
 
 .admin-main {
-  background-color: color($primary-colors, 1000); // optional
-
+  background-color: #10141e;
   flex: 1;
-  height: 100vh;
   overflow-y: auto;
 
-  // Hide scrollbar for WebKit browsers (Chrome, Safari, Edge)
   &::-webkit-scrollbar {
     width: 0;
     height: 0;
   }
 
-  // Optional: Hide scrollbar in Firefox
-  scrollbar-width: none; // Firefox
-  -ms-overflow-style: none; // IE and Edge
-
-  // Prevent scrollbars from flashing on overflow
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   overscroll-behavior: contain;
+}
+
+/* ======== Responsive: Sidebar at Bottom on Mobile ======== */
+@media (max-width: 768px) {
+  .admin-body {
+    flex-direction: column-reverse;
+  }
+
+  app-sidebar {
+    width: 100%;
+    height: 60px;
+    background-color: color($primary-colors, 900);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid color($primary-colors, 800);
+  }
+
+  .admin-main {
+    height: calc(100vh - 64px - 60px); // header + bottom nav
+  }
 }

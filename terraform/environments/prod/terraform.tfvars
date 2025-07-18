@@ -4,6 +4,6 @@ project_name       = "cineverse"
 domain_name        = "cineverse.com"  # Production domain
 enable_waf         = true
 enable_monitoring  = true
-api_endpoint       = "https://api-dev.cineverse.dev"
+api_endpoint       = "http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
 # Or use ALB domain directly: "https://dev-api-alb-123456789.eu-west-1.elb.amazonaws.com"
 use_existing_resources = true

@@ -1,0 +1,15 @@
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>{{ title }}</h2>
+      <button class="close-btn" (click)="cancel.emit()">×</button>
+    </div>
+
+    <p class="modal-message">{{ message }}</p>
+
+    <div class="modal-actions">
+      <button class="confirm-btn" (click)="confirm.emit()">{{ confirmText }}</button>
+      <button class="cancel-btn" (click)="cancel.emit()">{{ cancelText }}</button>
+    </div>
+  </div>
+</div>

@@ -46,7 +46,7 @@ variable "enable_monitoring" {
 variable "api_endpoint" {
   description = "Backend API endpoint URL"
   type        = string
-  default     = "https://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
+  default     = "http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
 }
 
 variable "tags" {
