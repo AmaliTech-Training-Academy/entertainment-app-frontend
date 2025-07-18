@@ -1,6 +1,12 @@
 video{
   width: 100%;
-  height: 629px;
+  height: 220px;
   margin-top: 50px;
   object-fit: cover;
+}
+
+@media (min-width: 768px) {
+  video {
+    height: 629px;
+  }
 }
