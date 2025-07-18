@@ -1,10 +1,8 @@
-import {
-  coerceBooleanProperty
-} from "./chunk-IBYU652R.js";
-import {
-  MatCommonModule
-} from "./chunk-JQQTDQJL.js";
+import { coerceBooleanProperty } from "./chunk-IBYU652R.js";
+import { MatCommonModule } from "./chunk-HCQZYJG3.js";
 import "./chunk-H3T65ING.js";
+import "./chunk-2QEZ2KQS.js";
+import "./chunk-TAPYLPZS.js";
 import "./chunk-52SUOJDU.js";
 import "./chunk-FJ2LSRVL.js";
 import "./chunk-3B7WPXDT.js";
@@ -19,7 +17,7 @@ import {
   ɵɵclassProp,
   ɵɵdefineComponent,
   ɵɵdefineInjector,
-  ɵɵdefineNgModule
+  ɵɵdefineNgModule,
 } from "./chunk-MTES5EJZ.js";
 import "./chunk-S35MAB2V.js";
 
@@ -51,49 +49,73 @@ var MatDivider = class _MatDivider {
     hostVars: 7,
     hostBindings: function MatDivider_HostBindings(rf, ctx) {
       if (rf & 2) {
-        ɵɵattribute("aria-orientation", ctx.vertical ? "vertical" : "horizontal");
-        ɵɵclassProp("mat-divider-vertical", ctx.vertical)("mat-divider-horizontal", !ctx.vertical)("mat-divider-inset", ctx.inset);
+        ɵɵattribute(
+          "aria-orientation",
+          ctx.vertical ? "vertical" : "horizontal"
+        );
+        ɵɵclassProp("mat-divider-vertical", ctx.vertical)(
+          "mat-divider-horizontal",
+          !ctx.vertical
+        )("mat-divider-inset", ctx.inset);
       }
     },
     inputs: {
       vertical: "vertical",
-      inset: "inset"
+      inset: "inset",
     },
     decls: 0,
     vars: 0,
-    template: function MatDivider_Template(rf, ctx) {
-    },
-    styles: [".mat-divider{display:block;margin:0;border-top-style:solid;border-top-color:var(--mat-divider-color, var(--mat-sys-outline));border-top-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-vertical{border-top:0;border-right-style:solid;border-right-color:var(--mat-divider-color, var(--mat-sys-outline));border-right-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-inset{margin-left:80px}[dir=rtl] .mat-divider.mat-divider-inset{margin-left:auto;margin-right:80px}\n"],
+    template: function MatDivider_Template(rf, ctx) {},
+    styles: [
+      ".mat-divider{display:block;margin:0;border-top-style:solid;border-top-color:var(--mat-divider-color, var(--mat-sys-outline));border-top-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-vertical{border-top:0;border-right-style:solid;border-right-color:var(--mat-divider-color, var(--mat-sys-outline));border-right-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-inset{margin-left:80px}[dir=rtl] .mat-divider.mat-divider-inset{margin-left:auto;margin-right:80px}\n",
+    ],
     encapsulation: 2,
-    changeDetection: 0
+    changeDetection: 0,
   });
 };
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(MatDivider, [{
-    type: Component,
-    args: [{
-      selector: "mat-divider",
-      host: {
-        "role": "separator",
-        "[attr.aria-orientation]": 'vertical ? "vertical" : "horizontal"',
-        "[class.mat-divider-vertical]": "vertical",
-        "[class.mat-divider-horizontal]": "!vertical",
-        "[class.mat-divider-inset]": "inset",
-        "class": "mat-divider"
-      },
-      template: "",
-      encapsulation: ViewEncapsulation.None,
-      changeDetection: ChangeDetectionStrategy.OnPush,
-      styles: [".mat-divider{display:block;margin:0;border-top-style:solid;border-top-color:var(--mat-divider-color, var(--mat-sys-outline));border-top-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-vertical{border-top:0;border-right-style:solid;border-right-color:var(--mat-divider-color, var(--mat-sys-outline));border-right-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-inset{margin-left:80px}[dir=rtl] .mat-divider.mat-divider-inset{margin-left:auto;margin-right:80px}\n"]
-    }]
-  }], null, {
-    vertical: [{
-      type: Input
-    }],
-    inset: [{
-      type: Input
-    }]
-  });
+  (typeof ngDevMode === "undefined" || ngDevMode) &&
+    setClassMetadata(
+      MatDivider,
+      [
+        {
+          type: Component,
+          args: [
+            {
+              selector: "mat-divider",
+              host: {
+                role: "separator",
+                "[attr.aria-orientation]":
+                  'vertical ? "vertical" : "horizontal"',
+                "[class.mat-divider-vertical]": "vertical",
+                "[class.mat-divider-horizontal]": "!vertical",
+                "[class.mat-divider-inset]": "inset",
+                class: "mat-divider",
+              },
+              template: "",
+              encapsulation: ViewEncapsulation.None,
+              changeDetection: ChangeDetectionStrategy.OnPush,
+              styles: [
+                ".mat-divider{display:block;margin:0;border-top-style:solid;border-top-color:var(--mat-divider-color, var(--mat-sys-outline));border-top-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-vertical{border-top:0;border-right-style:solid;border-right-color:var(--mat-divider-color, var(--mat-sys-outline));border-right-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-inset{margin-left:80px}[dir=rtl] .mat-divider.mat-divider-inset{margin-left:auto;margin-right:80px}\n",
+              ],
+            },
+          ],
+        },
+      ],
+      null,
+      {
+        vertical: [
+          {
+            type: Input,
+          },
+        ],
+        inset: [
+          {
+            type: Input,
+          },
+        ],
+      }
+    );
 })();
 var MatDividerModule = class _MatDividerModule {
   static ɵfac = function MatDividerModule_Factory(__ngFactoryType__) {
@@ -102,23 +124,30 @@ var MatDividerModule = class _MatDividerModule {
   static ɵmod = ɵɵdefineNgModule({
     type: _MatDividerModule,
     imports: [MatCommonModule, MatDivider],
-    exports: [MatDivider, MatCommonModule]
+    exports: [MatDivider, MatCommonModule],
   });
   static ɵinj = ɵɵdefineInjector({
-    imports: [MatCommonModule, MatCommonModule]
+    imports: [MatCommonModule, MatCommonModule],
   });
 };
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(MatDividerModule, [{
-    type: NgModule,
-    args: [{
-      imports: [MatCommonModule, MatDivider],
-      exports: [MatDivider, MatCommonModule]
-    }]
-  }], null, null);
+  (typeof ngDevMode === "undefined" || ngDevMode) &&
+    setClassMetadata(
+      MatDividerModule,
+      [
+        {
+          type: NgModule,
+          args: [
+            {
+              imports: [MatCommonModule, MatDivider],
+              exports: [MatDivider, MatCommonModule],
+            },
+          ],
+        },
+      ],
+      null,
+      null
+    );
 })();
-export {
-  MatDivider,
-  MatDividerModule
-};
+export { MatDivider, MatDividerModule };
 //# sourceMappingURL=@angular_material_divider.js.map

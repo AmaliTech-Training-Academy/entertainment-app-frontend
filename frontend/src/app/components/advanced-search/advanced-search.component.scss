@@ -14,6 +14,7 @@
   max-width: 600px;
   margin: 0 auto;
   flex-wrap: nowrap;
+  align-items: baseline;
   gap: map.get($spacing, 3);
 
   .search-field {
@@ -37,43 +38,64 @@
     }
   }
 
-  // .search-button {
-  //   display: flex;
-  //   justify-content: space-between;
-  //   align-items: center;
-  //   flex-shrink: 1;
-  //   position: relative;
+  .search-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; // Space between text and icon
+    min-width: 120px;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 4px;
+    background-color: #f44343; // Your red color
+    color: white;
+    font-size: 16px;
+    font-weight: normal; // Not bold
+    border: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden; // Keeps content contained
+    transition: all 0.2s ease;
 
-  //   div {
-  //     order: 1;
-  //     @include typography(heading, hh5);
-  //     color: map.get($neutral-colors, 100);
-  //     margin-right: map.get($spacing, 2);
-  //   }
+    &:hover {
+      background-color: #e03e3e; // Darker red on hover
+    }
 
-  //   // &.mat-mdc-raised-button {
-  //   @include typography(body, b1);
-  //   height: 48px;
-  //   width: 20%;
-  //   padding: 0 map.get($spacing, 6);
-  //   background-color: map.get($secondary-colors, 200);
-  //   color: map.get($neutral-colors, 100);
-  //   border-radius: map.get($radius, 4);
-  //   box-shadow: map.get($effects, E0);
+    div {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-  //   &:hover {
-  //     background-color: map.get($secondary-colors, 400);
-  //   }
+    img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      flex-shrink: 0; // Prevents icon from shrinking
+    }
 
-  //   img {
-  //     order: 2;
-  //   }
+    @media (max-width: 640px) {
+      padding: 0 12px;
+      min-width: 100px;
+      gap: 6px;
 
-  //   @media (max-width: 640px) {
-  //     @include typography(body, b1);
-  //   }
-  //   // }
-  // }
+      img {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    @media (max-width: 440px) {
+      height: 40px;
+      font-size: 14px;
+
+      img {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
 }
 
 .search-container {
@@ -170,67 +192,6 @@
 
     &:hover {
       background-color: map.get($primary-colors, 700) !important;
-    }
-  }
-}
-
-// dey  play
-
-.search-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px; // Space between text and icon
-  min-width: 120px;
-  height: 48px;
-  padding: 0 16px;
-  border-radius: 4px;
-  background-color: #f44343; // Your red color
-  color: white;
-  font-size: 16px;
-  font-weight: normal; // Not bold
-  border: none;
-  cursor: pointer;
-  box-sizing: border-box;
-  position: relative;
-  overflow: hidden; // Keeps content contained
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: #e03e3e; // Darker red on hover
-  }
-
-  div {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  img {
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-    flex-shrink: 0; // Prevents icon from shrinking
-  }
-
-  @media (max-width: 640px) {
-    padding: 0 12px;
-    min-width: 100px;
-    gap: 6px;
-
-    img {
-      width: 18px;
-      height: 18px;
-    }
-  }
-
-  @media (max-width: 440px) {
-    height: 40px;
-    font-size: 14px;
-
-    img {
-      width: 16px;
-      height: 16px;
     }
   }
 }
