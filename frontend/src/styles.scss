@@ -9,11 +9,18 @@
 
 
 .success-snackbar {
-  background-color: #43a047 !important; /* green */
-  color: #fff !important;
+  background: rgba(30, 30, 30, 0.6); // dark semi-transparent
+  color: #ffffff;
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .error-snackbar {
-  background-color: #e53935 !important; /* red */
-  color: #fff !important;
+  background: #1f263a; // dark semi-transparent
+  color: #ffffff;
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  border-radius: 5px;
 }
+
