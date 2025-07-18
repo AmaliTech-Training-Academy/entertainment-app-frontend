@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../core/services/auth/auth.service';
+import { AuthService } from '../../../core/services/login/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -90,14 +90,16 @@ export class LoginComponent implements OnInit {
       const { email, password } = this.loginForm.value;
       this.authService.login(email, password).subscribe({
         next: (response) => {
-          // Store token and user info if provided
-          if (response.token) {
-            localStorage.setItem('auth_token', response.token);
+          console.log('Login response:', response); // Log the response
+          // Extract token and user info from response.data
+          const { token, refreshToken, ...user } = response.data || {};
+          if (token) {
+            document.cookie = `auth_token=${token}; path=/;`;
           }
-          if (response.user) {
-            localStorage.setItem('auth_user', JSON.stringify(response.user));
+          if (Object.keys(user).length > 0) {
+            document.cookie = `auth_user=${encodeURIComponent(JSON.stringify(user))}; path=/;`;
           }
-          this.router.navigate(['']);
+          this.router.navigate(['/']);
         },
         error: (err) => {
           console.log('Login error:', err);

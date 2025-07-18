@@ -49,10 +49,16 @@ export class NavbarComponent {
   }
 
   checkAuth() {
-    const token = localStorage.getItem('auth_token');
-    const user = localStorage.getItem('auth_user');
+    // Parse cookies to get auth_token and auth_user
+    const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
+      const [key, value] = cookie.trim().split('=');
+      acc[key] = value;
+      return acc;
+    }, {});
+    const token = cookies['auth_token'];
+    const user = cookies['auth_user'];
     this.isAuthenticated = !!token && !!user;
-    this.user = user ? JSON.parse(user) : null;
+    this.user = user ? JSON.parse(decodeURIComponent(user)) : null;
   }
 
   toggleUserDropdown() {
@@ -60,11 +66,12 @@ export class NavbarComponent {
   }
 
   logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    // Remove cookies by setting expiry in the past
+    document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'auth_user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     this.isAuthenticated = false;
     this.user = null;
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
   }
 
   onSearchFocus() {
@@ -94,6 +101,9 @@ export class NavbarComponent {
 
   goToSignUp() {
     this.router.navigate(['/signup']);
+  }
+  goToUserDashboard() {
+    this.router.navigate(['/user-test']);
   }
 
   @HostListener('document:click', ['$event'])

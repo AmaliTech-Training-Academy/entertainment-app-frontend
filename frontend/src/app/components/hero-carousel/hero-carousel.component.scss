@@ -45,6 +45,7 @@
 .hero-content {
   color: map.get($neutral-colors, 100);
   // flex: 1 1 0;
+
 }
 
 .hero-title {
@@ -316,6 +317,7 @@
 
 @media (max-width: 900px) {
   .hero-content {
+    padding:20px;
     // margin-left: 20px;
     // max-width: 90vw;
   }
@@ -326,3 +328,13 @@
     height: 350px;
   }
 }
+@media (max-width:768){
+  .hero-content{
+    width: 100%;
+  }
+}
+// @media (min-width:768){
+//   .hero-content{
+//     padding: 10px;
+//   }
+// }

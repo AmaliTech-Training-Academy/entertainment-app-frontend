@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
+import { AuthGuard } from './core/auth.guard';
+import { RoleGuard } from './core/role.guard';
 
 export const routes: Routes = [
   {
@@ -17,6 +19,8 @@ export const routes: Routes = [
           import('./features/admin-dashboard/admin-dashboard.component').then(
             (m) => m.AdminDashboardComponent
           ),
+        canActivate: [RoleGuard],
+        data: { role: 'ROLE_AUTHENTICATED_USER' },
       },
       {
         path: 'movie/:id',
@@ -29,6 +33,7 @@ export const routes: Routes = [
           import('./pages/profile-page/profile-page.component').then(
             (m) => m.ProfilePageComponent
           ),
+        canActivate: [AuthGuard],
       },
       {
         path: 'advanced-search',
@@ -36,6 +41,7 @@ export const routes: Routes = [
           import(
             './pages/advanced-search.page/advanced-search.page.component'
           ).then((m) => m.AdvancedSearchPageComponent),
+        canActivate: [AuthGuard],
       },
       {
         path: 'for-you',
@@ -57,6 +63,20 @@ export const routes: Routes = [
           import('./pages/media-player-page/media-player-page.component').then(
             (m) => m.MediaPlayerPageComponent
           ),
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'user-test',
+        loadComponent: () =>
+          import('./pages/user-dashboard.page.component').then(
+            (m) => m.UserDashboardPageComponent,
+          ),
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'media-player',
+        loadComponent: () => import('./pages/media-player-page/media-player-page.component').then(m => m.MediaPlayerPageComponent),
+        canActivate: [AuthGuard],
       },
       // Add other main routes here
     ],
@@ -96,6 +116,8 @@ export const routes: Routes = [
       import('./pages/admin-layout/admin-layout.component').then(
         (m) => m.AdminLayoutComponent
       ),
+    canActivate: [RoleGuard],
+    data: { role: 'admin' },
     children: [
       {
         path: 'dashboard',
