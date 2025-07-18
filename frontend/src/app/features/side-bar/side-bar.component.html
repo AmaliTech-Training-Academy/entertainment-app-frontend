@@ -39,30 +39,19 @@
             <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
+
+          <svg *ngSwitchCase="'logout'" class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
         </ng-container>
         <span>{{ item.label }}</span>
       </a>
     </li>
   </ul>
 
-  <ul class="bottom-nav">
-    <li>
-      <a class="nav-item" routerLink="/">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="icon"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          viewBox="0 0 24 24"
-        >
-          <path d="M6 8L2 12L6 16" />
-          <path d="M2 12H22" />
-        </svg>
-        <span>{{ bottomItem.label }}</span>
-      </a>
-    </li>
-  </ul>
+<!-- <div class="top-nav">
+  <a class="nav-item" (click)="logout()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+      <span>Logout</span>
+</a>
+
+</div> -->
 </nav>
