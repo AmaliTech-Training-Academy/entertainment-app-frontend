@@ -18,17 +18,16 @@ interface CommentApiResponse {
   providedIn: 'root',
 })
 export class CommentService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl = environment.apiUrlDev;
 
   constructor(
     private http: HttpClient,
-    private errorHandler: ErrorHandlerService
+    private errorHandler: ErrorHandlerService,
   ) {}
 
   getCommentsByMediaId(mediaId: number): Observable<CommentApiResponse> {
-    return this.http.get<CommentApiResponse>(`${this.apiUrl}/api/v1/comments/media/${mediaId}`)
-      .pipe(
-        catchError((error) => this.errorHandler.handleHttpError(error))
-      );
+    return this.http
+      .get<CommentApiResponse>(`${this.apiUrl}/api/v1/comments/media/${mediaId}`)
+      .pipe(catchError((error) => this.errorHandler.handleHttpError(error)));
   }
 }

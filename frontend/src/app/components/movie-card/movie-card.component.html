@@ -8,14 +8,8 @@
       <div class="title-container">
         <h1 class="movie-title">{{ movie.title }}</h1>
 
-        <button
-          mat-icon-button
-          class="bookmark-button"
-          (click)="toggleBookmark()"
-        >
-          <mat-icon>{{
-            movie.isBookmarked ? "bookmark" : "bookmark_border"
-          }}</mat-icon>
+        <button mat-icon-button class="bookmark-button" (click)="toggleBookmark()">
+          <mat-icon>{{ movie.isBookmarked ? 'bookmark' : 'bookmark_border' }}</mat-icon>
         </button>
       </div>
       <div class="meta-container">

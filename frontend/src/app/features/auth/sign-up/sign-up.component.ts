@@ -40,31 +40,23 @@ export class SignUpComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {
     this.registerForm = this.fb.group(
       {
         firstName: ['', [Validators.required]],
         lastName: ['', [Validators.required]],
-        email: [
-          '',
-          [Validators.required, Validators.email],
-          [this.emailTakenValidator],
-        ],
+        email: ['', [Validators.required, Validators.email], [this.emailTakenValidator]],
         username: [{ value: '', disabled: true }, [Validators.required]],
         password: [
           '',
-          [
-            Validators.required,
-            Validators.minLength(8),
-            this.strongPasswordValidator,
-          ],
+          [Validators.required, Validators.minLength(8), this.strongPasswordValidator],
         ],
         confirmPassword: ['', Validators.required],
       },
       {
         validators: this.passwordMatchValidator,
-      }
+      },
     );
   }
 
@@ -167,18 +159,13 @@ export class SignUpComponent {
     }
   }
 
-  private strongPasswordValidator(
-    control: AbstractControl
-  ): ValidationErrors | null {
+  private strongPasswordValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
-    const strongPasswordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     return strongPasswordRegex.test(value) ? null : { weakPassword: true };
   }
 
-  emailTakenValidator = (
-    control: AbstractControl
-  ): Promise<ValidationErrors | null> => {
+  emailTakenValidator = (control: AbstractControl): Promise<ValidationErrors | null> => {
     return new Promise((resolve) => {
       const fakeEmails = ['ernesto@example.com', 'fan@cineverse.com'];
       const exists = fakeEmails.includes(control.value);
@@ -213,9 +200,6 @@ export class SignUpComponent {
   }
 
   get passwordMismatch(): boolean {
-    return (
-      !!this.confirmPassword?.touched &&
-      this.registerForm.hasError('passwordMismatch')
-    );
+    return !!this.confirmPassword?.touched && this.registerForm.hasError('passwordMismatch');
   }
 }

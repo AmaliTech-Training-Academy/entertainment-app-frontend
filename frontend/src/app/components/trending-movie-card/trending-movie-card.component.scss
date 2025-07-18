@@ -1,9 +1,9 @@
-@use "../../../styles/variables" as *;
-@use "../../../styles/radius" as *;
-@use "../../../styles/effects" as *;
-@use "../../../styles/spacing" as *;
-@use "../../../styles/stroke" as *;
-@use "sass:map";
+@use '../../../styles/variables' as *;
+@use '../../../styles/radius' as *;
+@use '../../../styles/effects' as *;
+@use '../../../styles/spacing' as *;
+@use '../../../styles/stroke' as *;
+@use 'sass:map';
 
 .trending-movie-card {
   background: map.get($neutral-colors, 800);

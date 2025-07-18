@@ -36,7 +36,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -44,9 +44,7 @@ export class LoginComponent implements OnInit {
         '',
         [
           Validators.required,
-          Validators.pattern(
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/,
-          ),
+          Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/),
         ],
       ],
     });
@@ -96,6 +94,9 @@ export class LoginComponent implements OnInit {
           if (token) {
             document.cookie = `auth_token=${token}; path=/;`;
           }
+          if (refreshToken) {
+            document.cookie = `refresh_token=${refreshToken}; path=/;`;
+          }
           if (Object.keys(user).length > 0) {
             document.cookie = `auth_user=${encodeURIComponent(JSON.stringify(user))}; path=/;`;
           }
@@ -104,7 +105,7 @@ export class LoginComponent implements OnInit {
         error: (err) => {
           console.log('Login error:', err);
           this.loginError = err?.error?.message || 'Invalid email or password.';
-        }
+        },
       });
     } else {
       this.loginForm.markAllAsTouched();

@@ -7,8 +7,8 @@ import { CommentSectionComponent } from '../../components/comment-section/commen
   standalone: true,
   imports: [MediaPlayerComponent, CommentSectionComponent],
   templateUrl: './media-player-page.component.html',
-  styleUrl: './media-player-page.component.scss'
+  styleUrl: './media-player-page.component.scss',
 })
 export class MediaPlayerPageComponent {
   // Media player now has hardcoded video URL
-} 
+}

@@ -6,11 +6,7 @@
 
     <section class="trending-section">
       <h3 class="section-title">
-        {{
-          advancedSearchComponent?.hasActiveFilters()
-            ? "Search Results"
-            : "Trending Now"
-        }}
+        {{ advancedSearchComponent?.hasActiveFilters() ? 'Search Results' : 'Trending Now' }}
       </h3>
 
       <app-pagination
@@ -34,10 +30,7 @@
       </div>
 
       <div *ngIf="filteredMovies.length > 0" class="movies-grid">
-        <app-movie-card
-          *ngFor="let movie of filteredMovies"
-          [movie]="movie"
-        ></app-movie-card>
+        <app-movie-card *ngFor="let movie of filteredMovies" [movie]="movie"></app-movie-card>
       </div>
 
       <app-pagination

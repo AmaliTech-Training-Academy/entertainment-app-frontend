@@ -27,4 +27,4 @@ export class MovieFavoriteCardComponent {
   getTypeIcon(type: string): string {
     return type === 'Movie' ? 'movie' : 'tv';
   }
-} 
+}

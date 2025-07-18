@@ -1,7 +1,7 @@
-@use "../../../styles/variables" as *;
-@use "../../../styles/typography" as *;
-@use "sass:map";
-@use "../../../styles/mixins" as mixins;
+@use '../../../styles/variables' as *;
+@use '../../../styles/typography' as *;
+@use 'sass:map';
+@use '../../../styles/mixins' as mixins;
 
 .top-cast-card {
   width: 100%;
@@ -24,7 +24,7 @@
     font-size: 14px;
     font-weight: 500;
     color: map.get($neutral-colors, 100);
-    @include mixins.typography("body", "b2");
+    @include mixins.typography('body', 'b2');
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

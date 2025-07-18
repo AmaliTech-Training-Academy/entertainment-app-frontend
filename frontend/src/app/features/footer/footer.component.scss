@@ -1,8 +1,8 @@
-@use "../../../../src/styles/variables" as *;
-@use "../../../../src/styles/typography" as *;
-@use "../../../../src/styles/mixins" as mixins;
-@use "../../../../src/styles/spacing" as *;
-@use "sass:map";
+@use '../../../../src/styles/variables' as *;
+@use '../../../../src/styles/typography' as *;
+@use '../../../../src/styles/mixins' as mixins;
+@use '../../../../src/styles/spacing' as *;
+@use 'sass:map';
 
 .footer {
   display: flex;
@@ -29,7 +29,7 @@
       .footer-link {
         color: map.get($neutral-colors, 400);
         text-decoration: none;
-        @include mixins.typography("body", "b2");
+        @include mixins.typography('body', 'b2');
         transition: color 0.3s;
         &:hover {
           color: map.get($neutral-colors, 100);
@@ -46,7 +46,7 @@
     margin-bottom: 16px;
     p {
       color: map.get($neutral-colors, 400);
-      @include mixins.typography("body", "b2");
+      @include mixins.typography('body', 'b2');
       margin: 0;
     }
   }
@@ -55,7 +55,7 @@
     text-align: center;
     p {
       color: map.get($neutral-colors, 400);
-      @include mixins.typography("body", "b2");
+      @include mixins.typography('body', 'b2');
       margin: 0;
       .recaptcha-link {
         color: map.get($neutral-colors, 400);
@@ -64,12 +64,12 @@
     }
   }
   @media (min-width: 768px) {
-        .footer-links {
-      grid-template-columns: repeat(4, 1fr); 
-      grid-template-rows: 1fr; 
+    .footer-links {
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: 1fr;
       gap: 32px 80px;
       justify-items: start;
-      margin-left:40px;
+      margin-left: 40px;
       .footer-column {
         align-items: flex-start;
         gap: 16px;

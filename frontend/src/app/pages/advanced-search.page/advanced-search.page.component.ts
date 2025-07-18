@@ -298,23 +298,13 @@ export class AdvancedSearchPageComponent implements OnInit {
         movie.title.toLowerCase().includes(event.query.toLowerCase()) ||
         movie.year.includes(event.query);
 
-      const matchesType =
-        event.filters.type === 'All' || movie.type === event.filters.type;
+      const matchesType = event.filters.type === 'All' || movie.type === event.filters.type;
       const matchesGenre =
-        event.filters.genre === 'All' ||
-        movie.genres.includes(event.filters.genre);
-      const matchesRating =
-        event.filters.rating === 'All' || movie.rating === event.filters.rating;
-      const matchesYear =
-        event.filters.year === 'All' || movie.year === event.filters.year;
+        event.filters.genre === 'All' || movie.genres.includes(event.filters.genre);
+      const matchesRating = event.filters.rating === 'All' || movie.rating === event.filters.rating;
+      const matchesYear = event.filters.year === 'All' || movie.year === event.filters.year;
 
-      return (
-        matchesQuery &&
-        matchesType &&
-        matchesGenre &&
-        matchesRating &&
-        matchesYear
-      );
+      return matchesQuery && matchesType && matchesGenre && matchesRating && matchesYear;
     });
   }
 

@@ -18,8 +18,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
       year: 1994,
       duration: '142m',
       genres: ['Drama'],
-      image:
-        'assets/images/breaking-bad2.png', // Prison cell by Matthew Ansley
+      image: 'assets/images/breaking-bad2.png', // Prison cell by Matthew Ansley
     },
     {
       title: 'The Godfather',
@@ -29,7 +28,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
       year: 1972,
       duration: '175m',
       genres: ['Crime', 'Drama'],
-      image:'assets/images/Dune-2.png', // Man in suit by Graphe Tween
+      image: 'assets/images/Dune-2.png', // Man in suit by Graphe Tween
     },
     {
       title: 'The Dark Knight',
@@ -39,8 +38,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
       year: 2008,
       duration: '152m',
       genres: ['Action', 'Crime', 'Drama'],
-      image:
-        'assets/images/Rectangle-4.png', // City at night by Denys Nevozhai
+      image: 'assets/images/Rectangle-4.png', // City at night by Denys Nevozhai
     },
     {
       title: "Schindler's List",
@@ -50,8 +48,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
       year: 1993,
       duration: '195m',
       genres: ['Biography', 'Drama', 'History'],
-      image:
-        'assets/images/bts.png', // Auschwitz by Karsten Winegeart
+      image: 'assets/images/bts.png', // Auschwitz by Karsten Winegeart
     },
     {
       title: 'Pulp Fiction',
@@ -61,8 +58,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
       year: 1994,
       duration: '154m',
       genres: ['Crime', 'Drama'],
-      image:
-        'assets/images/final-destination.png', // Mel's Drive-in by Cesira Alvarado
+      image: 'assets/images/final-destination.png', // Mel's Drive-in by Cesira Alvarado
     },
   ];
   currentIndex = 0;

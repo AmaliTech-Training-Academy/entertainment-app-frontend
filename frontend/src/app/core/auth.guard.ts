@@ -16,4 +16,4 @@ export const AuthGuard: CanActivateFn = (route, state) => {
     window.location.href = '/login';
     return false;
   }
-}; 
+};

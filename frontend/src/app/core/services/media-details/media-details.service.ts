@@ -9,21 +9,17 @@ import { ErrorHandlerService } from '../error-handler/error-handler.service';
   providedIn: 'root',
 })
 export class MediaDetailsService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl = environment.apiUrlDev;
 
   constructor(
     private http: HttpClient,
-    private errorHandler: ErrorHandlerService
+    private errorHandler: ErrorHandlerService,
   ) {}
 
-   getMediaDetailsById(mediaId: number): Observable<MediaDetails> {
-    return this.http.get<MediaDetailsResponse>(`${this.apiUrl}/api/v1/media/${mediaId}`)
-      .pipe(
-        map(response => response.data),
-        catchError((error) => this.errorHandler.handleHttpError(error))
-      );
+  getMediaDetailsById(mediaId: number): Observable<MediaDetails> {
+    return this.http.get<MediaDetailsResponse>(`${this.apiUrl}/api/v1/media/${mediaId}`).pipe(
+      map((response) => response.data),
+      catchError((error) => this.errorHandler.handleHttpError(error)),
+    );
   }
 }
-
-
-

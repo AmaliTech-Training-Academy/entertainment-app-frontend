@@ -1,9 +1,9 @@
-@use "../../../styles/_variables" as *;
-@use "../../../styles/_mixins" as mixins;
-@use "../../../styles/_effects" as effects;
-@use "../../../styles/_radius" as radius;
-@use "../../../styles/_stroke" as stroke;
-@use "sass:map";
+@use '../../../styles/_variables' as *;
+@use '../../../styles/_mixins' as mixins;
+@use '../../../styles/_effects' as effects;
+@use '../../../styles/_radius' as radius;
+@use '../../../styles/_stroke' as stroke;
+@use 'sass:map';
 
 .app-container {
   display: flex;
@@ -11,7 +11,7 @@
   min-height: 100vh;
   background-color: map.get($neutral-colors, 1000);
   color: map.get($neutral-colors, 100);
-  font-family: "Outfit", sans-serif;
+  font-family: 'Outfit', sans-serif;
 }
 
 .header {

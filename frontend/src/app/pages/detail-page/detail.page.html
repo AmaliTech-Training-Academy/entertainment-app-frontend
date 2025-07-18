@@ -9,13 +9,12 @@
       <h1 class="detail-header-title">Breaking Bad</h1>
       <h6 class="detail-header-subtitle">Plot Summary</h6>
       <p class="detail-header-content">
-        Walter White, a high school chemistry teacher who, after being diagnosed
-        with terminal lung cancer, partners with a former student, Jesse
-        Pinkman, to manufacture and sell methamphetamine. Driven by a need to
-        provide for his family after his death, Walter transforms from a
-        mild-mannered teacher into a ruthless drug kingpin known as Heisenberg,
-        navigating the dangerous criminal underworld while battling his illness
-        and internal conflicts.
+        Walter White, a high school chemistry teacher who, after being diagnosed with terminal lung
+        cancer, partners with a former student, Jesse Pinkman, to manufacture and sell
+        methamphetamine. Driven by a need to provide for his family after his death, Walter
+        transforms from a mild-mannered teacher into a ruthless drug kingpin known as Heisenberg,
+        navigating the dangerous criminal underworld while battling his illness and internal
+        conflicts.
       </p>
     </div>
   </div>
@@ -23,10 +22,7 @@
   <div class="movie-screenshot-section">
     <h2 class="screenshots-section-title">Movies Screenshot</h2>
     <div class="screenshots-list">
-      <app-screen-shot
-        *ngFor="let img of screenshots"
-        [imageUrl]="img"
-      ></app-screen-shot>
+      <app-screen-shot *ngFor="let img of screenshots" [imageUrl]="img"></app-screen-shot>
     </div>
   </div>
 
@@ -44,18 +40,12 @@
       </div>
 
       <ng-container *ngIf="!isLoggedIn; else commentInput">
-        <button class="custom-leave-comment-btn" (click)="login()">
-          Login to leave a comment
-        </button>
+        <button class="custom-leave-comment-btn" (click)="login()">Login to leave a comment</button>
       </ng-container>
       <ng-template #commentInput>
         <div class="comment-input-card">
           <img [src]="user.avatar" alt="User avatar" class="avatar" />
-          <input
-            [(ngModel)]="commentText"
-            type="text"
-            placeholder="Write a comment..."
-          />
+          <input [(ngModel)]="commentText" type="text" placeholder="Write a comment..." />
           <div class="input-actions">
             <button mat-icon-button class="cancel-btn" (click)="cancelComment()">
               <mat-icon>cancel</mat-icon>
@@ -71,7 +61,7 @@
     <div class="side-section">
       <div class="director-section">
         <h4>Director</h4>
-   
+
         <div class="director-card">
           <img
             src="https://randomuser.me/api/portraits/men/2.jpg"

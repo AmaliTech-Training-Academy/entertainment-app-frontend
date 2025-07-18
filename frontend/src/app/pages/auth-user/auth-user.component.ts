@@ -1,16 +1,23 @@
 import { Component } from '@angular/core';
-import { HeroCarouselComponent } from "../../components/hero-carousel/hero-carousel.component";
-import { TrendingMovieCardComponent } from "../../components/trending-movie-card/trending-movie-card.component";
+import { HeroCarouselComponent } from '../../components/hero-carousel/hero-carousel.component';
+import { TrendingMovieCardComponent } from '../../components/trending-movie-card/trending-movie-card.component';
 import { RecommendationComponent } from '../../components/recommendation/recommendation.component';
 import { FooterComponent } from '../../features/footer/footer.component';
 import { CommonModule } from '@angular/common';
-import { NavbarComponent } from "../../components/navbar/navbar.component";
+import { NavbarComponent } from '../../components/navbar/navbar.component';
 
 @Component({
   selector: 'app-auth-user',
-  imports: [HeroCarouselComponent, TrendingMovieCardComponent, RecommendationComponent, FooterComponent, CommonModule, NavbarComponent],
+  imports: [
+    HeroCarouselComponent,
+    TrendingMovieCardComponent,
+    RecommendationComponent,
+    FooterComponent,
+    CommonModule,
+    NavbarComponent,
+  ],
   templateUrl: './auth-user.component.html',
-  styleUrl: './auth-user.component.scss'
+  styleUrl: './auth-user.component.scss',
 })
 export class AuthUserComponent {
   trendingMovies = [
@@ -58,7 +65,7 @@ export class AuthUserComponent {
     },
   ];
 
-    currentTrendingStartIndex = 0;
+  currentTrendingStartIndex = 0;
   trendingSlideDirection: 'slide-left' | 'slide-right' | '' = '';
 
   get visibleTrendingMovies() {

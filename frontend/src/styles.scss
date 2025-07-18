@@ -1,12 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
-@use "../src/styles/reset" as *;
-@use "../src/styles/variables" as *;
-@use "../src/styles/button" as *;
-@use "../src/styles/radius" as *;
+@use '../src/styles/reset' as *;
+@use '../src/styles/variables' as *;
+@use '../src/styles/button' as *;
+@use '../src/styles/radius' as *;
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-
 
 .success-snackbar {
   background-color: #43a047 !important; /* green */

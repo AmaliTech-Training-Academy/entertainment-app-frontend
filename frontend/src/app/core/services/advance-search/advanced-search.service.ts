@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { delay, Observable, of } from 'rxjs';
-import { environment } from '../../../environments/environment.dev';
+import { environment } from '../../../../environments/environment';
 
 export interface Movie {
   title: string;
@@ -56,7 +56,7 @@ export class AdvancedSearchService {
       results = results.filter(
         (movie) =>
           movie.title.toLowerCase().includes(filters.query!.toLowerCase()) ||
-          movie.year.includes(filters.query!)
+          movie.year.includes(filters.query!),
       );
     }
 
@@ -65,9 +65,7 @@ export class AdvancedSearchService {
     }
 
     if (filters.genre && filters.genre !== 'All') {
-      results = results.filter((movie) =>
-        movie.genres.includes(filters.genre!)
-      );
+      results = results.filter((movie) => movie.genres.includes(filters.genre!));
     }
 
     if (filters.rating && filters.rating !== 'All') {

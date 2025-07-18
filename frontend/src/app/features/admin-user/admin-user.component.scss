@@ -1,5 +1,5 @@
-@use "sass:map";
-@use "../../../styles/variables" as *;
+@use 'sass:map';
+@use '../../../styles/variables' as *;
 
 // Helpers
 @function color($palette, $shade) {
@@ -127,7 +127,8 @@
   border-radius: 8px;
   overflow: hidden;
 
-  th, td {
+  th,
+  td {
     padding: 0.75rem 1rem;
     text-align: left;
     cursor: pointer;
@@ -166,7 +167,6 @@
     font-weight: 500;
   }
 }
-
 
 /* admin-user.component.scss */
 

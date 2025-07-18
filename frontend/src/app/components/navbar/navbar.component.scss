@@ -7,7 +7,7 @@
   background: transparent;
   padding: 1rem;
 
-  @media(min-width: 768px){
+  @media (min-width: 768px) {
     padding: 1rem 0;
   }
 }
@@ -101,9 +101,9 @@
   top: 100%;
   right: 0;
   min-width: 220px;
-  background: #10141E;
+  background: #10141e;
   color: #fff;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   z-index: 1000;
   margin-top: 16px;
@@ -121,7 +121,9 @@
   padding: 12px 24px;
   color: #fff;
   text-decoration: none;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
   cursor: pointer;
   border: none;
   background: transparent;
@@ -134,8 +136,7 @@
 
 .navbar__user-option:hover {
   background: #7588b6;
-   overflow: hidden;
-
+  overflow: hidden;
 }
 
 // .navbar__user-dropdown-username {
@@ -157,7 +158,7 @@
   z-index: 1000;
   background: #23243a;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   padding: 0;
   min-width: 350px;
   max-width: 400px;
@@ -188,7 +189,7 @@
   border-radius: 8px;
   flex-shrink: 0;
   background: #181a2a;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .search-dropdown__movie-info {

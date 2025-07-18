@@ -1,6 +1,6 @@
-@use "../../../styles/variables" as *;
-@use "../../../styles/spacing" as *;
-@use "sass:map";
+@use '../../../styles/variables' as *;
+@use '../../../styles/spacing' as *;
+@use 'sass:map';
 
 // Helpers
 @function color($palette, $shade) {

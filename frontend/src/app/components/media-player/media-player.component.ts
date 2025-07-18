@@ -6,8 +6,8 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
   styleUrls: ['./media-player.component.scss'],
 })
 export class MediaPlayerComponent {
-    // videoUrl= 'https://artlist.io/stock-footage/clip/car-parking-nervous-woman/6452580';
-  videoUrl = '/assets/videos/sample-video.mp4'; 
+  // videoUrl= 'https://artlist.io/stock-footage/clip/car-parking-nervous-woman/6452580';
+  videoUrl = '/assets/videos/sample-video.mp4';
   @ViewChild('mediaElement') mediaElement!: ElementRef<HTMLVideoElement>;
 
   isPlaying = false;
@@ -20,12 +20,12 @@ export class MediaPlayerComponent {
 
   ngAfterViewInit() {
     const video = this.mediaElement.nativeElement;
-    
+
     video.addEventListener('error', (e) => {
       console.error('Video error:', e);
       this.videoError = 'Failed to load video';
     });
-    
+
     video.addEventListener('loadeddata', () => {
       console.log('Video loaded successfully');
       this.duration = video.duration;
@@ -35,12 +35,14 @@ export class MediaPlayerComponent {
   togglePlay() {
     const el = this.mediaElement.nativeElement;
     if (el.paused) {
-      el.play().then(() => {
-        this.isPlaying = true;
-        console.log('Video started playing');
-      }).catch(err => {
-        console.error('Failed to play video:', err);
-      });
+      el.play()
+        .then(() => {
+          this.isPlaying = true;
+          console.log('Video started playing');
+        })
+        .catch((err) => {
+          console.error('Failed to play video:', err);
+        });
     } else {
       el.pause();
       this.isPlaying = false;
@@ -84,4 +86,4 @@ export class MediaPlayerComponent {
       this.isFullscreen = false;
     }
   }
-} 
+}

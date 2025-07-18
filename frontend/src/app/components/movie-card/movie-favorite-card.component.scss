@@ -1,11 +1,11 @@
-@use "../../../styles/variables" as *;
-@use "../../../styles/typography" as *;
-@use "../../../styles/effects" as *;
-@use "../../../styles/radius" as *;
-@use "../../../styles/spacing" as *;
-@use "../../../styles/stroke" as *;
-@use "../../../styles/mixins" as *;
-@use "sass:map";
+@use '../../../styles/variables' as *;
+@use '../../../styles/typography' as *;
+@use '../../../styles/effects' as *;
+@use '../../../styles/radius' as *;
+@use '../../../styles/spacing' as *;
+@use '../../../styles/stroke' as *;
+@use '../../../styles/mixins' as *;
+@use 'sass:map';
 
 .movie-favorite-card {
   background: #232836;
@@ -15,7 +15,7 @@
   min-width: 240px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
   color: map.get($neutral-colors, 100);
 
   .image-container {
@@ -68,7 +68,9 @@
     gap: map.get($spacing, 2);
     color: map.get($secondary-colors, 10);
     font-size: 1.1rem;
-    .calendar-icon, .type-icon, .star-icon {
+    .calendar-icon,
+    .type-icon,
+    .star-icon {
       font-size: 1.2rem;
       margin-left: 0.2rem;
     }
@@ -108,4 +110,4 @@
     min-width: 320px;
     max-width: 320px;
   }
-} 
+}

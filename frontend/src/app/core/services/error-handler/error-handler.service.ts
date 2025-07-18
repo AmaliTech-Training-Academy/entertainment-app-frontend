@@ -12,11 +12,10 @@ export interface ErrorInfo {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ErrorHandlerService {
-
-  constructor(private snackBar: MatSnackBar) { }
+  constructor(private snackBar: MatSnackBar) {}
 
   /**
    * Show a snackbar notification
@@ -38,7 +37,7 @@ export class ErrorHandlerService {
       message: 'An unexpected error occurred',
       code: 'UNKNOWN_ERROR',
       timestamp: new Date(),
-      userFriendlyMessage: 'Something went wrong. Please try again later.'
+      userFriendlyMessage: 'Something went wrong. Please try again later.',
     };
 
     if (error.error instanceof ErrorEvent) {
@@ -46,7 +45,7 @@ export class ErrorHandlerService {
         message: error.error.message,
         code: 'CLIENT_ERROR',
         timestamp: new Date(),
-        userFriendlyMessage: 'Network error. Please check your connection.'
+        userFriendlyMessage: 'Network error. Please check your connection.',
       };
       this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
     } else {
@@ -58,7 +57,7 @@ export class ErrorHandlerService {
             code: 'BAD_REQUEST',
             details: error.error,
             timestamp: new Date(),
-            userFriendlyMessage: 'Invalid request. Please check your input.'
+            userFriendlyMessage: 'Invalid request. Please check your input.',
           };
           this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
@@ -67,7 +66,7 @@ export class ErrorHandlerService {
             message: 'Unauthorized',
             code: 'UNAUTHORIZED',
             timestamp: new Date(),
-            userFriendlyMessage: 'Please log in to continue.'
+            userFriendlyMessage: 'Please log in to continue.',
           };
           this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
@@ -76,7 +75,7 @@ export class ErrorHandlerService {
             message: 'Forbidden',
             code: 'FORBIDDEN',
             timestamp: new Date(),
-            userFriendlyMessage: 'You don\'t have permission to perform this action.'
+            userFriendlyMessage: "You don't have permission to perform this action.",
           };
           this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
@@ -85,7 +84,7 @@ export class ErrorHandlerService {
             message: 'Not Found',
             code: 'NOT_FOUND',
             timestamp: new Date(),
-            userFriendlyMessage: 'The requested resource was not found.'
+            userFriendlyMessage: 'The requested resource was not found.',
           };
           this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
@@ -95,7 +94,7 @@ export class ErrorHandlerService {
             code: 'VALIDATION_ERROR',
             details: error.error,
             timestamp: new Date(),
-            userFriendlyMessage: 'Please check your input and try again.'
+            userFriendlyMessage: 'Please check your input and try again.',
           };
           this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
@@ -104,7 +103,7 @@ export class ErrorHandlerService {
             message: 'Too Many Requests',
             code: 'RATE_LIMIT',
             timestamp: new Date(),
-            userFriendlyMessage: 'Too many requests. Please wait a moment and try again.'
+            userFriendlyMessage: 'Too many requests. Please wait a moment and try again.',
           };
           this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
@@ -113,7 +112,7 @@ export class ErrorHandlerService {
             message: 'Internal Server Error',
             code: 'SERVER_ERROR',
             timestamp: new Date(),
-            userFriendlyMessage: 'Server error. Please try again later.'
+            userFriendlyMessage: 'Server error. Please try again later.',
           };
           this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
@@ -124,7 +123,7 @@ export class ErrorHandlerService {
             message: 'Service Unavailable',
             code: 'SERVICE_UNAVAILABLE',
             timestamp: new Date(),
-            userFriendlyMessage: 'Service temporarily unavailable. Please try again later.'
+            userFriendlyMessage: 'Service temporarily unavailable. Please try again later.',
           };
           this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
           break;
@@ -134,12 +133,11 @@ export class ErrorHandlerService {
             code: `HTTP_${error.status}`,
             details: error.error,
             timestamp: new Date(),
-            userFriendlyMessage: 'An unexpected error occurred. Please try again.'
+            userFriendlyMessage: 'An unexpected error occurred. Please try again.',
           };
           this.showSnackBar(errorInfo.userFriendlyMessage, 'error');
       }
     }
     return throwError(() => errorInfo);
   }
-
 }

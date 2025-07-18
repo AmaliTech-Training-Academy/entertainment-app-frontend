@@ -1,6 +1,6 @@
 // src/styles/_theme.scss
-@use "@angular/material" as mat;
-@use "./variables" as vars;
+@use '@angular/material' as mat;
+@use './variables' as vars;
 
 // Include core styles (required)
 @include mat.core();
@@ -14,7 +14,7 @@ $theme: mat.define-light-theme(
       warn: mat.define-palette(vars.$material-warn, 200),
     ),
     typography: mat.define-typography-config(
-        $font-family: "Outfit, sans-serif",
+        $font-family: 'Outfit, sans-serif',
       ),
     density: 0,
   )

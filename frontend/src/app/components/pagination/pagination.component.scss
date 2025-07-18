@@ -1,7 +1,7 @@
-@use "../../../styles/variables" as *;
-@use "../../../styles/spacing" as *;
-@use "../../../styles/radius" as *;
-@use "sass:map";
+@use '../../../styles/variables' as *;
+@use '../../../styles/spacing' as *;
+@use '../../../styles/radius' as *;
+@use 'sass:map';
 
 .pagination {
   display: flex;

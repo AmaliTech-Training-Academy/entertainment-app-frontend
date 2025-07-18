@@ -4,16 +4,18 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  private baseUrl = environment.apiUrl;
+  private baseUrl = environment.apiUrlDev;
 
   constructor(private http: HttpClient) {}
 
   login(email: string, password: string): Observable<any> {
-    return this.http.post(`https://d101mapcha7bof.cloudfront.net/api/v1/auth/login`, { email, password });
+    return this.http.post(`${this.baseUrl}/api/v1/auth/login`, { email, password });
+  }
+
+  refreshToken(refreshToken: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/v1/auth/refresh`, { refreshToken });
   }
 }
-// Amasaman70#
-//clement.adjei@amalitechtraining.org

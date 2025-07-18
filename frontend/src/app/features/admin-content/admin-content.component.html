@@ -24,7 +24,13 @@
         <option value="" disabled>Select genre</option>
         <option *ngFor="let genre of genres" [value]="genre">{{ genre }}</option>
       </select>
-      <input type="text" placeholder="Duration" [(ngModel)]="newContent.duration" name="duration" required />
+      <input
+        type="text"
+        placeholder="Duration"
+        [(ngModel)]="newContent.duration"
+        name="duration"
+        required
+      />
       <input type="date" [(ngModel)]="newContent.releaseDate" name="releaseDate" required />
       <select [(ngModel)]="newContent.status" name="status" required>
         <option value="Draft">Draft</option>

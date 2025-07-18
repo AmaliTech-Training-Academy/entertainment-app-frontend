@@ -22,44 +22,37 @@ export class HomePage implements OnInit {
   trendingMovies = [
     {
       rank: 1,
-      image:
-        'assets/images/final-destination.png',
+      image: 'assets/images/final-destination.png',
       alt: 'Final Destination Bloodlines poster',
     },
     {
       rank: 2,
-      image:
-        'assets/images/maa.png',
+      image: 'assets/images/maa.png',
       alt: 'Maa poster',
     },
     {
       rank: 3,
-      image:
-        'assets/images/heads-of-state.png',
+      image: 'assets/images/heads-of-state.png',
       alt: 'Heads of State poster',
     },
     {
       rank: 4,
-      image:
-        'assets/images/maa.png',
+      image: 'assets/images/maa.png',
       alt: 'Heads of State poster',
     },
     {
       rank: 5,
-      image:
-        'assets/images/heads-of-state.png',
+      image: 'assets/images/heads-of-state.png',
       alt: 'Heads of State poster',
     },
     {
       rank: 6,
-      image:
-        'assets/images/maa.png',
+      image: 'assets/images/maa.png',
       alt: 'Heads of State poster',
     },
     {
       rank: 7,
-      image:
-        'assets/images/heads-of-state.png',
+      image: 'assets/images/heads-of-state.png',
       alt: 'Ballerina poster',
     },
   ];

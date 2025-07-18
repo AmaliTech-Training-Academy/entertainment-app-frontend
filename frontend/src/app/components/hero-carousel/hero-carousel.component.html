@@ -1,8 +1,5 @@
 <div>
-  <div
-    class="hero-carousel"
-    [ngStyle]="{ 'background-image': 'url(' + currentHero.image + ')' }"
-  >
+  <div class="hero-carousel" [ngStyle]="{ 'background-image': 'url(' + currentHero.image + ')' }">
     <div class="hero-overlay">
       <div class="app-container">
         <div class="hero-content" [ngClass]="{ 'slide-animation': animate }">
@@ -12,20 +9,11 @@
             <span class="hero-rating">★ {{ currentHero.rating }}</span>
             <span class="hero-year">• {{ currentHero.year }}</span>
             <span class="hero-duration">• {{ currentHero.duration }}</span>
-            <span class="hero-genres"
-              >• {{ currentHero.genres.join(" ") }}</span
-            >
+            <span class="hero-genres">• {{ currentHero.genres.join(' ') }}</span>
           </div>
           <div class="hero-actions">
             <app-button type="primary" size="large" ariaLabel="Play Now">
-              <div
-                style="
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  gap: 12px;
-                "
-              >
+              <div style="display: flex; align-items: center; justify-content: center; gap: 12px">
                 <svg
                   width="24"
                   height="24"
@@ -42,14 +30,7 @@
               </div>
             </app-button>
             <app-button type="link" size="large" ariaLabel="Info">
-              <div
-                style="
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  gap: 12px;
-                "
-              >
+              <div style="display: flex; align-items: center; justify-content: center; gap: 12px">
                 <svg
                   width="24"
                   height="24"

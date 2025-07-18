@@ -1,9 +1,9 @@
-@use "./radius" as *;
-@use "./variables" as *;
-@use "./stroke" as *;
-@use "./mixins" as *;
-@use "./effects" as *;
-@use "sass:map";
+@use './radius' as *;
+@use './variables' as *;
+@use './stroke' as *;
+@use './mixins' as *;
+@use './effects' as *;
+@use 'sass:map';
 
 .button {
   &.mat-mdc-button {

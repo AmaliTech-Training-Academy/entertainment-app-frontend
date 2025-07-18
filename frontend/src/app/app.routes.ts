@@ -10,8 +10,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () =>
-          import('./pages/home/home.page.component').then((m) => m.HomePage),
+        loadComponent: () => import('./pages/home/home.page.component').then((m) => m.HomePage),
       },
       {
         path: 'dashboard',
@@ -24,46 +23,40 @@ export const routes: Routes = [
       },
       {
         path: 'movie/:id',
-        loadComponent: () =>
-          import('./pages/detail-page/detail.page').then(
-            (m) => m.DetailPage,
-          ),
+        loadComponent: () => import('./pages/detail-page/detail.page').then((m) => m.DetailPage),
       },
       {
         path: 'profile',
         loadComponent: () =>
-          import('./pages/profile-page/profile-page.component').then(
-            (m) => m.ProfilePageComponent,
-          ),
+          import('./pages/profile-page/profile-page.component').then((m) => m.ProfilePageComponent),
         canActivate: [AuthGuard],
       },
       {
         path: 'advanced-search',
         loadComponent: () =>
-          import(
-            './pages/advanced-search.page/advanced-search.page.component'
-          ).then((m) => m.AdvancedSearchPageComponent),
+          import('./pages/advanced-search.page/advanced-search.page.component').then(
+            (m) => m.AdvancedSearchPageComponent,
+          ),
         canActivate: [AuthGuard],
       },
       {
         path: 'for-you',
         loadComponent: () =>
-          import('./pages/for-you.page.component').then(
-            (m) => m.ForYouComponent,
-          ),
+          import('./pages/for-you.page.component').then((m) => m.ForYouComponent),
         canActivate: [AuthGuard],
       },
       {
         path: 'user-test',
         loadComponent: () =>
-          import('./pages/user-dashboard.page.component').then(
-            (m) => m.UserDashboardPageComponent,
-          ),
+          import('./pages/user-dashboard.page.component').then((m) => m.UserDashboardPageComponent),
         canActivate: [AuthGuard],
       },
       {
         path: 'media-player',
-        loadComponent: () => import('./pages/media-player-page/media-player-page.component').then(m => m.MediaPlayerPageComponent),
+        loadComponent: () =>
+          import('./pages/media-player-page/media-player-page.component').then(
+            (m) => m.MediaPlayerPageComponent,
+          ),
         canActivate: [AuthGuard],
       },
       // Add other main routes here
@@ -72,11 +65,9 @@ export const routes: Routes = [
   {
     path: 'user',
     loadComponent: () =>
-      import('./pages/auth-user/auth-user.component').then(
-        (m) => m.AuthUserComponent,
-      ),
+      import('./pages/auth-user/auth-user.component').then((m) => m.AuthUserComponent),
   },
- 
+
   {
     path: 'recommendation',
     loadComponent: () =>
@@ -87,23 +78,17 @@ export const routes: Routes = [
   {
     path: 'signup',
     loadComponent: () =>
-      import('./features/auth/sign-up/sign-up.component').then(
-        (m) => m.SignUpComponent,
-      ),
+      import('./features/auth/sign-up/sign-up.component').then((m) => m.SignUpComponent),
   },
   {
     path: 'login',
     loadComponent: () =>
-      import('./features/auth/login/login.component').then(
-        (m) => m.LoginComponent,
-      ),
+      import('./features/auth/login/login.component').then((m) => m.LoginComponent),
   },
   {
     path: 'admin',
     loadComponent: () =>
-      import('./pages/admin-layout/admin-layout.component').then(
-        (m) => m.AdminLayoutComponent,
-      ),
+      import('./pages/admin-layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
     canActivate: [RoleGuard],
     data: { role: 'admin' },
     children: [
@@ -118,9 +103,7 @@ export const routes: Routes = [
       {
         path: 'users',
         loadComponent: () =>
-          import('./features/admin-user/admin-user.component').then(
-            (m) => m.AdminUserComponent,
-          ),
+          import('./features/admin-user/admin-user.component').then((m) => m.AdminUserComponent),
       },
       {
         path: 'content',
@@ -128,7 +111,7 @@ export const routes: Routes = [
           import('./features/admin-content/admin-content.component').then(
             (m) => m.AdminContentComponent,
           ),
-        },
+      },
       {
         path: '',
         redirectTo: 'dashboard',

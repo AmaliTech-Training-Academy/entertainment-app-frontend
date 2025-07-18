@@ -21,7 +21,7 @@ interface Comment {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './comment-section.component.html',
-  styleUrls: ['./comment-section.component.scss']
+  styleUrls: ['./comment-section.component.scss'],
 })
 export class CommentSectionComponent {
   newComment = '';
@@ -30,51 +30,51 @@ export class CommentSectionComponent {
       id: 1,
       user: {
         name: 'Davida',
-        avatar: 'assets/images/image.png'
+        avatar: 'assets/images/image.png',
       },
-      text: 'Anyway to get drugs pushed down our throats, i\'m really not liking it. It should be taken down the internet',
+      text: "Anyway to get drugs pushed down our throats, i'm really not liking it. It should be taken down the internet",
       timestamp: 'July 12, 2025 at 12:25 am',
       likes: 0,
-      dislikes: 0
+      dislikes: 0,
     },
     {
       id: 2,
       user: {
         name: 'Davida',
-        avatar: 'assets/images/Rectangle 6.png'
+        avatar: 'assets/images/Rectangle 6.png',
       },
-      text: 'Anyway to get drugs pushed down our throats, i\'m really not liking it. It should be taken down the internet',
+      text: "Anyway to get drugs pushed down our throats, i'm really not liking it. It should be taken down the internet",
       timestamp: 'July 12, 2025 at 12:25 am',
       likes: 0,
-      dislikes: 0
+      dislikes: 0,
     },
     {
       id: 3,
       user: {
         name: 'Davida',
-        avatar: 'assets/images/Rectangle 5.png'
+        avatar: 'assets/images/Rectangle 5.png',
       },
-      text: 'Anyway to get drugs pushed down our throats, i\'m really not liking it. It should be taken down the internet',
+      text: "Anyway to get drugs pushed down our throats, i'm really not liking it. It should be taken down the internet",
       timestamp: 'July 12, 2025 at 12:25 am',
       likes: 0,
-      dislikes: 0
+      dislikes: 0,
     },
     {
       id: 4,
       user: {
         name: 'Davida',
-        avatar: 'assets/images/Rectangle 4.png'
+        avatar: 'assets/images/Rectangle 4.png',
       },
-      text: 'Anyway to get drugs pushed down our throats, i\'m really not liking it. It should be taken down the internet',
+      text: "Anyway to get drugs pushed down our throats, i'm really not liking it. It should be taken down the internet",
       timestamp: 'July 12, 2025 at 12:25 am',
       likes: 0,
-      dislikes: 0
-    }
+      dislikes: 0,
+    },
   ];
 
   currentUser = {
     name: 'User',
-    avatar: 'assets/images/Rectangle 3.png'
+    avatar: 'assets/images/Rectangle 3.png',
   };
 
   addComment() {
@@ -85,9 +85,9 @@ export class CommentSectionComponent {
         text: this.newComment,
         timestamp: new Date().toLocaleString(),
         likes: 0,
-        dislikes: 0
+        dislikes: 0,
       };
-      
+
       this.comments.unshift(comment);
       this.newComment = '';
     }
@@ -128,4 +128,4 @@ export class CommentSectionComponent {
       comment.userDisliked = true;
     }
   }
-} 
+}

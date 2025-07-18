@@ -1,7 +1,6 @@
 .dashboard-container {
   margin-top: 2rem;
   padding: 1rem;
- 
 }
 
 .dashboard-title {
@@ -22,8 +21,8 @@
   margin-bottom: 2.5rem;
   flex-wrap: wrap;
 
-  @media(min-width:768px){
-    grid-template-columns: repeat(3,1fr);
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -33,7 +32,7 @@
   align-items: center;
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   padding: 1rem 1.5rem;
   gap: 1rem;
 }
@@ -55,10 +54,20 @@
   margin-bottom: 0.5rem;
   display: inline-block;
 }
-.stat-icon.eye::before { content: '\1F441'; }
-.stat-icon.clock::before { content: '\23F1'; }
-.stat-icon.star::before { content: '\2B50'; color: #fbbf24; }
-.stat-icon.heart::before { content: '\2764'; color: #f87171; }
+.stat-icon.eye::before {
+  content: '\1F441';
+}
+.stat-icon.clock::before {
+  content: '\23F1';
+}
+.stat-icon.star::before {
+  content: '\2B50';
+  color: #fbbf24;
+}
+.stat-icon.heart::before {
+  content: '\2764';
+  color: #f87171;
+}
 
 .stat-value {
   font-size: 2rem;
@@ -87,7 +96,6 @@
 .dashboard-section-header h2 {
   font-size: 1.25rem;
   font-weight: 700;
-
 }
 
 .view-all {
@@ -121,7 +129,7 @@
 .movie-card {
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   padding: 0 0 1.25rem 0;
   width: 100%;
   max-width: 320px;
@@ -157,7 +165,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .movie-info {
@@ -230,7 +238,7 @@
 
 .trending-section__list {
   display: grid;
-  grid-template-columns: repeat(3,1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   padding: 0 1rem 2rem 1rem;
   align-items: flex-end;
@@ -321,7 +329,7 @@
     flex-direction: column;
     gap: 1rem;
   }
-} 
+}
 @media (max-width: 600px) {
   .trending-section__carousel {
     gap: 0;
@@ -344,7 +352,7 @@
     min-width: 240px;
     scroll-snap-align: start;
   }
-} 
+}
 @media (min-width: 901px) {
   .trending-section__arrow {
     display: flex;
@@ -377,4 +385,4 @@
     min-width: 320px;
     scroll-snap-align: start;
   }
-} 
+}

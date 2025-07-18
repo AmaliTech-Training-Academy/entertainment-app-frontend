@@ -25,10 +25,7 @@
               />
             </svg>
           </button>
-          <div
-            class="trending-section__list"
-            [ngClass]="trendingSlideDirection"
-          >
+          <div class="trending-section__list" [ngClass]="trendingSlideDirection">
             <app-trending-movie-card
               *ngFor="let movie of visibleTrendingMovies"
               [rank]="movie.rank"

@@ -18,7 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
     CommentCardComponent,
     TopCastCardComponent,
     RatingCardComponent,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './detail.page.html',
   styleUrls: ['./detail.page.scss'],
@@ -41,11 +41,9 @@ export class DetailPage implements OnInit {
   }
 
   ngOnInit() {
-    this.http
-      .get<{ screenshots: string[] }>('screenshots.json')
-      .subscribe((data) => {
-        this.screenshots = data.screenshots;
-      });
+    this.http.get<{ screenshots: string[] }>('screenshots.json').subscribe((data) => {
+      this.screenshots = data.screenshots;
+    });
     this.http.get<{ comments: any[] }>('comments.json').subscribe((data) => {
       this.comments = data.comments;
     });
@@ -76,4 +74,4 @@ export class DetailPage implements OnInit {
   cancelComment() {
     this.commentText = '';
   }
-} 
+}

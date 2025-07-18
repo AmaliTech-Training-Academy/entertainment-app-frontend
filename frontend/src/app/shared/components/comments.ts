@@ -4,5 +4,5 @@ export interface Comment {
   commentId: number;
   comment: string;
   username: string;
-  timestamp: string; 
+  timestamp: string;
 }

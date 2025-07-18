@@ -12,16 +12,76 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal/con
 })
 export class AdminUserComponent {
   users = [
-    { name: 'Ethan Carter', role: 'Admin', status: 'Active', joined: '2022-01-15', lastActive: '2024-03-20' },
-    { name: 'Olivia Bennett', role: 'Admin', status: 'Active', joined: '2022-03-22', lastActive: '2024-03-19' },
-    { name: 'Noah Thompson', role: 'Registered user', status: 'Inactive', joined: '2022-05-10', lastActive: '2023-12-15' },
-    { name: 'Ava Harper', role: 'Admin', status: 'Active', joined: '2022-07-05', lastActive: '2024-03-18' },
-    { name: 'Liam Foster', role: 'Registered user', status: 'Active', joined: '2022-09-12', lastActive: '2024-03-21' },
-    { name: 'Isabella Hayes', role: 'Admin', status: 'Active', joined: '2022-11-01', lastActive: '2024-03-20' },
-    { name: 'Jackson Reed', role: 'Registered user', status: 'Inactive', joined: '2023-01-20', lastActive: '2023-11-30' },
-    { name: 'Sophia Morgan', role: 'Admin', status: 'Active', joined: '2023-03-15', lastActive: '2024-03-19' },
-    { name: 'Aiden Parker', role: 'registered user', status: 'Active', joined: '2023-05-08', lastActive: '2024-03-22' },
-    { name: 'Chloe Bennett', role: 'Admin', status: 'Active', joined: '2023-07-02', lastActive: '2024-03-21' },
+    {
+      name: 'Ethan Carter',
+      role: 'Admin',
+      status: 'Active',
+      joined: '2022-01-15',
+      lastActive: '2024-03-20',
+    },
+    {
+      name: 'Olivia Bennett',
+      role: 'Admin',
+      status: 'Active',
+      joined: '2022-03-22',
+      lastActive: '2024-03-19',
+    },
+    {
+      name: 'Noah Thompson',
+      role: 'Registered user',
+      status: 'Inactive',
+      joined: '2022-05-10',
+      lastActive: '2023-12-15',
+    },
+    {
+      name: 'Ava Harper',
+      role: 'Admin',
+      status: 'Active',
+      joined: '2022-07-05',
+      lastActive: '2024-03-18',
+    },
+    {
+      name: 'Liam Foster',
+      role: 'Registered user',
+      status: 'Active',
+      joined: '2022-09-12',
+      lastActive: '2024-03-21',
+    },
+    {
+      name: 'Isabella Hayes',
+      role: 'Admin',
+      status: 'Active',
+      joined: '2022-11-01',
+      lastActive: '2024-03-20',
+    },
+    {
+      name: 'Jackson Reed',
+      role: 'Registered user',
+      status: 'Inactive',
+      joined: '2023-01-20',
+      lastActive: '2023-11-30',
+    },
+    {
+      name: 'Sophia Morgan',
+      role: 'Admin',
+      status: 'Active',
+      joined: '2023-03-15',
+      lastActive: '2024-03-19',
+    },
+    {
+      name: 'Aiden Parker',
+      role: 'registered user',
+      status: 'Active',
+      joined: '2023-05-08',
+      lastActive: '2024-03-22',
+    },
+    {
+      name: 'Chloe Bennett',
+      role: 'Admin',
+      status: 'Active',
+      joined: '2023-07-02',
+      lastActive: '2024-03-21',
+    },
   ];
 
   roles = ['Admin', 'Registered user'];
@@ -30,7 +90,6 @@ export class AdminUserComponent {
   showBanModal = false;
   selectedUserId: string | null = null;
   searchQuery: string = '';
-
 
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
@@ -46,39 +105,34 @@ export class AdminUserComponent {
   }
 
   toggleUserStatus() {
-  if (this.selectedUserIndex !== null) {
-    const user = this.users[this.selectedUserIndex];
-    this.selectedUserId = user.name;
+    if (this.selectedUserIndex !== null) {
+      const user = this.users[this.selectedUserIndex];
+      this.selectedUserId = user.name;
 
-    // Show confirmation based on current status
-    this.showBanModal = true;
+      // Show confirmation based on current status
+      this.showBanModal = true;
+    }
   }
-}
-
 
   get filteredUsers() {
-  if (!this.searchQuery.trim()) {
-    return this.users;
+    if (!this.searchQuery.trim()) {
+      return this.users;
+    }
+
+    const lowerQuery = this.searchQuery.toLowerCase();
+    return this.users.filter((user) => user.name.toLowerCase().includes(lowerQuery));
   }
-
-  const lowerQuery = this.searchQuery.toLowerCase();
-  return this.users.filter((user) =>
-    user.name.toLowerCase().includes(lowerQuery)
-  );
-}
-
 
   confirmBan() {
-  if (this.selectedUserIndex !== null) {
-    const user = this.users[this.selectedUserIndex];
-    user.status = user.status === 'Active' ? 'Inactive' : 'Active';
-    console.log(`${user.name} is now ${user.status}`);
+    if (this.selectedUserIndex !== null) {
+      const user = this.users[this.selectedUserIndex];
+      user.status = user.status === 'Active' ? 'Inactive' : 'Active';
+      console.log(`${user.name} is now ${user.status}`);
+    }
+
+    this.selectedUserIndex = null;
+    this.showBanModal = false;
   }
-
-  this.selectedUserIndex = null;
-  this.showBanModal = false;
-}
-
 
   cancelBan() {
     this.selectedUserId = null;

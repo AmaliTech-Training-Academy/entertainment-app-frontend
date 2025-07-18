@@ -17,18 +17,16 @@ export class AdminLayoutComponent {
 
   constructor(private router: Router) {}
 
-onLogoutClick() {
-  this.showLogoutModal = true;
-}
+  onLogoutClick() {
+    this.showLogoutModal = true;
+  }
 
-confirmLogout() {
-  this.showLogoutModal = false;
-  this.router.navigate(['/']); 
-}
+  confirmLogout() {
+    this.showLogoutModal = false;
+    this.router.navigate(['/']);
+  }
 
-
-cancelLogout() {
-  this.showLogoutModal = false;
-}
-
+  cancelLogout() {
+    this.showLogoutModal = false;
+  }
 }

@@ -1,7 +1,7 @@
-@use "../../../styles/variables" as *;
-@use "../../../styles/typography" as *;
-@use "../../../styles/mixins" as mixins;
-@use "sass:map";
+@use '../../../styles/variables' as *;
+@use '../../../styles/typography' as *;
+@use '../../../styles/mixins' as mixins;
+@use 'sass:map';
 
 .comment-section {
   width: 100%;
@@ -12,9 +12,9 @@
 
 // Comment Input Area
 .comment-input-container {
-    display: flex;
-    align-items: center;
-    width: 100%;
+  display: flex;
+  align-items: center;
+  width: 100%;
   gap: 12px;
   margin-bottom: 24px;
   padding: 16px;
@@ -46,11 +46,11 @@
   border-radius: 20px;
   color: #fff;
   font-size: 14px;
-  
+
   &::placeholder {
     color: #a0aec0;
   }
-  
+
   &:focus {
     outline: none;
     border-color: #667eea;
@@ -69,16 +69,16 @@
   color: white;
   cursor: pointer;
   transition: background-color 0.2s;
-  
+
   &:hover:not(:disabled) {
     background: #5a67d8;
   }
-  
+
   &:disabled {
     background: #4a5568;
     cursor: not-allowed;
   }
-  
+
   svg {
     width: 18px;
     height: 18px;
@@ -102,7 +102,9 @@
   justify-content: center;
   color: #a0aec0;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
   outline: none;
   box-shadow: none;
 
@@ -111,8 +113,6 @@
     height: 22px;
     stroke: currentColor;
   }
-
-
 
   &:disabled {
     background: #4a5568;
@@ -155,7 +155,7 @@
   border-radius: 8px;
   display: flex;
   align-items: flex-start;
-//   justify-content: center;
+  //   justify-content: center;
   position: relative;
 
   &__image {
@@ -180,7 +180,7 @@
     align-items: center;
     height: 24px;
     gap: 8px;
-    @include mixins.typography("body", "b2");
+    @include mixins.typography('body', 'b2');
     color: map.get($neutral-colors, 400);
   }
 
@@ -225,16 +225,16 @@
   border-radius: 4px;
   transition: all 0.2s;
   font-size: 12px;
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.1);
     color: map.get($neutral-colors, 100);
   }
-  
+
   &.active {
     color: #667eea;
   }
-  
+
   svg {
     width: 25px;
     height: 25px;
@@ -250,38 +250,36 @@
     width: 80%;
     height: 125px;
     padding: 16px;
-    
+
     &__image {
       width: 70px;
       height: 70px;
     }
-    
+
     &__text-area {
       width: 404px;
       height: 101px;
     }
-    
+
     &__header {
       width: 404px;
       height: 24px;
-      @include mixins.typography("body", "b2");
+      @include mixins.typography('body', 'b2');
     }
-    
+
     &__description {
       width: 404px;
       height: 72px;
-      @include mixins.typography("body", "b1");
+      @include mixins.typography('body', 'b1');
     }
   }
-    .comment-input-container {
+  .comment-input-container {
     width: 80%;
+  }
 
-
-}
-  
   .comment-actions {
     right: 16px;
     top: 50%;
     transform: translateY(-50%);
   }
-} 
+}

@@ -26,4 +26,4 @@ export const RoleGuard: CanActivateFn = (route, state) => {
     window.location.href = '/login';
     return false;
   }
-}; 
+};

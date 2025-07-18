@@ -1,3 +1,3 @@
 export const environment = {
-     apiUrl: 'http://cineverse-service-alb-staging-346786246.eu-west-1.elb.amazonaws.com/'
+  apiUrl: process.env['NG_APP_API_URL'],
 };

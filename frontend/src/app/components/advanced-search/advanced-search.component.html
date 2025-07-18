@@ -46,11 +46,7 @@
       <!-- Genre -->
       <div class="filter-group">
         <span class="filter-label">Genre:</span>
-        <button
-          mat-button
-          [matMenuTriggerFor]="genreMenu"
-          class="filter-button"
-        >
+        <button mat-button [matMenuTriggerFor]="genreMenu" class="filter-button">
           {{ selectedFilters.genre }}
           <mat-icon fontIcon="arrow_drop_down"></mat-icon>
         </button>
@@ -68,11 +64,7 @@
       <!-- Rating -->
       <div class="filter-group">
         <span class="filter-label">Rating:</span>
-        <button
-          mat-button
-          [matMenuTriggerFor]="ratingMenu"
-          class="filter-button"
-        >
+        <button mat-button [matMenuTriggerFor]="ratingMenu" class="filter-button">
           {{ selectedFilters.rating }}
           <mat-icon fontIcon="arrow_drop_down"></mat-icon>
         </button>
@@ -108,13 +100,8 @@
       <!-- Language -->
       <div class="filter-group">
         <span class="filter-label">Language:</span>
-        <button
-          mat-button
-          [matMenuTriggerFor]="languageMenu"
-          class="filter-button"
-        >
-          {{ selectedFilters.language
-          }}<mat-icon fontIcon="arrow_drop_down"></mat-icon>
+        <button mat-button [matMenuTriggerFor]="languageMenu" class="filter-button">
+          {{ selectedFilters.language }}<mat-icon fontIcon="arrow_drop_down"></mat-icon>
         </button>
         <mat-menu #languageMenu="matMenu" panelClass="filter-menu">
           <button

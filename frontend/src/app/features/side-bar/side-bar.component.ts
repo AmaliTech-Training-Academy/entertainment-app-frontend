@@ -2,15 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { RouterLink, RouterModule, RouterLinkActive, Router } from '@angular/router';
 
-
 @Component({
   selector: 'app-sidebar',
-  imports: [CommonModule, RouterModule ],
+  imports: [CommonModule, RouterModule],
   templateUrl: './side-bar.component.html',
   styleUrls: ['./side-bar.component.scss'],
 })
 export class SidebarComponent {
-   @Output() logoutClicked = new EventEmitter<void>();
+  @Output() logoutClicked = new EventEmitter<void>();
   bottomItem = { label: 'Back to Home' };
 
   constructor(private router: Router) {}
@@ -21,7 +20,6 @@ export class SidebarComponent {
     { label: 'Content', route: '/admin/content', icon: 'film' },
     { label: 'Logout', route: '/', icon: 'logout' },
   ];
-
 
   onItemClick(item: any) {
     if (item.label === 'Logout') {

@@ -8,7 +8,7 @@ import { MovieFavoriteCardComponent } from '../components/movie-card/movie-favor
   standalone: true,
   imports: [CommonModule, TrendingMovieCardComponent, MovieFavoriteCardComponent],
   templateUrl: './user-dashboard.page.component.html',
-  styleUrls: ['./user-dashboard.page.component.scss']
+  styleUrls: ['./user-dashboard.page.component.scss'],
 })
 export class UserDashboardPageComponent {
   user = {
@@ -16,7 +16,7 @@ export class UserDashboardPageComponent {
     moviesWatched: 127,
     watchTime: 248,
     avgRating: 4.2,
-    favorites: 45
+    favorites: 45,
   };
 
   continueWatching = [
@@ -104,8 +104,9 @@ export class UserDashboardPageComponent {
   get visibleTrendingMovies() {
     const n = this.trendingMovies.length;
     if (n === 0) return [];
-    return Array.from({ length: Math.min(4, n) }, (_, i) =>
-      this.trendingMovies[(this.currentTrendingStartIndex + i) % n]
+    return Array.from(
+      { length: Math.min(4, n) },
+      (_, i) => this.trendingMovies[(this.currentTrendingStartIndex + i) % n],
     );
   }
 
@@ -128,4 +129,4 @@ export class UserDashboardPageComponent {
       this.trendingSlideDirection = '';
     }, 400);
   }
-} 
+}
