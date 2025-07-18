@@ -26,6 +26,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/profile-page/profile-page.component').then(
+            (m) => m.ProfilePageComponent,
+          ),
+      },
+      {
         path: 'advanced-search',
         loadComponent: () =>
           import(
@@ -45,7 +52,11 @@ export const routes: Routes = [
       import('./pages/user-dashboard.page.component').then(
         (m) => m.UserDashboardPageComponent,
       ),
-  }
+  },
+  {
+    path: 'media-player',
+    loadComponent: () => import('./pages/media-player-page/media-player-page.component').then(m => m.MediaPlayerPageComponent)
+  },
       // Add other main routes here
     ],
   },
