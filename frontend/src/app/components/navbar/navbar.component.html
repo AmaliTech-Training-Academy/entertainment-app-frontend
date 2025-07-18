@@ -74,7 +74,7 @@
       </div>
     </div>
     <div class="navbar__actions">
-      <!-- <ng-container *ngIf="!isAuthenticated; else userMenu">
+      <ng-container *ngIf="!isAuthenticated; else userMenu">
         <a class="navbar__sign-in" href="#" (click)="goToLogin(); $event.preventDefault()">Sign In</a>
         <app-button type="primary" size="medium" (buttonClick)="goToSignUp()">Sign Up</app-button>
       </ng-container>
@@ -82,8 +82,7 @@
         <div class="navbar__user" (click)="toggleUserDropdown()">
           <app-avatar [src]="user?.avatar || ''" [name]="user?.name || ''" [size]="50" class="navbar__avatar"></app-avatar>
           <div class="navbar__user-dropdown" *ngIf="showUserDropdown" (click)="$event.stopPropagation()">
-            <div class="navbar__user-dropdown-username">{{ user?.name }}</div>
-            <a class="navbar__user-option" href="#">Profile</a>
+            <a class="navbar__user-option" (click)=" goToUserDashboard();$event.preventDefault()"href="#">Profile</a>
             <a
               class="navbar__user-option"
               href="#"
@@ -92,22 +91,10 @@
             >
           </div>
         </div>
-      </ng-template> -->
-      <div class="navbar__user" (click)="toggleUserDropdown()">
-          <app-avatar [src]="user?.avatar || ''" [name]="user?.name || ''" [size]="50" class="navbar__avatar"></app-avatar>
-          <div class="navbar__user-dropdown" *ngIf="showUserDropdown" (click)="$event.stopPropagation()">
-            <a class="navbar__user-option" 
-            (click)=" goToUserDashboard();$event.preventDefault()">Profile Management</a>
-            <a
-              class="navbar__user-option"
-              href="#"
-              (click)="logout(); $event.preventDefault()"
-              >Logout</a
-            >
-          </div>
+      </ng-template>
     
     </div>
     
   </div>
   
-<!-- </nav> -->
+</nav>
