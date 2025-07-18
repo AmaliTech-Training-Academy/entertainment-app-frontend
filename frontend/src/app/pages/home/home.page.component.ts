@@ -23,43 +23,43 @@ export class HomePage {
     {
       rank: 1,
       image:
-        'https://upload.wikimedia.org/wikipedia/en/a/ab/Final_Destination_Bloodlines_%282025%29_poster.jpg',
+        'assets/images/final-destination.png',
       alt: 'Final Destination Bloodlines poster',
     },
     {
       rank: 2,
       image:
-        'https://images.unsplash.com/photo-1635805737707-575885ab0820?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        'assets/images/maa.png',
       alt: 'Maa poster',
     },
     {
       rank: 3,
       image:
-        'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        'assets/images/heads-of-state.png',
       alt: 'Heads of State poster',
     },
     {
       rank: 4,
       image:
-        'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        'assets/images/maa.png',
       alt: 'Heads of State poster',
     },
     {
       rank: 5,
       image:
-        'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        'assets/images/heads-of-state.png',
       alt: 'Heads of State poster',
     },
     {
       rank: 6,
       image:
-        'https://images.unsplash.com/photo-1613679074451-9ddcc1103cc8?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        'assets/images/maa.png',
       alt: 'Heads of State poster',
     },
     {
       rank: 7,
       image:
-        'https://images.unsplash.com/photo-1556684996-c32e7604965a?q=80&w=2148&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        'assets/images/heads-of-state.png',
       alt: 'Ballerina poster',
     },
   ];

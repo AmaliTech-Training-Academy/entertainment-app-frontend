@@ -12,12 +12,14 @@
         class="comment-input"
         (keyup.enter)="addComment()">
     </div>
-    <button (click)="addComment()" class="send-button" [disabled]="!newComment.trim()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="22" y1="2" x2="11" y2="13"></line>
-        <polygon points="22,2 15,22 11,13 2,9"></polygon>
-      </svg>
-    </button>
+    <div class="input-actions">
+      <button mat-icon-button class="cancel-btn" (click)="cancelComment()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <button mat-icon-button class="submit-btn" (click)="submitComment()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 12 15 16 10"/></svg>
+      </button>
+    </div>
   </div>
 
   <!-- Comments List -->

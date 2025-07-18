@@ -93,6 +93,14 @@ export class CommentSectionComponent {
     }
   }
 
+  submitComment() {
+    this.addComment();
+  }
+
+  cancelComment() {
+    this.newComment = '';
+  }
+
   likeComment(comment: Comment) {
     if (comment.userLiked) {
       comment.likes--;
