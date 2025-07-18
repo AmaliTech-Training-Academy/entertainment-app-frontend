@@ -21,8 +21,15 @@ export const routes: Routes = [
       {
         path: 'movie/:id',
         loadComponent: () =>
-          import('./pages/home/detail-page/detail.page').then(
+          import('./pages/detail-page/detail.page').then(
             (m) => m.DetailPage,
+          ),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/profile-page/profile-page.component').then(
+            (m) => m.ProfilePageComponent,
           ),
       },
       {
@@ -45,7 +52,11 @@ export const routes: Routes = [
       import('./pages/user-dashboard.page.component').then(
         (m) => m.UserDashboardPageComponent,
       ),
-  }
+  },
+  {
+    path: 'media-player',
+    loadComponent: () => import('./pages/media-player-page/media-player-page.component').then(m => m.MediaPlayerPageComponent)
+  },
       // Add other main routes here
     ],
   },

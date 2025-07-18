@@ -74,6 +74,7 @@
     gap: map.get($spacing, 1);
 
     span {
+      order: 2;
       color: map.get($primary-colors, 100);
     }
   }
@@ -82,12 +83,16 @@
     font-size: 16px;
     width: 16px;
     height: 16px;
+    order: 1;
   }
 
   .outlined-star {
     font-size: 1rem; 
     color: transparent;
-    -webkit-text-stroke: 1.5px white;
+    -webkit-text-stroke: 1.5px white; // white border
+    text-stroke: 1.5px white;
+    height: 1rem;
+    margin: 0;
     margin-left: 0.5rem;
   }
 

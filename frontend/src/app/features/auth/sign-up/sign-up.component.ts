@@ -40,7 +40,7 @@ export class SignUpComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
+    private router: Router
   ) {
     this.registerForm = this.fb.group(
       {
@@ -64,7 +64,7 @@ export class SignUpComponent {
       },
       {
         validators: this.passwordMatchValidator,
-      },
+      }
     );
   }
 
@@ -168,7 +168,7 @@ export class SignUpComponent {
   }
 
   private strongPasswordValidator(
-    control: AbstractControl,
+    control: AbstractControl
   ): ValidationErrors | null {
     const value = control.value;
     const strongPasswordRegex =
@@ -177,7 +177,7 @@ export class SignUpComponent {
   }
 
   emailTakenValidator = (
-    control: AbstractControl,
+    control: AbstractControl
   ): Promise<ValidationErrors | null> => {
     return new Promise((resolve) => {
       const fakeEmails = ['ernesto@example.com', 'fan@cineverse.com'];

@@ -1,0 +1,80 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/spacing" as *;
+@use "../../../styles/radius" as *;
+@use "sass:map";
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: map.get($spacing, 1);
+  margin: map.get($spacing, 7) 0;
+  padding: map.get($spacing, 2);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: map.get($spacing, 2);
+    border-radius: map.get($radius, 2);
+    border: 1px solid #e2e8f0;
+    background-color: transparent;
+    color: map.get($primary-colors, 100);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &.active {
+      background-color: map.get($neutral-colors, 100);
+      border-color: map.get($neutral-colors, 100);
+      color: map.get($primary-colors, 800);
+    }
+
+    &.previous-page,
+    &.next-page {
+      padding: 0 map.get($spacing, 6);
+      font-weight: 600;
+      min-width: auto;
+    }
+  }
+
+  // Hide some page numbers on very small screens
+  @media (max-width: 360px) {
+    .page-numbers {
+      display: none;
+
+      &:nth-child(-n + 2),
+      &:nth-last-child(-n + 2),
+      &.active {
+        display: flex;
+      }
+    }
+  }
+
+  @media (min-width: 640px) {
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+    padding: 0;
+
+    button {
+      min-width: 2.5rem;
+      height: 2.5rem;
+      font-size: 0.875rem;
+      padding: 0 0.75rem;
+    }
+  }
+}

@@ -3,7 +3,11 @@
   align-items: center;
   justify-content: space-between;
   background: transparent;
-  padding: 1rem 0;
+  padding: 1rem;
+
+  @media(min-width: 768px){
+    padding: 1rem 0;
+  }
 }
 
 .navbar__logo {
