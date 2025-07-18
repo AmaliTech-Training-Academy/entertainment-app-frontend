@@ -43,3 +43,10 @@ variable "enable_waf_logging" {
   type        = bool
   default     = true
 }
+
+# New variable for production-specific features
+variable "is_production" {
+  description = "Whether this is a production environment"
+  type        = bool
+  default     = false
+}

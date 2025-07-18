@@ -4,10 +4,19 @@ resource "aws_cloudfront_distribution" "website" {
   comment             = "CineVerse ${var.environment} Frontend Distribution"
   default_root_object = "index.html"
   price_class         = var.price_class
-  # FIXED: Only set web_acl_id if it's not empty (WAF is optional for dev)
   web_acl_id          = var.waf_web_acl_id != "" ? var.waf_web_acl_id : null
 
   aliases = var.domain_aliases
+
+  # Enhanced logging configuration
+  dynamic "logging_config" {
+    for_each = var.enable_access_logging ? [1] : []
+    content {
+      include_cookies = false
+      bucket          = aws_s3_bucket.cloudfront_logs[0].bucket_domain_name
+      prefix          = "cloudfront-access-logs/"
+    }
+  }
 
   origin {
     domain_name              = var.s3_bucket_domain_name
@@ -15,6 +24,7 @@ resource "aws_cloudfront_distribution" "website" {
     origin_access_control_id = var.origin_access_control_id
   }
 
+  # Enhanced default cache behavior with optimized TTL
   default_cache_behavior {
     allowed_methods            = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods             = ["GET", "HEAD"]
@@ -26,7 +36,7 @@ resource "aws_cloudfront_distribution" "website" {
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
 
-  # Cache behavior for static assets
+  # Optimized cache behavior for static assets with longer TTL
   ordered_cache_behavior {
     path_pattern               = "/assets/*"
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
@@ -35,6 +45,44 @@ resource "aws_cloudfront_distribution" "website" {
     compress                   = true
     viewer_protocol_policy     = "redirect-to-https"
     cache_policy_id            = aws_cloudfront_cache_policy.static_assets.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Additional cache behavior for CSS/JS files
+  ordered_cache_behavior {
+    path_pattern               = "*.css"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-${var.s3_bucket_id}"
+    compress                   = true
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = aws_cloudfront_cache_policy.static_assets.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  ordered_cache_behavior {
+    path_pattern               = "*.js"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-${var.s3_bucket_id}"
+    compress                   = true
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = aws_cloudfront_cache_policy.static_assets.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Cache behavior for images with very long TTL
+  ordered_cache_behavior {
+    path_pattern               = "*.{jpg,jpeg,png,gif,ico,svg,webp}"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-${var.s3_bucket_id}"
+    compress                   = true
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = aws_cloudfront_cache_policy.images.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
@@ -52,27 +100,88 @@ resource "aws_cloudfront_distribution" "website" {
     minimum_protocol_version      = var.use_default_certificate ? null : "TLSv1.2_2021"
   }
 
+  # Enhanced error responses
   custom_error_response {
     error_code         = 403
     response_code      = 200
     response_page_path = "/index.html"
+    error_caching_min_ttl = 300
   }
 
   custom_error_response {
     error_code         = 404
     response_code      = 200
     response_page_path = "/index.html"
+    error_caching_min_ttl = 300
+  }
+
+  custom_error_response {
+    error_code         = 500
+    response_code      = 500
+    response_page_path = "/error.html"
+    error_caching_min_ttl = 0
   }
 
   tags = var.tags
 }
 
-# Cache Policy for SPA with environment-specific unique name
+# S3 bucket for CloudFront access logs
+resource "aws_s3_bucket" "cloudfront_logs" {
+  count  = var.enable_access_logging ? 1 : 0
+  bucket = "${replace(var.s3_bucket_id, "-frontend-", "-cloudfront-logs-")}"
+  
+  tags = merge(var.tags, {
+    Purpose = "cloudfront-access-logs"
+  })
+}
+
+resource "aws_s3_bucket_public_access_block" "cloudfront_logs" {
+  count  = var.enable_access_logging ? 1 : 0
+  bucket = aws_s3_bucket.cloudfront_logs[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_logs" {
+  count  = var.enable_access_logging ? 1 : 0
+  bucket = aws_s3_bucket.cloudfront_logs[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+    bucket_key_enabled = true
+  }
+}
+
+# Lifecycle for CloudFront logs
+resource "aws_s3_bucket_lifecycle_configuration" "cloudfront_logs" {
+  count  = var.enable_access_logging ? 1 : 0
+  bucket = aws_s3_bucket.cloudfront_logs[0].id
+
+  rule {
+    id     = "cloudfront_log_retention"
+    status = "Enabled"
+
+    expiration {
+      days = var.environment == "prod" ? 365 : 90
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+
+# Enhanced Cache Policy for SPA with environment-specific TTL
 resource "aws_cloudfront_cache_policy" "spa" {
   name        = "cineverse-${var.environment}-spa-cache-policy"
-  comment     = "Cache policy for SPA applications - ${var.environment}"
-  default_ttl = 86400
-  max_ttl     = 31536000
+  comment     = "Optimized cache policy for SPA applications - ${var.environment}"
+  default_ttl = var.cloudfront_cache_ttl
+  max_ttl     = var.cloudfront_cache_ttl * 2
   min_ttl     = 0
 
   parameters_in_cache_key_and_forwarded_to_origin {
@@ -93,10 +202,36 @@ resource "aws_cloudfront_cache_policy" "spa" {
   }
 }
 
-# Cache Policy for Static Assets with environment-specific unique name
+# Enhanced Cache Policy for Static Assets with optimized TTL
 resource "aws_cloudfront_cache_policy" "static_assets" {
   name        = "cineverse-${var.environment}-static-assets-cache-policy"
-  comment     = "Cache policy for static assets (CSS, JS, images) - ${var.environment}"
+  comment     = "Optimized cache policy for static assets - ${var.environment}"
+  default_ttl = var.static_assets_ttl
+  max_ttl     = var.static_assets_ttl
+  min_ttl     = var.static_assets_ttl
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "none"
+    }
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+  }
+}
+
+# Cache Policy for Images with very long TTL
+resource "aws_cloudfront_cache_policy" "images" {
+  name        = "cineverse-${var.environment}-images-cache-policy"
+  comment     = "Cache policy for images with long TTL - ${var.environment}"
   default_ttl = 31536000  # 1 year
   max_ttl     = 31536000  # 1 year
   min_ttl     = 31536000  # 1 year
@@ -144,10 +279,10 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
   }
 }
 
-# Response Headers Policy for Security with environment-specific unique name
+# Enhanced Response Headers Policy for Security
 resource "aws_cloudfront_response_headers_policy" "security" {
   name    = "cineverse-${var.environment}-security-headers"
-  comment = "Security headers for CineVerse frontend - ${var.environment}"
+  comment = "Enhanced security headers for CineVerse frontend - ${var.environment}"
 
   cors_config {
     access_control_allow_credentials = false
@@ -189,8 +324,17 @@ resource "aws_cloudfront_response_headers_policy" "security" {
     }
 
     content_security_policy {
-      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ${var.api_endpoint}; media-src 'self';"
+      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ${var.api_endpoint}; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';"
       override = true
+    }
+  }
+
+  # Add server timing header for performance monitoring
+  custom_headers_config {
+    items {
+      header   = "Server-Timing"
+      value    = "cf-cache;dur=0"
+      override = false
     }
   }
 }

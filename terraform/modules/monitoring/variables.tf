@@ -18,6 +18,11 @@ variable "cloudfront_distribution_id" {
   type        = string
 }
 
+variable "cloudfront_domain_name" {
+  description = "CloudFront domain name"
+  type        = string
+}
+
 variable "s3_bucket_arn" {
   description = "S3 bucket ARN"
   type        = string
@@ -45,4 +50,29 @@ variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)
   default     = {}
+}
+
+# New variables for enhanced monitoring
+variable "enable_rum" {
+  description = "Enable CloudWatch RUM for real user monitoring"
+  type        = bool
+  default     = false
+}
+
+variable "enable_cost_alerts" {
+  description = "Enable cost monitoring and alerts"
+  type        = bool
+  default     = false
+}
+
+variable "cost_alert_thresholds" {
+  description = "Cost alert thresholds"
+  type = object({
+    warning  = number
+    critical = number
+  })
+  default = {
+    warning  = 100
+    critical = 250
+  }
 }

@@ -15,7 +15,13 @@ variable "enable_versioning" {
 }
 
 variable "enable_intelligent_tiering" {
-  description = "Enable S3 Intelligent Tiering"
+  description = "Enable S3 Intelligent Tiering for cost optimization"
+  type        = bool
+  default     = false
+}
+
+variable "enable_access_logging" {
+  description = "Enable S3 access logging"
   type        = bool
   default     = false
 }

@@ -59,3 +59,22 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+# New variables for enhanced features
+variable "cloudfront_cache_ttl" {
+  description = "Default cache TTL for CloudFront in seconds"
+  type        = number
+  default     = 86400  # 1 day
+}
+
+variable "static_assets_ttl" {
+  description = "Cache TTL for static assets in seconds"
+  type        = number
+  default     = 31536000  # 1 year
+}
+
+variable "enable_access_logging" {
+  description = "Enable CloudFront access logging"
+  type        = bool
+  default     = false
+}

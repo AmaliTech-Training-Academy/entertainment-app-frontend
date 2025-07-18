@@ -48,3 +48,47 @@ variable "tags" {
   description = "Common tags to apply to all resources"
   default     = {}
 }
+
+# New variables for production enhancements
+variable "cost_center" {
+  description = "Cost center for resource allocation"
+  type        = string
+  default     = "frontend-team"
+}
+
+variable "owner" {
+  description = "Owner of the resources"
+  type        = string
+  default     = "devops-team"
+}
+
+variable "blocked_countries" {
+  description = "List of country codes to block in WAF (production only)"
+  type        = list(string)
+  default     = []
+}
+
+variable "slack_webhook_url" {
+  description = "Slack webhook URL for notifications"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "notification_emails" {
+  description = "List of email addresses for notifications"
+  type        = list(string)
+  default     = []
+}
+
+variable "enable_drift_detection" {
+  description = "Enable infrastructure drift detection"
+  type        = bool
+  default     = false
+}
+
+variable "enable_rollback_automation" {
+  description = "Enable automated rollback capabilities"
+  type        = bool
+  default     = false
+}

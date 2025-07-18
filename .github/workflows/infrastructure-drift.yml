@@ -1,0 +1,328 @@
+# name: Infrastructure Drift Detection
+
+# on:
+#   schedule:
+#     # Run every day at 6 AM UTC for production
+#     - cron: '0 6 * * *'
+#   # Allow manual trigger
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         description: 'Environment to check for drift'
+#         required: true
+#         default: 'prod'
+#         type: choice
+#         options:
+#           - dev
+#           - staging
+#           - prod
+
+# env:
+#   TERRAFORM_VERSION: '1.9.8'
+#   AWS_REGION: 'eu-west-1'
+
+# jobs:
+#   drift-detection:
+#     name: Detect Infrastructure Drift
+#     runs-on: self-hosted
+#     strategy:
+#       matrix:
+#         environment: 
+#           - ${{ github.event.inputs.environment || 'prod' }}
+#           # For scheduled runs, also check staging
+#           - ${{ github.event_name == 'schedule' && 'staging' || '' }}
+#       fail-fast: false
+#     steps:
+#       - name: Skip empty environment
+#         if: matrix.environment == ''
+#         run: |
+#           echo "Skipping empty environment"
+#           exit 0
+
+#       - uses: actions/checkout@v4
+
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v3
+#         with:
+#           terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ env.AWS_REGION }}
+
+#       - name: Prepare Environment Configuration
+#         working-directory: terraform
+#         env:
+#           ENVIRONMENT: ${{ matrix.environment }}
+#         run: |
+#           echo " Preparing drift detection for environment: $ENVIRONMENT"
+#           mkdir -p environments/$ENVIRONMENT
+          
+#           # Create backend configuration
+#           cat > environments/$ENVIRONMENT/backend.hcl << EOF
+#           bucket         = "cineverse-terraform-state-$ENVIRONMENT"
+#           key            = "frontend/$ENVIRONMENT/terraform.tfstate"
+#           region         = "${{ env.AWS_REGION }}"
+#           encrypt        = true
+#           dynamodb_table = "cineverse-terraform-locks"
+#           EOF
+          
+#           # Create terraform variables based on environment
+#           case "$ENVIRONMENT" in
+#             "dev")
+#               WAF_ENABLED="false"
+#               DOMAIN_NAME='""'
+#               BLOCKED_COUNTRIES='[]'
+#               COST_CENTER='"frontend-development"'
+#               ;;
+#             "staging")
+#               WAF_ENABLED="true"
+#               DOMAIN_NAME='"staging.cineverse.com"'
+#               BLOCKED_COUNTRIES='["CN"]'
+#               COST_CENTER='"frontend-staging"'
+#               ;;
+#             "prod")
+#               WAF_ENABLED="true"
+#               DOMAIN_NAME='"cineverse.com"'
+#               BLOCKED_COUNTRIES='["CN", "RU", "KP"]'
+#               COST_CENTER='"frontend-production"'
+#               ;;
+#           esac
+          
+#           cat > environments/$ENVIRONMENT/terraform.tfvars << EOF
+#           environment      = "$ENVIRONMENT"
+#           project_name     = "cineverse"
+#           aws_region       = "${{ env.AWS_REGION }}"
+#           enable_waf       = $WAF_ENABLED
+#           blocked_countries = $BLOCKED_COUNTRIES
+#           enable_monitoring = true
+#           cost_center = $COST_CENTER
+#           owner      = "devops-team"
+#           domain_name = $DOMAIN_NAME
+#           api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
+#           enable_drift_detection     = $([ "$ENVIRONMENT" = "prod" ] && echo "true" || echo "false")
+#           enable_rollback_automation = $([ "$ENVIRONMENT" = "prod" ] && echo "true" || echo "false")
+          
+#           tags = {
+#             Environment = "$ENVIRONMENT"
+#             Project     = "CineVerse"
+#             CostCenter  = $COST_CENTER
+#             Owner       = "devops-team"
+#             ManagedBy   = "terraform-drift-detection"
+#           }
+#           EOF
+
+#       - name: Initialize Terraform
+#         working-directory: terraform
+#         env:
+#           ENVIRONMENT: ${{ matrix.environment }}
+#         run: |
+#           echo " Initializing Terraform for $ENVIRONMENT"
+#           terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl"
+
+#       - name: Check for Drift
+#         id: drift
+#         working-directory: terraform
+#         env:
+#           ENVIRONMENT: ${{ matrix.environment }}
+#         run: |
+#           echo " Checking for infrastructure drift in $ENVIRONMENT"
+          
+#           # Set environment variables for sensitive data
+#           export TF_VAR_slack_webhook_url="${{ secrets.SLACK_WEBHOOK_URL }}"
+#           export TF_VAR_notification_emails='["${{ secrets.NOTIFICATION_EMAIL }}"]'
+          
+#           # Run terraform plan to detect drift
+#           terraform plan \
+#             -var-file="environments/$ENVIRONMENT/terraform.tfvars" \
+#             -detailed-exitcode \
+#             -out="drift-plan-$ENVIRONMENT.tfplan" \
+#             -no-color > drift-output-$ENVIRONMENT.txt 2>&1
+          
+#           PLAN_EXIT_CODE=$?
+          
+#           if [[ $PLAN_EXIT_CODE -eq 0 ]]; then
+#             echo " No drift detected in $ENVIRONMENT environment"
+#             echo "drift_detected=false" >> $GITHUB_OUTPUT
+#             echo "drift_summary=No changes detected" >> $GITHUB_OUTPUT
+#           elif [[ $PLAN_EXIT_CODE -eq 1 ]]; then
+#             echo " Terraform plan failed for $ENVIRONMENT"
+#             echo "drift_detected=error" >> $GITHUB_OUTPUT
+#             echo "drift_summary=Terraform plan failed" >> $GITHUB_OUTPUT
+#             cat drift-output-$ENVIRONMENT.txt
+#             exit 1
+#           elif [[ $PLAN_EXIT_CODE -eq 2 ]]; then
+#             echo " Infrastructure drift detected in $ENVIRONMENT environment"
+#             echo "drift_detected=true" >> $GITHUB_OUTPUT
+            
+#             # Extract changes summary
+#             CHANGES_SUMMARY=$(grep -E "Plan:|# " drift-output-$ENVIRONMENT.txt | head -10 || echo "Changes detected")
+#             echo "drift_summary<<EOF" >> $GITHUB_OUTPUT
+#             echo "$CHANGES_SUMMARY" >> $GITHUB_OUTPUT
+#             echo "EOF" >> $GITHUB_OUTPUT
+            
+#             echo " Changes detected:"
+#             echo "$CHANGES_SUMMARY"
+#           fi
+
+#       - name: Upload Drift Report
+#         if: steps.drift.outputs.drift_detected == 'true'
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: drift-report-${{ matrix.environment }}-${{ github.run_number }}
+#           path: |
+#             terraform/drift-plan-${{ matrix.environment }}.tfplan
+#             terraform/drift-output-${{ matrix.environment }}.txt
+#           retention-days: 30
+
+#       - name: Get Current Infrastructure State
+#         if: steps.drift.outputs.drift_detected == 'true'
+#         working-directory: terraform
+#         env:
+#           ENVIRONMENT: ${{ matrix.environment }}
+#         run: |
+#           echo " Current infrastructure state for $ENVIRONMENT:"
+          
+#           # List all resources
+#           echo "## Resources in State:"
+#           terraform state list | sort
+          
+#           echo ""
+#           echo "## Resource Counts by Type:"
+#           terraform state list | cut -d. -f1 | sort | uniq -c | sort -nr
+          
+#           # Check for any resources not managed by Terraform
+#           echo ""
+#           echo " Checking for unmanaged resources..."
+          
+#           # Check S3 buckets
+#           echo "S3 Buckets in region:"
+#           aws s3api list-buckets --query "Buckets[?contains(Name, 'cineverse') && contains(Name, '$ENVIRONMENT')].Name" --output table
+          
+#           # Check CloudFront distributions
+#           echo "CloudFront Distributions:"
+#           aws cloudfront list-distributions --query "DistributionList.Items[?Comment && contains(Comment, 'CineVerse') && contains(Comment, '$ENVIRONMENT')].{Id:Id,Comment:Comment,Status:Status}" --output table
+
+#       - name: Send Drift Alert
+#         if: steps.drift.outputs.drift_detected == 'true'
+#         env:
+#           ENVIRONMENT: ${{ matrix.environment }}
+#         run: |
+#           echo " Sending drift detection alert for $ENVIRONMENT"
+          
+#           # Send Slack notification if webhook is available
+#           if [[ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]]; then
+#             curl -X POST -H 'Content-type: application/json' \
+#               --data "{
+#                 \"text\": \" Infrastructure Drift Detected\",
+#                 \"attachments\": [{
+#                   \"color\": \"warning\",
+#                   \"title\": \"Infrastructure Drift Alert\",
+#                   \"fields\": [
+#                     {\"title\": \"Environment\", \"value\": \"$ENVIRONMENT\", \"short\": true},
+#                     {\"title\": \"Status\", \"value\": \"Drift Detected\", \"short\": true},
+#                     {\"title\": \"Detection Time\", \"value\": \"$(date -u +%Y-%m-%d\\ %H:%M:%S\\ UTC)\", \"short\": true},
+#                     {\"title\": \"Action Required\", \"value\": \"Review and apply changes\", \"short\": true}
+#                   ],
+#                   \"text\": \"Changes detected:\\n\`\`\`\\n${{ steps.drift.outputs.drift_summary }}\\n\`\`\`\"
+#                 }]
+#               }" \
+#               "${{ secrets.SLACK_WEBHOOK_URL }}"
+#           fi
+          
+#           # Send email notification via SNS if configured
+#           if [[ -n "${{ secrets.NOTIFICATION_EMAIL }}" ]]; then
+#             # Get SNS topic ARN for the environment
+#             SNS_TOPIC_ARN=$(aws sns list-topics --query "Topics[?contains(TopicArn, 'cineverse-$ENVIRONMENT-alerts')].TopicArn" --output text)
+            
+#             if [[ -n "$SNS_TOPIC_ARN" ]]; then
+#               aws sns publish \
+#                 --topic-arn "$SNS_TOPIC_ARN" \
+#                 --subject "Infrastructure Drift Detected - $ENVIRONMENT" \
+#                 --message "Infrastructure drift has been detected in the $ENVIRONMENT environment.
+
+#               Detection Time: $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)
+              
+#               Changes Summary:
+#               ${{ steps.drift.outputs.drift_summary }}
+              
+#               Please review the changes and take appropriate action.
+              
+#               View the full report: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+#               "
+#             fi
+#           fi
+
+#       - name: Create GitHub Issue for Critical Drift
+#         if: steps.drift.outputs.drift_detected == 'true' && matrix.environment == 'prod'
+#         uses: actions/github-script@v7
+#         with:
+#           script: |
+#             const { data: issues } = await github.rest.issues.listForRepo({
+#               owner: context.repo.owner,
+#               repo: context.repo.repo,
+#               labels: ['infrastructure-drift', 'production'],
+#               state: 'open'
+#             });
+            
+#             // Only create issue if one doesn't already exist
+#             if (issues.length === 0) {
+#               await github.rest.issues.create({
+#                 owner: context.repo.owner,
+#                 repo: context.repo.repo,
+#                 title: ` Production Infrastructure Drift Detected`,
+#                 body: `## Infrastructure Drift Alert
+                
+#                 **Environment:** Production
+#                 **Detection Time:** ${new Date().toISOString()}
+#                 **Workflow Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+                
+#                 ### Changes Detected:
+#                 \`\`\`
+#                 ${{ steps.drift.outputs.drift_summary }}
+#                 \`\`\`
+                
+#                 ### Recommended Actions:
+#                 1. Review the drift detection report
+#                 2. Identify the source of the changes
+#                 3. Update Terraform configuration if changes are intended
+#                 4. Apply Terraform changes to restore desired state
+#                 5. Investigate if changes were made outside of Terraform
+                
+#                 ### Next Steps:
+#                 - [ ] Review drift report
+#                 - [ ] Determine if changes are intentional
+#                 - [ ] Update infrastructure as code
+#                 - [ ] Apply corrections
+#                 - [ ] Close this issue
+#                 `,
+#                 labels: ['infrastructure-drift', 'production', 'urgent']
+#               });
+#             }
+
+#       - name: Summary Report
+#         if: always()
+#         env:
+#           ENVIRONMENT: ${{ matrix.environment }}
+#         run: |
+#           cat << EOF >> $GITHUB_STEP_SUMMARY
+#           #  Infrastructure Drift Detection Report
+          
+#           **Environment:** $ENVIRONMENT  
+#           **Detection Time:** $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)  
+#           **Status:** ${{ steps.drift.outputs.drift_detected == 'true' && '⚠️ Drift Detected' || steps.drift.outputs.drift_detected == 'false' && '✅ No Drift' || '❌ Error' }}
+          
+#           ##  Summary
+#           ${{ steps.drift.outputs.drift_summary }}
+          
+#           ##  Actions
+#           - [View Full Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+#           - [Infrastructure Repository](${{ github.server_url }}/${{ github.repository }})
+#           - [AWS Console](https://console.aws.amazon.com)
+          
+#           ##  Next Steps
+#           ${{ steps.drift.outputs.drift_detected == 'true' && '1. Review the detected changes\n2. Determine if changes are intentional\n3. Update Terraform configuration\n4. Apply corrective measures' || 'No action required - infrastructure is in sync' }}
+#           EOF
