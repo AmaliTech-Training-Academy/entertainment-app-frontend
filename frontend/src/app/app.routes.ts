@@ -69,13 +69,16 @@ export const routes: Routes = [
         path: 'user-test',
         loadComponent: () =>
           import('./pages/user-dashboard.page.component').then(
-            (m) => m.UserDashboardPageComponent,
+            (m) => m.UserDashboardPageComponent
           ),
         canActivate: [AuthGuard],
       },
       {
         path: 'media-player',
-        loadComponent: () => import('./pages/media-player-page/media-player-page.component').then(m => m.MediaPlayerPageComponent),
+        loadComponent: () =>
+          import('./pages/media-player-page/media-player-page.component').then(
+            (m) => m.MediaPlayerPageComponent
+          ),
         canActivate: [AuthGuard],
       },
       // Add other main routes here
@@ -145,9 +148,9 @@ export const routes: Routes = [
         path: 'content',
         loadComponent: () =>
           import('./features/admin-content/admin-content.component').then(
-            (m) => m.AdminContentComponent,
+            (m) => m.AdminContentComponent
           ),
-        },
+      },
       {
         path: '',
         redirectTo: 'dashboard',

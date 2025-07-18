@@ -198,7 +198,7 @@ import {
   AdvancedSearchService,
   Movie,
   MoviesApiResponse,
-} from '../../core/services/advanced-search.service';
+} from '../../core/services/advance-search/advanced-search.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Cache service to handle caching of API responses
@@ -332,11 +332,11 @@ export class AdvancedSearchPageComponent implements OnInit {
     }
 
     this.advSearchService.searchMovies(filters).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.cacheService.set(cacheKey, response);
         this.handleMovieResponse(response);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Failed to fetch movies:', err);
         this.isLoading = false;
       },

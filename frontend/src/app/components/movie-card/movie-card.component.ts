@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
-import { Movie } from '../../core/services/advanced-search.service';
+import { Movie } from '../../core/services/advance-search/advanced-search.service';
 
 @Component({
   selector: 'app-movie-card',

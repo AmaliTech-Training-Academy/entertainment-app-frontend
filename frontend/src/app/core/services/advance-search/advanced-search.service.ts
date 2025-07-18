@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
-import { environment } from '../../../environments/environment.dev';
+import { environment } from '../../../../environments/environment.dev';
 
 export interface Movie {
   id: string;
