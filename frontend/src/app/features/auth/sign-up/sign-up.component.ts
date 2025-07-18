@@ -151,7 +151,7 @@ export class SignUpComponent {
           }
           // Optionally store user info in cookies as well if needed
           // Redirect to home page
-          this.router.navigate(['/home']);
+          this.router.navigate(['/login']);
         },
         error: (err) => {
           this.loading = false;

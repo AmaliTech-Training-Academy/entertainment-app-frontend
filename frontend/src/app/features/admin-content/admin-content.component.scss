@@ -1,0 +1,235 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/spacing' as *;
+@use 'sass:map';
+
+@function color($palette, $shade) {
+  @return map.get($palette, $shade);
+}
+
+@function space($size) {
+  @return map.get($spacing, $size);
+}
+
+.content-management {
+  background-color: color($primary-colors, 1000);
+  color: color($neutral-colors, 100);
+  padding: space(4);
+
+  .page-header {
+    margin-bottom: space(lg);
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: color($neutral-colors, 500);
+      margin-top: 12px;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .top-bar {
+    flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+
+    @media (min-width: 768px) {
+      display: flex;
+        gap: 1rem;
+        margin-bottom: space(3);
+    }
+
+    .search-input {
+      background: color($primary-colors, 700);
+      border: none;
+      border-radius: 0.5rem;
+      padding: 1rem 1rem;
+      width: 100%;
+      color: color($neutral-colors, 100);
+      margin-bottom: 1rem;
+    }
+
+    .upload-btn {
+      background-color: color($secondary-colors, 200);
+      color: white;
+      border: none;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 2rem;
+
+      &:hover {
+        background-color: color($secondary-colors, 300);
+      }
+      
+    }
+
+    @media (min-width: 768px) {
+
+      .upload-btn {
+        width: 150px;
+      }
+
+      .search-input {
+        width: 60%;
+      }
+    }
+  }
+
+  h3 {
+    margin-bottom: space(3);
+  }
+
+  .bulk-actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: space(3);
+
+    .bulk-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .edit-btn,
+    .delete-btn {
+      background-color: color($primary-colors, 700);
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+    }
+
+    .dropdown {
+      position: relative;
+
+      .dropdown-btn {
+        background-color: transparent;
+        border: 1px solid color($neutral-colors, 100);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        // border: none;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: color($neutral-colors, 900);
+        list-style: none;
+        padding: 0.5rem 0;
+        margin-top: 0.5rem;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+        width: 100%;
+
+        li {
+          padding: 0.5rem 1rem;
+          cursor: pointer;
+
+          &:hover {
+            background-color: color($neutral-colors, 800);
+          }
+        }
+      }
+    }
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      align-items: center;
+
+      .dropdown .dropdown-btn {
+        width: auto;
+      }
+    }
+  }
+
+  .table-wrapper {
+    overflow-x: hidden;
+    border: 1px solid color($neutral-colors, 100);
+    border-radius: 0.5rem;
+  }
+
+  .content-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+    border-radius: 0.625rem;
+    th,
+    td {
+      text-align: left;
+      padding: space(3);
+      white-space: nowrap;
+    }
+
+    th {
+      background-color: transparent;
+      color: color($neutral-colors, 100);
+      font-weight: 400;
+      border-bottom: 1px solid color($primary-colors, 100);
+    }
+
+    td {
+      background-color: color($primary-colors, 800);
+      color: color($primary-colors, 100);
+      border-bottom: 1px solid color($primary-colors, 100);
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    .status {
+      color: color($primary-colors, 100);
+      
+    }
+
+    tr {
+      border-radius: 0.625rem;
+      overflow: hidden;
+    }
+  }
+}
+
+
+.no-results {
+  text-align: center;
+  font-style: italic;
+  padding: 1rem;
+  color: gray;
+}
+
+.upload-form {
+  background: #f9f9f9;
+  padding: 1rem;
+  margin: 1rem 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+
+  input, select {
+    display: block;
+    margin: 0.5rem 0;
+    padding: 0.4rem;
+    width: 100%;
+  }
+
+  button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+  }
+}

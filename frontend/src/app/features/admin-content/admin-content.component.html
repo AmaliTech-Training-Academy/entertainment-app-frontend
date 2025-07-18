@@ -1,0 +1,113 @@
+<section class="content-management">
+  <header class="page-header">
+    <h1>Content Management</h1>
+    <p>Manage content inventory</p>
+  </header>
+
+  <div class="top-bar">
+    <input
+      class="search-input"
+      type="text"
+      placeholder="Search movies"
+      [(ngModel)]="searchTerm"
+      (input)="filterContent()"
+    />
+    <button class="upload-btn" (click)="uploadContent()">+ Upload content</button>
+  </div>
+
+  <!-- Upload Form -->
+  <div *ngIf="showUploadForm" class="upload-form">
+    <h3>Add New Content</h3>
+    <form (ngSubmit)="addContent()">
+      <input type="text" placeholder="Title" [(ngModel)]="newContent.title" name="title" required />
+      <select [(ngModel)]="newContent.genre" name="genre" required>
+        <option value="" disabled>Select genre</option>
+        <option *ngFor="let genre of genres" [value]="genre">{{ genre }}</option>
+      </select>
+      <input type="text" placeholder="Duration" [(ngModel)]="newContent.duration" name="duration" required />
+      <input type="date" [(ngModel)]="newContent.releaseDate" name="releaseDate" required />
+      <select [(ngModel)]="newContent.status" name="status" required>
+        <option value="Draft">Draft</option>
+        <option value="Published">Published</option>
+        <option value="Archived">Archived</option>
+      </select>
+      <button type="submit">Upload</button>
+    </form>
+  </div>
+
+  <!-- Edit Form -->
+  <div *ngIf="showEditForm" class="upload-form">
+    <h3>{{ editingMultiple ? 'Edit Selected Content' : 'Edit Movie' }}</h3>
+    <form (ngSubmit)="submitEdit()">
+      <input type="text" [(ngModel)]="editContent.title" name="editTitle" required />
+      <select [(ngModel)]="editContent.genre" name="editGenre" required>
+        <option *ngFor="let genre of genres" [value]="genre">{{ genre }}</option>
+      </select>
+      <input type="text" [(ngModel)]="editContent.duration" name="editDuration" required />
+      <input type="date" [(ngModel)]="editContent.releaseDate" name="editReleaseDate" required />
+      <select [(ngModel)]="editContent.status" name="editStatus" required>
+        <option value="Draft">Draft</option>
+        <option value="Published">Published</option>
+        <option value="Archived">Archived</option>
+      </select>
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
+
+  <h3>Bulk Actions</h3>
+  <div class="bulk-actions">
+    <div class="bulk-buttons">
+      <button class="edit-btn" (click)="editSelected()">Edit</button>
+      <button class="delete-btn" (click)="deleteSelected()">Delete</button>
+    </div>
+
+    <div class="dropdown">
+      <button class="dropdown-btn" (click)="toggleDropdown()">All Genre</button>
+      <ul *ngIf="dropdownOpen" class="dropdown-menu">
+        <li *ngFor="let genre of genres" (click)="selectGenre(genre)">{{ genre }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="content-table">
+      <thead>
+        <tr>
+          <th>
+            <input type="checkbox" [(ngModel)]="selectAll" (change)="toggleAll()" />
+          </th>
+          <th>Title</th>
+          <th>Genre</th>
+          <th>Duration</th>
+          <th>Release Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredContent">
+          <td>
+            <input type="checkbox" [(ngModel)]="item.selected" (change)="onItemSelectionChange()" />
+          </td>
+          <td>{{ item.title }}</td>
+          <td>{{ item.genre }}</td>
+          <td>{{ item.duration }}</td>
+          <td>{{ item.releaseDate }}</td>
+          <td class="status">{{ item.status }}</td>
+        </tr>
+        <tr *ngIf="filteredContent.length === 0">
+          <td colspan="6" class="no-results">No movies found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<app-confirm-modal
+  *ngIf="showConfirmModal"
+  [title]="'Delete Confirmation'"
+  [message]="'Are you sure you want to delete the selected movie(s)?'"
+  [confirmText]="'Delete'"
+  [cancelText]="'Cancel'"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()"
+></app-confirm-modal>
