@@ -119,7 +119,7 @@ export const routes: Routes = [
       import('./pages/admin-layout/admin-layout.component').then(
         (m) => m.AdminLayoutComponent
       ),
-    canActivate: [RoleGuard],
+    // canActivate: [RoleGuard],
     data: { role: 'admin' },
     children: [
       {
