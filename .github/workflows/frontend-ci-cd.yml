@@ -296,7 +296,7 @@ jobs:
           domain_name = $DOMAIN_NAME
           
           # API endpoint
-          api_endpoint = "https://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
+          api_endpoint = "http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
           
           # Tags
           tags = {
@@ -453,7 +453,7 @@ jobs:
           domain_name = $DOMAIN_NAME
           
           # API endpoint
-          api_endpoint = "https://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
+          api_endpoint = "http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
           
           # Tags
           tags = {

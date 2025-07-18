@@ -120,6 +120,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'content',
+        loadComponent: () =>
+          import('./features/admin-content/admin-content.component').then(
+            (m) => m.AdminContentComponent,
+          ),
+        },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',
