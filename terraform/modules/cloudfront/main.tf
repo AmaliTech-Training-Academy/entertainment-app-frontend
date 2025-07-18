@@ -160,7 +160,7 @@ resource "aws_cloudfront_distribution" "website" {
   }
 
   default_cache_behavior {
-    allowed_methods            = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
@@ -186,7 +186,7 @@ resource "aws_cloudfront_distribution" "website" {
   # API behavior
   ordered_cache_behavior {
     path_pattern               = "/api/*"
-    allowed_methods            = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "DELETE"]
+    allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "API-ALB"
     compress                   = true
