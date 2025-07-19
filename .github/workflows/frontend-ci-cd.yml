@@ -1,832 +1,1337 @@
-# name: CineVerse Frontend (Production environment)
+# =============================================================================
+# CineVerse Frontend CI/CD Pipeline
+# =============================================================================
+# This workflow provides comprehensive CI/CD for the CineVerse frontend application
+# with support for both automated and manual deployments across multiple environments.
+#
+# Key Features:
+# - Multi-environment support (dev, staging, prod)
+# - Manual approval system via workflow_dispatch
+# - Environment protection rules for production/staging
+# - Comprehensive security scanning
+# - Infrastructure as Code with Terraform
+# - CloudFront CDN with HTTP-compatible ALB backend
+# - Enhanced monitoring and notifications
+#
+# Environments:
+# - dev: Development environment with relaxed security
+# - staging: Pre-production environment with full security
+# - prod: Production environment with enhanced protections
+# =============================================================================
 
-# env:
-#   APP_NAME: 'entertainment-app-frontend'
-#   AWS_REGION: 'eu-west-1'
-#   TERRAFORM_VERSION: '1.9.8'
-#   NODE_VERSION: '18'
+name: CineVerse Frontend (Production environment)
 
-# on:
-#   push:
-#     branches: [dev, staging, prod]
-#     paths: ['frontend/**', 'terraform/**', '.github/workflows/frontend-ci-cd.yml']
-#   pull_request:
-#     branches: [dev, staging, prod]
-#     paths: ['frontend/**', 'terraform/**']
+# =============================================================================
+# Environment Variables
+# =============================================================================
+# Global variables used across all jobs in the workflow
+env:
+  APP_NAME: 'entertainment-app-frontend'    # Angular application name for build artifacts
+  TERRAFORM_VERSION: '1.9.8'               # Terraform version for infrastructure deployment
+  NODE_VERSION: '18'                       # Node.js version for frontend build
 
-# jobs:
-#   # =============================================================================
-#   # Environment Configuration
-#   # =============================================================================
-#   setup:
-#     name: Setup Environment
-#     runs-on: self-hosted
-#     outputs:
-#       environment: ${{ steps.config.outputs.environment }}
-#       should_deploy: ${{ steps.config.outputs.should_deploy }}
-#       is_production: ${{ steps.config.outputs.is_production }}
-#       requires_approval: ${{ steps.config.outputs.requires_approval }}
-#     steps:
-#       - name: Configure Environment
-#         id: config
-#         run: |
-#           BRANCH="${{ github.ref_name }}"
-#           EVENT_NAME="${{ github.event_name }}"
-          
-#           echo "Environment Detection:"
-#           echo "Branch: $BRANCH"
-#           echo "Event: $EVENT_NAME"
-          
-#           # Set environment based on branch
-#           if [[ "$BRANCH" == "prod" ]]; then
-#             echo "environment=prod" >> $GITHUB_OUTPUT
-#             echo "is_production=true" >> $GITHUB_OUTPUT
-#             echo "requires_approval=true" >> $GITHUB_OUTPUT
-#             echo "Environment set to: prod (production)"
-#             ENV_NAME="prod"
-#           elif [[ "$BRANCH" == "staging" ]]; then
-#             echo "environment=staging" >> $GITHUB_OUTPUT
-#             echo "is_production=false" >> $GITHUB_OUTPUT
-#             echo "requires_approval=true" >> $GITHUB_OUTPUT
-#             echo "Environment set to: staging"
-#             ENV_NAME="staging"
-#           else
-#             echo "environment=dev" >> $GITHUB_OUTPUT
-#             echo "is_production=false" >> $GITHUB_OUTPUT
-#             echo "requires_approval=false" >> $GITHUB_OUTPUT
-#             echo "Environment set to: dev (default)"
-#             ENV_NAME="dev"
-#           fi
-          
-#           # Only deploy on push to main branches
-#           if [[ "$EVENT_NAME" == "push" && "$BRANCH" =~ ^(dev|staging|prod)$ ]]; then
-#             echo "should_deploy=true" >> $GITHUB_OUTPUT
-#             echo "Deployment enabled for push to $BRANCH"
-#             SHOULD_DEPLOY="true"
-#           else
-#             echo "should_deploy=false" >> $GITHUB_OUTPUT
-#             echo "Deployment disabled (event: $EVENT_NAME, branch: $BRANCH)"
-#             SHOULD_DEPLOY="false"
-#           fi
-          
-#           echo ""
-#           echo "Final Configuration:"
-#           echo "Environment: $ENV_NAME"
-#           echo "Should Deploy: $SHOULD_DEPLOY"
-#           echo "Is Production: $([ "$BRANCH" == "prod" ] && echo "true" || echo "false")"
-#           echo "Requires Approval: $([ "$BRANCH" == "prod" ] || [ "$BRANCH" == "staging" ] && echo "true" || echo "false")"
-
-#   # =============================================================================
-#   # Enhanced Security Scanning
-#   # =============================================================================
-#   security:
-#     name: Security Scan
-#     runs-on: self-hosted
-#     needs: setup
-#     if: always()
-#     steps:
-#       - uses: actions/checkout@v4
+# =============================================================================
+# Workflow Triggers
+# =============================================================================
+# Define when this workflow should execute
+on:
+  # Automatic triggers for code changes
+  push:
+    branches: [dev, staging, prod]          # Only trigger on main environment branches
+    paths: ['frontend/**', 'terraform/**', '.github/workflows/frontend-ci-cd.yml']
+  
+  # Pull request validation (no deployment)
+  pull_request:
+    branches: [dev, staging, prod]          # Validate changes against main branches
+    paths: ['frontend/**', 'terraform/**']
+  
+  # Manual deployment trigger with approval controls
+  # This allows team members to manually deploy with explicit approval
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - 'dev'      # Development environment
+          - 'staging'  # Staging environment  
+          - 'prod'     # Production environment
       
-#       - name: Setup Node.js
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: ${{ env.NODE_VERSION }}
-#           cache: 'npm'
-#           cache-dependency-path: frontend/package-lock.json
-
-#       - name: Install Dependencies
-#         working-directory: frontend
-#         run: npm ci
-
-#       - name: NPM Security Audit
-#         working-directory: frontend
-#         run: |
-#           npm audit --audit-level=moderate --json > npm-audit-report.json || true
-#           npm audit --audit-level=moderate
-#         continue-on-error: false
-
-#       - name: Terraform Security Scan
-#         uses: aquasecurity/tfsec-action@v1.0.0
-#         with:
-#           working_directory: terraform/
-#           format: sarif
-#           soft_fail: true
-
-#       - name: Production-Only: Enhanced Security Checks
-#         if: needs.setup.outputs.is_production == 'true'
-#         working-directory: frontend
-#         run: |
-#           echo "Running enhanced security checks for production..."
-          
-#           # Check for console.log statements in production build
-#           if grep -r "console\." src/ --exclude-dir=node_modules; then
-#             echo "WARNING: console statements found in source code"
-#           fi
-          
-#           # Check for development dependencies in package.json
-#           if jq -e '.dependencies | keys[] | select(test("dev|test|mock"))' package.json; then
-#             echo "WARNING: Development packages found in dependencies"
-#           fi
-
-#       - name: Upload Security Reports
-#         uses: actions/upload-artifact@v4
-#         if: always()
-#         with:
-#           name: security-reports-${{ github.sha }}
-#           path: |
-#             frontend/npm-audit-report.json
-#             terraform/tfsec-report.sarif
-#           retention-days: 30
-
-#   # =============================================================================
-#   # Build and Test
-#   # =============================================================================
-#   build:
-#     name: Build & Test
-#     runs-on: self-hosted
-#     needs: [setup]
-#     if: always()
-#     steps:
-#       - uses: actions/checkout@v4
+      approve_deployment:
+        description: 'Approve deployment to selected environment?'
+        required: true
+        default: 'no'          # Default to 'no' for safety
+        type: choice
+        options:
+          - 'no'               # Explicitly deny deployment
+          - 'yes'              # Explicitly approve deployment
       
-#       - name: Setup Node.js
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: ${{ env.NODE_VERSION }}
-#           cache: 'npm'
-#           cache-dependency-path: frontend/package-lock.json
-
-#       - name: Install Dependencies
-#         working-directory: frontend
-#         run: npm ci
-
-#       # Enhanced testing for production
-#       - name: Install Chromium for Headless Tests
-#         run: sudo apt-get update && sudo apt-get install -y chromium-browser
-
-#       - name: Run Frontend Tests
-#         working-directory: frontend
-#         env:
-#           CHROME_BIN: /usr/bin/chromium-browser
-#         run: |
-#           npm test -- --no-watch --browsers=ChromeHeadless --code-coverage
-#         continue-on-error: ${{ needs.setup.outputs.is_production != 'true' }}
-
-#       - name: Production-Only: Enhanced Testing
-#         if: needs.setup.outputs.is_production == 'true'
-#         working-directory: frontend
-#         run: |
-#           echo "Running enhanced tests for production..."
-#           npm run test:ci -- --browsers=ChromeHeadless --code-coverage --watch=false
-          
-#           # Check code coverage thresholds
-#           if [ -f coverage/lcov.info ]; then
-#             echo "Code coverage report generated"
-#           fi
-
-#       - name: Create Environment Files
-#         working-directory: frontend/src/environments
-#         run: |
-#           ENV="${{ needs.setup.outputs.environment }}"
-          
-#           # Create base environment file
-#           cat > environment.ts << 'EOF'
-#           export const environment = {
-#             production: false,
-#             apiUrl: 'http://localhost:3000/api'
-#           };
-#           EOF
-          
-#           # Create environment-specific files with enhanced configurations
-#           case "$ENV" in
-#             "dev")
-#               cat > environment.dev.ts << 'EOF'
-#           export const environment = {
-#             production: false,
-#             apiUrl: 'https://api-dev.cineverse.com/api',
-#             enableDebugMode: true,
-#             enableAnalytics: false,
-#             logLevel: 'debug'
-#           };
-#           EOF
-#               ;;
-#             "staging")
-#               cat > environment.staging.ts << 'EOF'
-#           export const environment = {
-#             production: false,
-#             apiUrl: 'https://api-staging.cineverse.com/api',
-#             enableDebugMode: false,
-#             enableAnalytics: true,
-#             logLevel: 'warn'
-#           };
-#           EOF
-#               ;;
-#             "prod")
-#               cat > environment.prod.ts << 'EOF'
-#           export const environment = {
-#             production: true,
-#             apiUrl: 'https://api.cineverse.com/api',
-#             enableDebugMode: false,
-#             enableAnalytics: true,
-#             logLevel: 'error',
-#             enablePerformanceMonitoring: true,
-#             rumConfig: {
-#               applicationId: 'cineverse-prod-rum',
-#               identityPoolId: 'us-east-1:rum-identity-pool'
-#             }
-#           };
-#           EOF
-#               ;;
-#           esac
-
-#       - name: Build Application
-#         working-directory: frontend
-#         run: |
-#           ENV="${{ needs.setup.outputs.environment }}"
-#           echo "Building for environment: $ENV"
-          
-#           case "$ENV" in
-#             "dev")     npm run build -- --configuration=development ;;
-#             "staging") npm run build -- --configuration=staging ;;
-#             "prod")    npm run build -- --configuration=production --optimization --aot --build-optimizer ;;
-#             *)         echo "Unknown environment: $ENV" && exit 1 ;;
-#           esac
-          
-#           echo "Build completed successfully"
-          
-#           # Verify build output
-#           if [ -d "dist/${{ env.APP_NAME }}" ]; then
-#             echo "Build output found in dist/${{ env.APP_NAME }}"
-#             ls -la "dist/${{ env.APP_NAME }}"
-            
-#             # Production-only: Verify bundle size
-#             if [[ "$ENV" == "prod" ]]; then
-#               echo "Checking bundle sizes for production..."
-#               find "dist/${{ env.APP_NAME }}" -name "*.js" -exec ls -lh {} \; | head -10
-#             fi
-#           else
-#             echo "Build output not found"
-#             ls -la dist/
-#             exit 1
-#           fi
-
-#       - name: Upload Build Artifact
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: frontend-build-${{ needs.setup.outputs.environment }}
-#           path: frontend/dist/${{ env.APP_NAME }}
-#           retention-days: 7
-
-#       - name: Upload Test Coverage
-#         if: needs.setup.outputs.is_production == 'true'
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: coverage-report-${{ github.sha }}
-#           path: frontend/coverage/
-#           retention-days: 30
-
-#   # =============================================================================
-#   # Infrastructure Planning
-#   # =============================================================================
-#   plan:
-#     name: Infrastructure Plan
-#     runs-on: self-hosted
-#     needs: [setup, build, security]
-#     if: always() && needs.build.result == 'success' && needs.security.result == 'success'
-#     env:
-#       ENVIRONMENT: ${{ needs.setup.outputs.environment }}
-#     outputs:
-#       plan_changes: ${{ steps.plan.outputs.plan_changes }}
-#       plan_exitcode: ${{ steps.plan.outputs.plan_exitcode }}
-#     steps:
-#       - uses: actions/checkout@v4
+      force_rebuild:
+        description: 'Force rebuild even if no changes detected?'
+        required: false
+        default: false         # Optional flag to clear caches and rebuild
+        type: boolean
       
-#       - name: Debug Environment
-#         run: |
-#           echo "Plan Job Environment Debug:"
-#           echo "ENVIRONMENT (from env): $ENVIRONMENT"
-#           echo "setup.outputs.environment: ${{ needs.setup.outputs.environment }}"
-#           echo "github.ref_name: ${{ github.ref_name }}"
-#           echo "should_deploy: ${{ needs.setup.outputs.should_deploy }}"
-#           echo "is_production: ${{ needs.setup.outputs.is_production }}"
+      skip_tests:
+        description: 'Skip tests (NOT recommended for production)'
+        required: false
+        default: false         # Emergency option to skip tests (with warnings)
+        type: boolean
+
+jobs:
+  # =============================================================================
+  # Job 1: Environment Configuration and Setup
+  # =============================================================================
+  # This job determines the target environment and deployment configuration
+  # based on the trigger type (push, PR, or manual dispatch)
+  setup:
+    name: Setup Environment
+    runs-on: self-hosted
+    
+    # Outputs for downstream jobs to use
+    outputs:
+      environment: ${{ steps.config.outputs.environment }}                    # Target environment (dev/staging/prod)
+      should_deploy: ${{ steps.config.outputs.should_deploy }}              # Whether deployment should proceed
+      is_production: ${{ steps.config.outputs.is_production }}              # Whether target is production
+      requires_approval: ${{ steps.config.outputs.requires_approval }}      # Whether manual approval is needed
+      is_manual_dispatch: ${{ steps.config.outputs.is_manual_dispatch }}    # Whether triggered manually
+      manual_approval_received: ${{ steps.config.outputs.manual_approval_received }} # Manual approval status
+    
+    steps:
+      - name: Configure Environment (Enhanced)
+        id: config
+        run: |
+          EVENT_NAME="${{ github.event_name }}"
+          echo "Event: $EVENT_NAME"
+          
+          # =================================================================
+          # Handle Manual Workflow Dispatch
+          # =================================================================
+          # When triggered manually, use inputs to determine environment
+          # and validate approval before proceeding
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "is_manual_dispatch=true" >> $GITHUB_OUTPUT
+            BRANCH="${{ github.event.inputs.environment }}"
+            MANUAL_APPROVAL="${{ github.event.inputs.approve_deployment }}"
+            FORCE_REBUILD="${{ github.event.inputs.force_rebuild }}"
+            SKIP_TESTS="${{ github.event.inputs.skip_tests }}"
+            
+            echo "Manual Workflow Dispatch Detected"
+            echo "Target Environment: $BRANCH"
+            echo "Deployment Approved: $MANUAL_APPROVAL"
+            echo "Force Rebuild: $FORCE_REBUILD"
+            echo "Skip Tests: $SKIP_TESTS"
+            
+            # Validate manual approval - this is our first safety check
+            # If user didn't explicitly approve, block the deployment
+            if [[ "$MANUAL_APPROVAL" != "yes" ]]; then
+              echo "Deployment not approved via manual dispatch"
+              echo "manual_approval_received=false" >> $GITHUB_OUTPUT
+              echo "should_deploy=false" >> $GITHUB_OUTPUT
+            else
+              echo "Manual approval received via workflow dispatch"
+              echo "manual_approval_received=true" >> $GITHUB_OUTPUT
+              echo "should_deploy=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            # =============================================================
+            # Handle Automatic Triggers (Push/PR)
+            # =============================================================
+            # For automatic triggers, use the actual branch name
+            echo "is_manual_dispatch=false" >> $GITHUB_OUTPUT
+            echo "manual_approval_received=false" >> $GITHUB_OUTPUT
+            BRANCH="${{ github.ref_name }}"
+            
+            # Only deploy on push to main branches (not on PRs)
+            # PRs are for validation only and don't trigger deployments
+            if [[ "$EVENT_NAME" == "push" && "$BRANCH" =~ ^(dev|staging|prod)$ ]]; then
+              echo "should_deploy=true" >> $GITHUB_OUTPUT
+              echo "Deployment enabled for push to $BRANCH"
+            else
+              echo "should_deploy=false" >> $GITHUB_OUTPUT
+              echo "Deployment disabled (event: $EVENT_NAME, branch: $BRANCH)"
+            fi
+          fi
+          
+          # =================================================================
+          # Set Environment Configuration
+          # =================================================================
+          # Configure environment-specific settings based on target branch
+          if [[ "$BRANCH" == "prod" ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+            echo "is_production=true" >> $GITHUB_OUTPUT
+            echo "requires_approval=true" >> $GITHUB_OUTPUT  # Production always requires approval
+            ENV_NAME="prod"
+          elif [[ "$BRANCH" == "staging" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "is_production=false" >> $GITHUB_OUTPUT
+            echo "requires_approval=true" >> $GITHUB_OUTPUT  # Staging requires approval
+            ENV_NAME="staging"
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+            echo "is_production=false" >> $GITHUB_OUTPUT
+            echo "requires_approval=false" >> $GITHUB_OUTPUT # Dev doesn't require approval
+            ENV_NAME="dev"
+          fi
+          
+          # =================================================================
+          # Output Final Configuration Summary
+          # =================================================================
+          echo ""
+          echo "Final Configuration:"
+          echo "Environment: $ENV_NAME"
+          echo "Is Manual Dispatch: $EVENT_NAME == workflow_dispatch"
+          echo "Manual Approval Received: ${{ github.event.inputs.approve_deployment == 'yes' }}"
+          echo "Should Deploy: $(echo '${{ steps.config.outputs.should_deploy }}')"
+          echo "Is Production: $([ "$BRANCH" == "prod" ] && echo "true" || echo "false")"
+          echo "Requires Environment Approval: $([ "$BRANCH" == "prod" ] || [ "$BRANCH" == "staging" ] && echo "true" || echo "false")"
+
+  # =============================================================================
+  # Job 2: Manual Approval Validation
+  # =============================================================================
+  # This job validates manual approval inputs when workflow is triggered manually
+  # It provides an additional safety check before proceeding with deployment
+  manual_approval_check:
+    name: Manual Approval Validation
+    runs-on: self-hosted
+    needs: [setup]
+    
+    # Only run this job for manual dispatches
+    if: needs.setup.outputs.is_manual_dispatch == 'true'
+    
+    steps:
+      - name: Validate Manual Approval
+        run: |
+          APPROVAL="${{ github.event.inputs.approve_deployment }}"
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+          
+          echo "Validating Manual Approval"
+          echo "Environment: $ENVIRONMENT"
+          echo "Approval Status: $APPROVAL"
+          echo "Actor: ${{ github.actor }}"
+          echo "Triggered at: $(date)"
+          
+          # =================================================================
+          # Validate Approval Status
+          # =================================================================
+          # If deployment wasn't explicitly approved, block execution
+          # This prevents accidental deployments from manual triggers
+          if [[ "$APPROVAL" != "yes" ]]; then
+            echo ""
+            echo "DEPLOYMENT BLOCKED"
+            echo "Reason: Manual approval not provided"
+            echo "Required action: Re-run workflow and select 'yes' for approval"
+            echo ""
+            exit 1
+          fi
+          
+          echo ""
+          echo "MANUAL APPROVAL VALIDATED"
+          echo "Proceeding with deployment to $ENVIRONMENT"
+          echo "Approved by: ${{ github.actor }}"
+          
+          # =================================================================
+          # Additional Production Validation
+          # =================================================================
+          # For production deployments, provide extra warnings and validation
+          if [[ "$ENVIRONMENT" == "prod" ]]; then
+            echo ""
+            echo "PRODUCTION DEPLOYMENT APPROVED"
+            echo "Extra caution required for production deployment"
+            echo "Pre-deployment checklist:"
+            echo "   Manual approval received"
+            echo "   Actor validated: ${{ github.actor }}"
+            echo "   Environment confirmed: $ENVIRONMENT"
+            echo ""
+          fi
+
+  # =============================================================================
+  # Job 3: Security Scanning and Vulnerability Assessment
+  # =============================================================================
+  # Comprehensive security scanning for both application code and infrastructure
+  # This job must pass before deployment can proceed
+  security:
+    name: Security Scan
+    runs-on: self-hosted
+    needs: [setup, manual_approval_check]
+    
+    # Run if setup succeeded and either:
+    # - Not a manual dispatch, OR
+    # - Manual dispatch with successful approval validation
+    if: |
+      always() && 
+      needs.setup.result == 'success' &&
+      (needs.setup.outputs.is_manual_dispatch == 'false' || needs.manual_approval_check.result == 'success')
+    
+    steps:
+      # Checkout code for security scanning
+      - uses: actions/checkout@v4
       
-#       - name: Setup Terraform
-#         uses: hashicorp/setup-terraform@v3
-#         with:
-#           terraform_version: ${{ env.TERRAFORM_VERSION }}
+      # =================================================================
+      # Setup Node.js Environment
+      # =================================================================
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'                                    # Enable npm caching for faster builds
+          cache-dependency-path: frontend/package-lock.json
 
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v4
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: ${{ env.AWS_REGION }}
+      # =================================================================
+      # Install Dependencies for Security Scanning
+      # =================================================================
+      - name: Install Dependencies
+        working-directory: frontend
+        run: npm ci  # Use 'ci' for faster, reproducible installs in CI environment
 
-#       - name: Create Enhanced Environment Configuration
-#         working-directory: terraform
-#         run: |
-#           echo "Creating enhanced configuration for environment: $ENVIRONMENT"
-#           mkdir -p environments/$ENVIRONMENT
+      # =================================================================
+      # NPM Security Audit
+      # =================================================================
+      # Check for known vulnerabilities in dependencies
+      - name: NPM Security Audit
+        working-directory: frontend
+        run: |
+          # Generate JSON report for artifact storage
+          npm audit --audit-level=moderate --json > npm-audit-report.json || true
           
-#           # Create backend configuration
-#           cat > environments/$ENVIRONMENT/backend.hcl << EOF
-#           bucket         = "cineverse-terraform-state-$ENVIRONMENT"
-#           key            = "frontend/$ENVIRONMENT/terraform.tfstate"
-#           region         = "${{ env.AWS_REGION }}"
-#           encrypt        = true
-#           dynamodb_table = "cineverse-terraform-locks"
-#           EOF
-          
-#           # Environment-specific configurations
-#           case "$ENVIRONMENT" in
-#             "dev")
-#               WAF_ENABLED="false"
-#               DOMAIN_NAME='""'
-#               BLOCKED_COUNTRIES='[]'
-#               COST_CENTER='"frontend-development"'
-#               ;;
-#             "staging")
-#               WAF_ENABLED="true"
-#               DOMAIN_NAME='"staging.cineverse.com"'
-#               BLOCKED_COUNTRIES='["CN"]'
-#               COST_CENTER='"frontend-staging"'
-#               ;;
-#             "prod")
-#               WAF_ENABLED="true"
-#               DOMAIN_NAME='"cineverse.com"'
-#               BLOCKED_COUNTRIES='["CN", "RU", "KP"]'
-#               COST_CENTER='"frontend-production"'
-#               ;;
-#           esac
-          
-#           echo "WAF Enabled: $WAF_ENABLED"
-#           echo "Domain Name: $DOMAIN_NAME"
-#           echo "Blocked Countries: $BLOCKED_COUNTRIES"
-          
-#           # Create enhanced terraform variables
-#           cat > environments/$ENVIRONMENT/terraform.tfvars << EOF
-#           # Basic configuration
-#           environment      = "$ENVIRONMENT"
-#           project_name     = "cineverse"
-#           aws_region       = "${{ env.AWS_REGION }}"
-          
-#           # Security configuration
-#           enable_waf       = $WAF_ENABLED
-#           blocked_countries = $BLOCKED_COUNTRIES
-          
-#           # Monitoring and observability
-#           enable_monitoring = true
-          
-#           # Cost management
-#           cost_center = $COST_CENTER
-#           owner      = "devops-team"
-          
-#           # Domain configuration
-#           domain_name = $DOMAIN_NAME
-          
-#           # API endpoint
-#           api_endpoint = "https://api-$ENVIRONMENT.cineverse.com"
-          
-#           # Advanced features (production-specific)
-#           enable_drift_detection     = $([ "$ENVIRONMENT" = "prod" ] && echo "true" || echo "false")
-#           enable_rollback_automation = $([ "$ENVIRONMENT" = "prod" ] && echo "true" || echo "false")
-          
-#           # Resource tagging
-#           tags = {
-#             Environment = "$ENVIRONMENT"
-#             Project     = "CineVerse"
-#             CostCenter  = $COST_CENTER
-#             Owner       = "devops-team"
-#             Branch      = "${{ github.ref_name }}"
-#             CommitSHA   = "${{ github.sha }}"
-#             DeployedBy  = "${{ github.actor }}"
-#             Backup      = "$([ "$ENVIRONMENT" = "prod" ] && echo "required" || echo "optional")"
-#             Compliance  = "$([ "$ENVIRONMENT" = "prod" ] && echo "required" || echo "optional")"
-#           }
-#           EOF
-          
-#           echo "Created terraform.tfvars:"
-#           cat environments/$ENVIRONMENT/terraform.tfvars
-          
-#           echo ""
-#           echo "Created backend.hcl:"
-#           cat environments/$ENVIRONMENT/backend.hcl
+          # Run audit with console output (fails on moderate+ vulnerabilities)
+          npm audit --audit-level=moderate
+        continue-on-error: false  # Fail the build if vulnerabilities are found
 
-#       - name: Terraform Init & Validate
-#         working-directory: terraform
-#         run: |
-#           echo "Initializing Terraform for environment: $ENVIRONMENT"
-          
-#           terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl" || {
-#             echo "Terraform init failed. Checking S3 bucket and DynamoDB table..."
-#             aws s3 ls s3://cineverse-terraform-state-$ENVIRONMENT || echo "S3 bucket cineverse-terraform-state-$ENVIRONMENT not found"
-#             aws dynamodb describe-table --table-name cineverse-terraform-locks --region ${{ env.AWS_REGION }} || echo "DynamoDB table cineverse-terraform-locks not found"
-#             exit 1
-#           }
-          
-#           terraform validate
-          
-#           # Show current state summary
-#           RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
-#           echo "Current state contains $RESOURCE_COUNT resources"
-          
-#           if [[ $RESOURCE_COUNT -gt 0 ]]; then
-#             echo "Current resources in state:"
-#             terraform state list | head -10
-#             if [[ $RESOURCE_COUNT -gt 10 ]]; then
-#               echo "... and $((RESOURCE_COUNT - 10)) more"
-#             fi
-#           fi
+      # =================================================================
+      # Terraform Security Scanning
+      # =================================================================
+      # Scan Terraform code for security misconfigurations
+      - name: Terraform Security Scan
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          working_directory: terraform/
+          format: sarif                   # Generate SARIF format for GitHub integration
+          soft_fail: true                 # Don't fail build, but report issues
 
-#       - name: Terraform Plan with Enhanced Validation
-#         id: plan
-#         working-directory: terraform
-#         run: |
-#           echo "Creating Terraform plan for environment: $ENVIRONMENT"
+      # =================================================================
+      # Production-Specific Security Checks
+      # =================================================================
+      # Additional security validation for production deployments
+      - name: Production-Only Enhanced Security Checks
+        if: needs.setup.outputs.is_production == 'true'
+        working-directory: frontend
+        run: |
+          echo "Running enhanced security checks for production..."
           
-#           # Set environment variables for sensitive data
-#           export TF_VAR_slack_webhook_url="${{ secrets.SLACK_WEBHOOK_URL }}"
-#           export TF_VAR_notification_emails='["${{ secrets.NOTIFICATION_EMAIL }}"]'
+          # Check for console.log statements that might leak sensitive info
+          if grep -r "console\." src/ --exclude-dir=node_modules; then
+            echo "WARNING: console statements found in source code"
+          fi
           
-#           # Check if state file exists and has resources
-#           RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
-#           echo "Current state contains $RESOURCE_COUNT resources"
-          
-#           # Run terraform plan with detailed output
-#           terraform plan \
-#             -var-file="environments/$ENVIRONMENT/terraform.tfvars" \
-#             -out="$ENVIRONMENT.tfplan" \
-#             -detailed-exitcode \
-#             -lock-timeout=10m
-          
-#           PLAN_EXIT_CODE=$?
-#           echo "plan_exitcode=$PLAN_EXIT_CODE" >> $GITHUB_OUTPUT
-          
-#           if [[ $RESOURCE_COUNT -eq 0 ]]; then
-#             echo "State is empty - forcing plan creation for initial deployment"
-#             echo "plan_changes=true" >> $GITHUB_OUTPUT
-#           elif [[ $PLAN_EXIT_CODE -eq 0 ]]; then
-#             echo "No changes needed - infrastructure is up to date"
-#             echo "plan_changes=false" >> $GITHUB_OUTPUT
-#           elif [[ $PLAN_EXIT_CODE -eq 1 ]]; then
-#             echo "Terraform plan failed"
-#             echo "plan_changes=error" >> $GITHUB_OUTPUT
-#             exit 1
-#           elif [[ $PLAN_EXIT_CODE -eq 2 ]]; then
-#             echo "Changes detected - plan created successfully"
-#             echo "plan_changes=true" >> $GITHUB_OUTPUT
-#           fi
-          
-#           # Verify plan file exists
-#           if [[ -f "$ENVIRONMENT.tfplan" ]]; then
-#             echo "Plan file created: $ENVIRONMENT.tfplan"
-            
-#             # Show plan summary for production
-#             if [[ "$ENVIRONMENT" == "prod" ]]; then
-#               echo "Production plan summary:"
-#               terraform show -no-color "$ENVIRONMENT.tfplan" | head -50
-#             fi
-#           else
-#             echo "WARNING: Plan file $ENVIRONMENT.tfplan not created"
-#           fi
+          # Check for development dependencies in production package.json
+          if jq -e '.dependencies | keys[] | select(test("dev|test|mock"))' package.json; then
+            echo "WARNING: Development packages found in dependencies"
+          fi
 
-#       - name: Upload Terraform Plan
-#         uses: actions/upload-artifact@v4
-#         if: steps.plan.outputs.plan_changes == 'true'
-#         with:
-#           name: terraform-plan-${{ env.ENVIRONMENT }}
-#           path: terraform/${{ env.ENVIRONMENT }}.tfplan
-#           retention-days: 7
+      # =================================================================
+      # Upload Security Reports for Review
+      # =================================================================
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v4
+        if: always()  # Always upload, even if security checks fail
+        with:
+          name: security-reports-${{ github.sha }}
+          path: |
+            frontend/npm-audit-report.json
+            terraform/tfsec-report.sarif
+          retention-days: 30
 
-#   # =============================================================================
-#   # Manual Approval for Production/Staging
-#   # =============================================================================
-#   approval:
-#     name: Deployment Approval
-#     runs-on: self-hosted
-#     needs: [setup, plan]
-#     if: needs.setup.outputs.requires_approval == 'true' && needs.setup.outputs.should_deploy == 'true' && needs.plan.result == 'success'
-#     environment: 
-#       name: ${{ needs.setup.outputs.environment }}-approval
-#       url: https://${{ needs.setup.outputs.environment }}.cineverse.com
-#     steps:
-#       - name: Manual Approval Required
-#         run: |
-#           echo " Deployment to ${{ needs.setup.outputs.environment }} requires manual approval"
-#           echo " Plan Changes: ${{ needs.plan.outputs.plan_changes }}"
-#           echo " Environment: ${{ needs.setup.outputs.environment }}"
-#           echo " Branch: ${{ github.ref_name }}"
-#           echo " Triggered by: ${{ github.actor }}"
-#           echo " Commit: ${{ github.sha }}"
-          
-#           if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
-#             echo "  PRODUCTION DEPLOYMENT - Extra caution required!"
-#             echo " Security checks passed: ${{ needs.security.result }}"
-#             echo " Build completed: ${{ needs.build.result }}"
-#             echo " Infrastructure plan: ${{ needs.plan.result }}"
-#           fi
-
-#   # =============================================================================
-#   # Deployment with Enhanced Features
-#   # =============================================================================
-#   deploy:
-#     name: Deploy to ${{ needs.setup.outputs.environment }}
-#     runs-on: self-hosted
-#     needs: [setup, plan, approval]
-#     if: |
-#       always() && 
-#       needs.setup.outputs.should_deploy == 'true' && 
-#       needs.plan.result == 'success' && 
-#       (needs.setup.outputs.requires_approval == 'false' || needs.approval.result == 'success')
-#     environment: ${{ needs.setup.outputs.environment }}
-#     env:
-#       ENVIRONMENT: ${{ needs.setup.outputs.environment }}
-#     steps:
-#       - uses: actions/checkout@v4
+  # =============================================================================
+  # Job 4: Build and Test Application
+  # =============================================================================
+  # Build the frontend application and run comprehensive tests
+  # Supports both manual dispatch options and environment-specific builds
+  build:
+    name: Build & Test
+    runs-on: self-hosted
+    needs: [setup, manual_approval_check]
+    
+    # Run if setup succeeded and either:
+    # - Not a manual dispatch, OR
+    # - Manual dispatch with successful approval validation
+    if: |
+      always() && 
+      needs.setup.result == 'success' &&
+      (needs.setup.outputs.is_manual_dispatch == 'false' || needs.manual_approval_check.result == 'success')
+    
+    steps:
+      # Checkout source code
+      - uses: actions/checkout@v4
       
-#       - name: Setup Terraform
-#         uses: hashicorp/setup-terraform@v3
-#         with:
-#           terraform_version: ${{ env.TERRAFORM_VERSION }}
+      # =================================================================
+      # Setup Node.js Build Environment
+      # =================================================================
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v4
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: ${{ env.AWS_REGION }}
+      # =================================================================
+      # Install Project Dependencies
+      # =================================================================
+      - name: Install Dependencies
+        working-directory: frontend
+        run: npm ci  # Clean install for reproducible builds
 
-#       - name: Send Deployment Start Notification
-#         if: needs.setup.outputs.is_production == 'true'
-#         run: |
-#           # Send Slack notification about deployment start
-#           if [[ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]]; then
-#             curl -X POST -H 'Content-type: application/json' \
-#               --data "{\"text\":\" Starting deployment to $ENVIRONMENT\n• Branch: ${{ github.ref_name }}\n• Actor: ${{ github.actor }}\n• Commit: \`${{ github.sha }}\`\"}" \
-#               "${{ secrets.SLACK_WEBHOOK_URL }}"
-#           fi
+      # =================================================================
+      # Setup Test Environment
+      # =================================================================
+      # Install browser for headless testing (skip if tests are disabled)
+      - name: Install Chromium for Headless Tests
+        if: github.event.inputs.skip_tests != 'true'
+        run: sudo apt-get update && sudo apt-get install -y chromium-browser
 
-#       # ... (rest of the deployment steps similar to previous version but with enhanced monitoring)
+      # =================================================================
+      # Run Frontend Tests
+      # =================================================================
+      # Execute unit tests and generate coverage reports
+      - name: Run Frontend Tests
+        if: github.event.inputs.skip_tests != 'true'
+        working-directory: frontend
+        env:
+          CHROME_BIN: /usr/bin/chromium-browser
+        run: |
+          npm test -- --no-watch --browsers=ChromeHeadless --code-coverage
+        # Allow non-production environments to continue even if tests fail
+        continue-on-error: ${{ needs.setup.outputs.is_production != 'true' }}
 
-#       - name: Enhanced Infrastructure Apply
-#         working-directory: terraform
-#         run: |
-#           echo "=== Applying Infrastructure Changes ==="
+      # =================================================================
+      # Test Skip Warning
+      # =================================================================
+      # Warn when tests are skipped, especially for production
+      - name: Skip Tests Warning
+        if: github.event.inputs.skip_tests == 'true'
+        run: |
+          echo "WARNING: Tests skipped via manual input"
+          echo "This is NOT recommended for production deployments"
+          if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
+            echo "CRITICAL: Tests skipped for PRODUCTION deployment!"
+            echo "Consider re-running with tests enabled"
+          fi
+
+      # =================================================================
+      # Production-Specific Enhanced Testing
+      # =================================================================
+      # Run additional tests and validations for production builds
+      - name: Production-Only Enhanced Testing
+        if: needs.setup.outputs.is_production == 'true' && github.event.inputs.skip_tests != 'true'
+        working-directory: frontend
+        run: |
+          echo "Running enhanced tests for production..."
+          npm run test:ci -- --browsers=ChromeHeadless --code-coverage --watch=false
           
-#           # Recreate configuration
-#           mkdir -p environments/$ENVIRONMENT
+          # Verify code coverage report generation
+          if [ -f coverage/lcov.info ]; then
+            echo "Code coverage report generated"
+          fi
+
+      # =================================================================
+      # Build Application for Target Environment
+      # =================================================================
+      # Build the application with environment-specific configurations
+      - name: Build Application
+        working-directory: frontend
+        run: |
+          ENV="${{ needs.setup.outputs.environment }}"
+          echo "Building for environment: $ENV"
           
-#           # Set environment variables for sensitive data
-#           export TF_VAR_slack_webhook_url="${{ secrets.SLACK_WEBHOOK_URL }}"
-#           export TF_VAR_notification_emails='["${{ secrets.NOTIFICATION_EMAIL }}"]'
+          # Check if force rebuild is enabled (clears caches)
+          if [[ "${{ github.event.inputs.force_rebuild }}" == "true" ]]; then
+            echo "Force rebuild enabled - cleaning build cache"
+            rm -rf dist/ node_modules/.cache/ || true
+          fi
           
-#           # Initialize terraform
-#           terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl"
+          # Environment-specific build configurations
+          case "$ENV" in
+            "dev")     
+              # Development build with source maps and debugging
+              npm run build -- --configuration=development ;;
+            "staging") 
+              # Staging build with production optimizations but debugging enabled
+              npm run build -- --configuration=staging ;;
+            "prod")    
+              # Full production build with all optimizations
+              npm run build -- --configuration=production --optimization --aot --build-optimizer ;;
+            *)         
+              echo "Unknown environment: $ENV" && exit 1 ;;
+          esac
           
-#           # Apply with enhanced monitoring
-#           if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
-#             echo " PRODUCTION DEPLOYMENT - Enhanced safety measures enabled"
+          echo "Build completed successfully"
+          
+          # =============================================================
+          # Verify Build Output
+          # =============================================================
+          if [ -d "dist/${{ env.APP_NAME }}" ]; then
+            echo "Build output found in dist/${{ env.APP_NAME }}"
+            ls -la "dist/${{ env.APP_NAME }}"
             
-#             # Create backup before deployment
-#             aws lambda invoke \
-#               --function-name "cineverse-$ENVIRONMENT-rollback-handler" \
-#               --payload '{"action": "backup"}' \
-#               /tmp/backup-response.json || echo "Backup creation skipped (function may not exist yet)"
-#           fi
-          
-#           # Apply terraform changes
-#           terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
-          
-#           echo " Infrastructure deployment completed successfully"
+            # Production-specific bundle size analysis
+            if [[ "$ENV" == "prod" ]]; then
+              echo "Checking bundle sizes for production..."
+              find "dist/${{ env.APP_NAME }}" -name "*.js" -exec ls -lh {} \; | head -10
+            fi
+          else
+            echo "Build output not found"
+            ls -la dist/
+            exit 1
+          fi
 
-#       - name: Get Enhanced Infrastructure Outputs
-#         id: outputs
-#         working-directory: terraform
-#         run: |
-#           echo "=== Extracting Infrastructure Outputs ==="
-          
-#           # Wait for state to stabilize
-#           sleep 10
-          
-#           # Extract outputs with enhanced error handling
-#           S3_BUCKET=$(terraform output -raw s3_bucket_name 2>/dev/null || echo "")
-#           CF_ID=$(terraform output -raw cloudfront_distribution_id 2>/dev/null || echo "")
-#           CF_DOMAIN=$(terraform output -raw cloudfront_domain_name 2>/dev/null || echo "")
-#           WEBSITE_URL=$(terraform output -raw website_url 2>/dev/null || echo "")
-          
-#           # Production-specific outputs
-#           if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
-#             RUM_ID=$(terraform output -raw rum_app_monitor_id 2>/dev/null || echo "")
-#             ROLLBACK_LAMBDA=$(terraform output -raw rollback_lambda_arn 2>/dev/null || echo "")
-#             echo "rum_app_monitor_id=$RUM_ID" >> $GITHUB_OUTPUT
-#             echo "rollback_lambda_arn=$ROLLBACK_LAMBDA" >> $GITHUB_OUTPUT
-#           fi
-          
-#           echo "s3_bucket=$S3_BUCKET" >> $GITHUB_OUTPUT
-#           echo "cloudfront_id=$CF_ID" >> $GITHUB_OUTPUT
-#           echo "cloudfront_domain=$CF_DOMAIN" >> $GITHUB_OUTPUT
-#           echo "website_url=$WEBSITE_URL" >> $GITHUB_OUTPUT
-          
-#           echo " Infrastructure outputs extracted successfully"
+      # =================================================================
+      # Upload Build Artifacts
+      # =================================================================
+      # Store build artifacts for deployment job
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build-${{ needs.setup.outputs.environment }}
+          path: frontend/dist/${{ env.APP_NAME }}
+          retention-days: 7
 
-#       - name: Download Build Artifact
-#         uses: actions/download-artifact@v4
-#         with:
-#           name: frontend-build-${{ env.ENVIRONMENT }}
-#           path: build
+      # =================================================================
+      # Upload Test Coverage (Production Only)
+      # =================================================================
+      # Store coverage reports for production builds
+      - name: Upload Test Coverage
+        if: needs.setup.outputs.is_production == 'true' && github.event.inputs.skip_tests != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.sha }}
+          path: frontend/coverage/
+          retention-days: 30
 
-#       - name: Enhanced S3 Deployment
-#         run: |
-#           S3_BUCKET="${{ steps.outputs.outputs.s3_bucket }}"
-          
-#           echo " Deploying to S3 bucket: $S3_BUCKET"
-          
-#           # Verify build contents
-#           echo " Build contents:"
-#           ls -la build/
-          
-#           # Determine deployment path
-#           if [ -d "build/browser" ]; then
-#             echo " Angular SSR detected - deploying from browser/ directory"
-#             DEPLOY_PATH="build/browser"
-#           elif [ -f "build/index.html" ]; then
-#             echo " Standard Angular build detected"
-#             DEPLOY_PATH="build"
-#           else
-#             echo " ERROR: Neither build/browser nor build/index.html found!"
-#             exit 1
-#           fi
-          
-#           # Production-specific: Create deployment metadata
-#           if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
-#             cat > "$DEPLOY_PATH/deployment-info.json" << EOF
-#           {
-#             "version": "${{ github.sha }}",
-#             "environment": "$ENVIRONMENT",
-#             "deployedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-#             "deployedBy": "${{ github.actor }}",
-#             "branch": "${{ github.ref_name }}",
-#             "buildNumber": "${{ github.run_number }}"
-#           }
-#           EOF
-#           fi
-          
-#           # Deploy with optimized cache headers
-#           echo " Syncing files to S3..."
-          
-#           # Static assets with long cache
-#           aws s3 sync "$DEPLOY_PATH/" s3://$S3_BUCKET/ --delete \
-#             --cache-control "public, max-age=31536000, immutable" \
-#             --exclude "*.html" --exclude "*.js" --exclude "*.css" \
-#             --exclude "deployment-info.json"
-          
-#           # Dynamic content with short cache
-#           aws s3 sync "$DEPLOY_PATH/" s3://$S3_BUCKET/ --delete \
-#             --cache-control "public, max-age=0, must-revalidate" \
-#             --include "*.html" --include "*.js" --include "*.css" \
-#             --include "deployment-info.json"
-          
-#           echo " S3 deployment completed successfully"
+  # =============================================================================
+  # Job 5: Infrastructure Planning with Terraform
+  # =============================================================================
+  # Plan infrastructure changes using Terraform
+  # Creates execution plans that will be applied during deployment
+  plan:
+    name: Infrastructure Plan
+    runs-on: self-hosted
+    needs: [setup, build, security]
+    
+    # Only run if build and security jobs completed successfully
+    if: always() && needs.build.result == 'success' && needs.security.result == 'success'
+    
+    env:
+      ENVIRONMENT: ${{ needs.setup.outputs.environment }}
+    
+    # Outputs for deployment job
+    outputs:
+      plan_changes: ${{ steps.plan.outputs.plan_changes }}      # Whether infrastructure changes are needed
+      plan_exitcode: ${{ steps.plan.outputs.plan_exitcode }}   # Terraform plan exit code
+    
+    steps:
+      # Checkout source code for Terraform files
+      - uses: actions/checkout@v4
+      
+      # =================================================================
+      # Debug Environment Configuration
+      # =================================================================
+      - name: Debug Environment
+        run: |
+          echo "Plan Job Environment Debug:"
+          echo "ENVIRONMENT (from env): $ENVIRONMENT"
+          echo "setup.outputs.environment: ${{ needs.setup.outputs.environment }}"
+          echo "github.ref_name: ${{ github.ref_name }}"
+          echo "should_deploy: ${{ needs.setup.outputs.should_deploy }}"
+          echo "is_production: ${{ needs.setup.outputs.is_production }}"
+          echo "is_manual_dispatch: ${{ needs.setup.outputs.is_manual_dispatch }}"
+      
+      # =================================================================
+      # Setup Terraform
+      # =================================================================
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-#       - name: Enhanced CloudFront Cache Invalidation
-#         if: success()
-#         run: |
-#           CLOUDFRONT_ID="${{ steps.outputs.outputs.cloudfront_id }}"
-          
-#           if [[ -z "$CLOUDFRONT_ID" ]]; then
-#             echo " CloudFront ID not available. Skipping invalidation."
-#             exit 0
-#           fi
+      # =================================================================
+      # Configure AWS Credentials
+      # =================================================================
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-#           echo " Invalidating CloudFront distribution: $CLOUDFRONT_ID"
+      # =================================================================
+      # Create Environment-Specific Configuration
+      # =================================================================
+      # Generate Terraform variables and backend configuration for each environment
+      - name: Create Enhanced Environment Configuration
+        working-directory: terraform
+        run: |
+          echo "Creating enhanced configuration for environment: $ENVIRONMENT"
+          mkdir -p environments/$ENVIRONMENT
+          
+          # =============================================================
+          # Create Terraform Backend Configuration
+          # =============================================================
+          # Each environment uses its own state file for isolation
+          cat > environments/$ENVIRONMENT/backend.hcl << EOF
+          bucket         = "cineverse-terraform-state-$ENVIRONMENT"
+          key            = "frontend/$ENVIRONMENT/terraform.tfstate"
+          region         = "${{ env.AWS_REGION }}"
+          encrypt        = true
+          dynamodb_table = "cineverse-terraform-locks"
+          EOF
+          
+          # =============================================================
+          # Environment-Specific Configuration
+          # =============================================================
+          # Set different security and infrastructure settings per environment
+          case "$ENVIRONMENT" in
+            "dev")
+              WAF_ENABLED="false"                                                              # No WAF for dev
+              DOMAIN_NAME='""'                                                                 # No custom domain
+              BLOCKED_COUNTRIES='[]'                                                           # No geo-blocking
+              COST_CENTER='"frontend-development"'                                            # Cost tracking
+              ALB_DOMAIN="cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com" # Dev ALB
+              ;;
+            "staging")
+              WAF_ENABLED="true"                                                               # Enable WAF
+              DOMAIN_NAME='"staging.cineverse.com"'                                           # Staging domain
+              BLOCKED_COUNTRIES='["CN"]'                                                       # Basic geo-blocking
+              COST_CENTER='"frontend-staging"'                                                # Cost tracking
+              ALB_DOMAIN="cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com" # Staging ALB
+              ;;
+            "prod")
+              WAF_ENABLED="true"                                                               # Enable WAF
+              DOMAIN_NAME='"cineverse.com"'                                                    # Production domain
+              BLOCKED_COUNTRIES='["CN", "RU", "KP"]'                                          # Enhanced geo-blocking
+              COST_CENTER='"frontend-production"'                                             # Cost tracking
+              ALB_DOMAIN="cineverse-prod-service-alb-964667856.eu-west-1.elb.amazonaws.com"   # Production ALB
+              ;;
+          esac
+          
+          echo "WAF Enabled: $WAF_ENABLED"
+          echo "Domain Name: $DOMAIN_NAME"
+          echo "Blocked Countries: $BLOCKED_COUNTRIES"
+          echo "ALB Domain: $ALB_DOMAIN"
+          
+          # =============================================================
+          # Create Terraform Variables File
+          # =============================================================
+          cat > environments/$ENVIRONMENT/terraform.tfvars << EOF
+          # Basic configuration
+          environment      = "$ENVIRONMENT"
+          project_name     = "cineverse"
+          aws_region       = "${{ env.AWS_REGION }}"
+          
+          # Security configuration
+          enable_waf       = $WAF_ENABLED
+          blocked_countries = $BLOCKED_COUNTRIES
+          
+          # Monitoring and observability
+          enable_monitoring = true
+          
+          # Cost management
+          cost_center = $COST_CENTER
+          owner      = "devops-team"
+          
+          # Domain configuration
+          domain_name = $DOMAIN_NAME
+          
+          # ALB domain for HTTP communication (CRITICAL for CloudFront-ALB integration)
+          alb_domain_name = "$ALB_DOMAIN"
+          
+          # API endpoint (for backward compatibility)
+          api_endpoint = "http://$ALB_DOMAIN"
+          
+          # Advanced features (production-specific)
+          enable_drift_detection     = $([ "$ENVIRONMENT" = "prod" ] && echo "true" || echo "false")
+          enable_rollback_automation = $([ "$ENVIRONMENT" = "prod" ] && echo "true" || echo "false")
+          
+          # Resource tagging for governance and cost tracking
+          tags = {
+            Environment = "$ENVIRONMENT"
+            Project     = "CineVerse"
+            CostCenter  = $COST_CENTER
+            Owner       = "devops-team"
+            Branch      = "${{ github.ref_name }}"
+            CommitSHA   = "${{ github.sha }}"
+            DeployedBy  = "${{ github.actor }}"
+            DeployMethod = "${{ needs.setup.outputs.is_manual_dispatch == 'true' && 'Manual Dispatch' || 'Automated' }}"
+            Backup      = "$([ "$ENVIRONMENT" = "prod" ] && echo "required" || echo "optional")"
+            Compliance  = "$([ "$ENVIRONMENT" = "prod" ] && echo "required" || echo "optional")"
+          }
+          EOF
+          
+          echo "Created terraform.tfvars:"
+          cat environments/$ENVIRONMENT/terraform.tfvars
+          
+          echo ""
+          echo "Created backend.hcl:"
+          cat environments/$ENVIRONMENT/backend.hcl
 
-#           INVALIDATION_ID=$(aws cloudfront create-invalidation \
-#             --distribution-id "$CLOUDFRONT_ID" \
-#             --paths "/*" \
-#             --query 'Invalidation.Id' \
-#             --output text)
+      # =================================================================
+      # Initialize and Validate Terraform
+      # =================================================================
+      - name: Terraform Init & Validate
+        working-directory: terraform
+        run: |
+          echo "Initializing Terraform for environment: $ENVIRONMENT"
+          
+          # Initialize Terraform with environment-specific backend
+          terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl" || {
+            echo "Terraform init failed. Checking S3 bucket and DynamoDB table..."
+            aws s3 ls s3://cineverse-terraform-state-$ENVIRONMENT || echo "S3 bucket cineverse-terraform-state-$ENVIRONMENT not found"
+            aws dynamodb describe-table --table-name cineverse-terraform-locks --region ${{ env.AWS_REGION }} || echo "DynamoDB table cineverse-terraform-locks not found"
+            exit 1
+          }
+          
+          # Validate Terraform configuration syntax
+          terraform validate
+          
+          # =============================================================
+          # Show Current State Summary
+          # =============================================================
+          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
+          echo "Current state contains $RESOURCE_COUNT resources"
+          
+          if [[ $RESOURCE_COUNT -gt 0 ]]; then
+            echo "Current resources in state:"
+            terraform state list | head -10
+            if [[ $RESOURCE_COUNT -gt 10 ]]; then
+              echo "... and $((RESOURCE_COUNT - 10)) more"
+            fi
+          fi
 
-#           echo " Cache invalidation created: $INVALIDATION_ID"
+      # =================================================================
+      # Create Terraform Execution Plan
+      # =================================================================
+      - name: Terraform Plan with Enhanced Validation
+        id: plan
+        working-directory: terraform
+        run: |
+          echo "Creating Terraform plan for environment: $ENVIRONMENT"
           
-#           # For production, wait for invalidation to complete
-#           if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
-#             echo "⏳ Waiting for cache invalidation to complete..."
-#             aws cloudfront wait invalidation-completed \
-#               --distribution-id "$CLOUDFRONT_ID" \
-#               --id "$INVALIDATION_ID" \
-#               --cli-read-timeout 300 || echo " Invalidation wait timed out"
-#           fi
-
-#       - name: Enhanced Deployment Verification
-#         run: |
-#           echo " Verifying deployment..."
+          # Set environment variables for sensitive data
+          export TF_VAR_slack_webhook_url="${{ secrets.SLACK_WEBHOOK_URL }}"
+          export TF_VAR_notification_emails='["${{ secrets.NOTIFICATION_EMAIL }}"]'
           
-#           DOMAIN="${{ steps.outputs.outputs.cloudfront_domain }}"
-#           WEBSITE_URL="https://$DOMAIN"
+          # Check current state
+          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo 0)
+          echo "Current state contains $RESOURCE_COUNT resources"
           
-#           # Wait for propagation
-#           sleep 30
+          # =============================================================
+          # Run Terraform Plan
+          # =============================================================
+          # -detailed-exitcode: 0=no changes, 1=error, 2=changes detected
+          terraform plan \
+            -var-file="environments/$ENVIRONMENT/terraform.tfvars" \
+            -out="$ENVIRONMENT.tfplan" \
+            -detailed-exitcode \
+            -lock-timeout=10m
           
-#           # Basic health check
-#           RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" $WEBSITE_URL)
+          PLAN_EXIT_CODE=$?
+          echo "plan_exitcode=$PLAN_EXIT_CODE" >> $GITHUB_OUTPUT
           
-#           if [[ "$RESPONSE_CODE" == "200" ]]; then
-#             echo " Application is responding correctly (HTTP $RESPONSE_CODE)"
-#           else
-#             echo " Application returned HTTP $RESPONSE_CODE (may need propagation time)"
-#           fi
+          # =============================================================
+          # Interpret Plan Results
+          # =============================================================
+          if [[ $RESOURCE_COUNT -eq 0 ]]; then
+            echo "State is empty - forcing plan creation for initial deployment"
+            echo "plan_changes=true" >> $GITHUB_OUTPUT
+          elif [[ $PLAN_EXIT_CODE -eq 0 ]]; then
+            echo "No changes needed - infrastructure is up to date"
+            echo "plan_changes=false" >> $GITHUB_OUTPUT
+          elif [[ $PLAN_EXIT_CODE -eq 1 ]]; then
+            echo "Terraform plan failed"
+            echo "plan_changes=error" >> $GITHUB_OUTPUT
+            exit 1
+          elif [[ $PLAN_EXIT_CODE -eq 2 ]]; then
+            echo "Changes detected - plan created successfully"
+            echo "plan_changes=true" >> $GITHUB_OUTPUT
+          fi
           
-#           # Production-specific verification
-#           if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
-#             echo " Running production-specific health checks..."
+          # =============================================================
+          # Verify and Display Plan
+          # =============================================================
+          if [[ -f "$ENVIRONMENT.tfplan" ]]; then
+            echo "Plan file created: $ENVIRONMENT.tfplan"
             
-#             # Check deployment info endpoint
-#             DEPLOYMENT_INFO=$(curl -s "$WEBSITE_URL/deployment-info.json" || echo "")
-#             if [[ -n "$DEPLOYMENT_INFO" ]]; then
-#               echo " Deployment info: $DEPLOYMENT_INFO"
-#             fi
+            # Show plan summary for production (security review)
+            if [[ "$ENVIRONMENT" == "prod" ]]; then
+              echo "Production plan summary:"
+              terraform show -no-color "$ENVIRONMENT.tfplan" | head -50
+            fi
+          else
+            echo "WARNING: Plan file $ENVIRONMENT.tfplan not created"
+          fi
+
+      # =================================================================
+      # Upload Terraform Plan for Deployment
+      # =================================================================
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        if: steps.plan.outputs.plan_changes == 'true'
+        with:
+          name: terraform-plan-${{ env.ENVIRONMENT }}
+          path: terraform/${{ env.ENVIRONMENT }}.tfplan
+          retention-days: 7
+
+  # =============================================================================
+  # Job 6: Environment Protection Approval
+  # =============================================================================
+  # This job handles GitHub Environment protection rules for staging/production
+  # It only runs when manual approval hasn't already been received via workflow_dispatch
+  approval:
+    name: Environment Approval
+    runs-on: self-hosted
+    needs: [setup, plan]
+    
+    # Run this job only when:
+    # - Environment requires approval (staging/prod)
+    # - Deployment should proceed
+    # - Infrastructure planning succeeded
+    # - Manual approval wasn't already received via workflow_dispatch
+    if: |
+      needs.setup.outputs.requires_approval == 'true' && 
+      needs.setup.outputs.should_deploy == 'true' && 
+      needs.plan.result == 'success' &&
+      needs.setup.outputs.manual_approval_received == 'false'
+    
+    # Use GitHub Environment protection rules
+    environment: 
+      name: ${{ needs.setup.outputs.environment }}-approval
+      url: https://${{ needs.setup.outputs.environment }}.cineverse.com
+    
+    steps:
+      - name: Environment Approval Required
+        run: |
+          echo "Environment-based approval required for ${{ needs.setup.outputs.environment }}"
+          echo "Deployment Details:"
+          echo "   Environment: ${{ needs.setup.outputs.environment }}"
+          echo "   Plan Changes: ${{ needs.plan.outputs.plan_changes }}"
+          echo "   Branch: ${{ github.ref_name }}"
+          echo "   Triggered by: ${{ github.actor }}"
+          echo "   Commit: ${{ github.sha }}"
+          echo "   Manual Dispatch: ${{ needs.setup.outputs.is_manual_dispatch }}"
+          
+          # Extra warnings for production deployments
+          if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
+            echo ""
+            echo "PRODUCTION DEPLOYMENT - Extra caution required!"
+            echo "   Security checks: ${{ needs.security.result }}"
+            echo "   Build completed: ${{ needs.build.result }}"
+            echo "   Infrastructure plan: ${{ needs.plan.result }}"
+            echo ""
+            echo "Please review all checks before approving"
+          fi
+
+  # =============================================================================
+  # Job 7: Deployment Execution
+  # =============================================================================
+  # This job deploys the application to the target environment
+  # It handles both infrastructure deployment and application deployment
+  deploy:
+    name: Deploy to ${{ needs.setup.outputs.environment }}
+    runs-on: self-hosted
+    needs: [setup, plan, approval]
+    
+    # Deploy when:
+    # - Deployment is approved
+    # - Infrastructure planning succeeded
+    # - Either no approval required, OR environment approval received, OR manual approval received
+    if: |
+      always() && 
+      needs.setup.outputs.should_deploy == 'true' && 
+      needs.plan.result == 'success' && 
+      (
+        needs.setup.outputs.requires_approval == 'false' || 
+        needs.approval.result == 'success' ||
+        needs.setup.outputs.manual_approval_received == 'true'
+      )
+    
+    # Use GitHub Environment for deployment tracking
+    environment: ${{ needs.setup.outputs.environment }}
+    
+    env:
+      ENVIRONMENT: ${{ needs.setup.outputs.environment }}
+    
+    steps:
+      # Checkout source code for deployment
+      - uses: actions/checkout@v4
+      
+      # =================================================================
+      # Pre-deployment Summary and Validation
+      # =================================================================
+      - name: Pre-deployment Summary
+        run: |
+          echo "Starting deployment with following configuration:"
+          echo "   Environment: $ENVIRONMENT"
+          echo "   Manual Dispatch: ${{ needs.setup.outputs.is_manual_dispatch }}"
+          echo "   Manual Approval: ${{ needs.setup.outputs.manual_approval_received }}"
+          echo "   Environment Approval: ${{ needs.approval.result }}"
+          echo "   Is Production: ${{ needs.setup.outputs.is_production }}"
+          echo "   Force Rebuild: ${{ github.event.inputs.force_rebuild }}"
+          echo "   Skip Tests: ${{ github.event.inputs.skip_tests }}"
+          echo "   Actor: ${{ github.actor }}"
+          echo "   Commit: ${{ github.sha }}"
+      
+      # =================================================================
+      # Setup Deployment Tools
+      # =================================================================
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # =================================================================
+      # Send Deployment Start Notification (Production Only)
+      # =================================================================
+      - name: Send Deployment Start Notification
+        if: needs.setup.outputs.is_production == 'true'
+        run: |
+          # Determine deployment method for notification
+          if [[ "${{ needs.setup.outputs.is_manual_dispatch }}" == "true" ]]; then
+            DEPLOY_METHOD="Manual Dispatch"
+            APPROVAL_METHOD="Workflow Input"
+          else
+            DEPLOY_METHOD="Automated Push"
+            APPROVAL_METHOD="Environment Protection"
+          fi
+          
+          # Send Slack notification about deployment start
+          if [[ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data "{
+                \"text\": \"Starting deployment to $ENVIRONMENT\",
+                \"attachments\": [{
+                  \"color\": \"warning\",
+                  \"fields\": [
+                    {\"title\": \"Environment\", \"value\": \"$ENVIRONMENT\", \"short\": true},
+                    {\"title\": \"Method\", \"value\": \"$DEPLOY_METHOD\", \"short\": true},
+                    {\"title\": \"Branch\", \"value\": \"${{ github.ref_name }}\", \"short\": true},
+                    {\"title\": \"Actor\", \"value\": \"${{ github.actor }}\", \"short\": true},
+                    {\"title\": \"Commit\", \"value\": \"${{ github.sha }}\", \"short\": true},
+                    {\"title\": \"Approval\", \"value\": \"$APPROVAL_METHOD\", \"short\": true}
+                  ]
+                }]
+              }" \
+              "${{ secrets.SLACK_WEBHOOK_URL }}"
+          fi
+
+      # =================================================================
+      # Deploy Infrastructure with Terraform
+      # =================================================================
+      - name: Enhanced Infrastructure Apply
+        working-directory: terraform
+        run: |
+          echo "=== Applying Infrastructure Changes ==="
+          
+          # =============================================================
+          # Recreate Environment Configuration
+          # =============================================================
+          # We need to recreate the configuration since this is a new job
+          mkdir -p environments/$ENVIRONMENT
+          
+          # Environment-specific ALB domain mapping
+          case "$ENVIRONMENT" in
+            "dev")
+              ALB_DOMAIN="cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
+              ;;
+            "staging")
+              ALB_DOMAIN="cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
+              ;;
+            "prod")
+              ALB_DOMAIN="cineverse-prod-service-alb-964667856.eu-west-1.elb.amazonaws.com"
+              ;;
+          esac
+          
+          # =============================================================
+          # Create Backend Configuration
+          # =============================================================
+          cat > environments/$ENVIRONMENT/backend.hcl << EOF
+          bucket         = "cineverse-terraform-state-$ENVIRONMENT"
+          key            = "frontend/$ENVIRONMENT/terraform.tfstate"
+          region         = "${{ env.AWS_REGION }}"
+          encrypt        = true
+          dynamodb_table = "cineverse-terraform-locks"
+          EOF
+          
+          # =============================================================
+          # Create Terraform Variables (Minimal for Deployment)
+          # =============================================================
+          cat > environments/$ENVIRONMENT/terraform.tfvars << EOF
+          environment      = "$ENVIRONMENT"
+          project_name     = "cineverse"
+          aws_region       = "${{ env.AWS_REGION }}"
+          alb_domain_name  = "$ALB_DOMAIN"
+          api_endpoint     = "http://$ALB_DOMAIN"
+          tags = {
+            Environment = "$ENVIRONMENT"
+            Project     = "CineVerse"
+            DeployedBy  = "${{ github.actor }}"
+            DeployMethod = "${{ needs.setup.outputs.is_manual_dispatch == 'true' && 'Manual Dispatch' || 'Automated' }}"
+            CommitSHA   = "${{ github.sha }}"
+          }
+          EOF
+          
+          # =============================================================
+          # Set Sensitive Environment Variables
+          # =============================================================
+          export TF_VAR_slack_webhook_url="${{ secrets.SLACK_WEBHOOK_URL }}"
+          export TF_VAR_notification_emails='["${{ secrets.NOTIFICATION_EMAIL }}"]'
+          
+          # =============================================================
+          # Initialize Terraform
+          # =============================================================
+          terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl"
+          
+          # =============================================================
+          # Production Safety Measures
+          # =============================================================
+          if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
+            echo "PRODUCTION DEPLOYMENT - Enhanced safety measures enabled"
             
-#             # Check security headers
-#             SECURITY_HEADERS=$(curl -s -I $WEBSITE_URL | grep -E "(X-Content-Type-Options|X-Frame-Options|Strict-Transport-Security)" || echo "")
-#             if [[ -n "$SECURITY_HEADERS" ]]; then
-#               echo " Security headers verified"
-#             fi
-#           fi
+            # Attempt to create backup before deployment (if rollback function exists)
+            aws lambda invoke \
+              --function-name "cineverse-$ENVIRONMENT-rollback-handler" \
+              --payload '{"action": "backup"}' \
+              /tmp/backup-response.json || echo "Backup creation skipped (function may not exist yet)"
+          fi
+          
+          # =============================================================
+          # Apply Infrastructure Changes
+          # =============================================================
+          terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
+          
+          echo "Infrastructure deployment completed successfully"
 
-#       - name: Send Success Notification
-#         if: success()
-#         run: |
-#           WEBSITE_URL="${{ steps.outputs.outputs.website_url }}"
+      # =================================================================
+      # Extract Infrastructure Outputs
+      # =================================================================
+      - name: Get Enhanced Infrastructure Outputs
+        id: outputs
+        working-directory: terraform
+        run: |
+          echo "=== Extracting Infrastructure Outputs ==="
           
-#           # Send Slack notification
-#           if [[ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]]; then
-#             curl -X POST -H 'Content-type: application/json' \
-#               --data "{
-#                 \"text\": \" Deployment to $ENVIRONMENT completed successfully!\",
-#                 \"attachments\": [{
-#                   \"color\": \"good\",
-#                   \"fields\": [
-#                     {\"title\": \"Environment\", \"value\": \"$ENVIRONMENT\", \"short\": true},
-#                     {\"title\": \"URL\", \"value\": \"$WEBSITE_URL\", \"short\": true},
-#                     {\"title\": \"Version\", \"value\": \"${{ github.sha }}\", \"short\": true},
-#                     {\"title\": \"Deployed by\", \"value\": \"${{ github.actor }}\", \"short\": true}
-#                   ]
-#                 }]
-#               }" \
-#               "${{ secrets.SLACK_WEBHOOK_URL }}"
-#           fi
+          # Wait for AWS resources to stabilize
+          sleep 10
           
-#           # Update GitHub status
-#           echo " Deployment completed successfully!"
+          # =============================================================
+          # Extract Standard Outputs
+          # =============================================================
+          S3_BUCKET=$(terraform output -raw s3_bucket_name 2>/dev/null || echo "")
+          CF_ID=$(terraform output -raw cloudfront_distribution_id 2>/dev/null || echo "")
+          CF_DOMAIN=$(terraform output -raw cloudfront_domain_name 2>/dev/null || echo "")
+          WEBSITE_URL=$(terraform output -raw website_url 2>/dev/null || echo "")
+          
+          # =============================================================
+          # Extract Production-Specific Outputs
+          # =============================================================
+          if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
+            RUM_ID=$(terraform output -raw rum_app_monitor_id 2>/dev/null || echo "")
+            ROLLBACK_LAMBDA=$(terraform output -raw rollback_lambda_arn 2>/dev/null || echo "")
+            echo "rum_app_monitor_id=$RUM_ID" >> $GITHUB_OUTPUT
+            echo "rollback_lambda_arn=$ROLLBACK_LAMBDA" >> $GITHUB_OUTPUT
+          fi
+          
+          # =============================================================
+          # Set Outputs for Subsequent Steps
+          # =============================================================
+          echo "s3_bucket=$S3_BUCKET" >> $GITHUB_OUTPUT
+          echo "cloudfront_id=$CF_ID" >> $GITHUB_OUTPUT
+          echo "cloudfront_domain=$CF_DOMAIN" >> $GITHUB_OUTPUT
+          echo "website_url=$WEBSITE_URL" >> $GITHUB_OUTPUT
+          
+          echo "Infrastructure outputs extracted successfully"
 
-#       - name: Send Failure Notification
-#         if: failure()
-#         run: |
-#           # Send failure notification
-#           if [[ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]]; then
-#             curl -X POST -H 'Content-type: application/json' \
-#               --data "{
-#                 \"text\": \" Deployment to $ENVIRONMENT failed!\",
-#                 \"attachments\": [{
-#                   \"color\": \"danger\",
-#                   \"fields\": [
-#                     {\"title\": \"Environment\", \"value\": \"$ENVIRONMENT\", \"short\": true},
-#                     {\"title\": \"Branch\", \"value\": \"${{ github.ref_name }}\", \"short\": true},
-#                     {\"title\": \"Actor\", \"value\": \"${{ github.actor }}\", \"short\": true},
-#                     {\"title\": \"Run\", \"value\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\", \"short\": true}
-#                   ]
-#                 }]
-#               }" \
-#               "${{ secrets.SLACK_WEBHOOK_URL }}"
-#           fi
+      # =================================================================
+      # Download Application Build Artifacts
+      # =================================================================
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build-${{ env.ENVIRONMENT }}
+          path: build
 
-#       - name: Enhanced Deployment Summary
-#         if: always()
-#         run: |
-#           cat << EOF >> $GITHUB_STEP_SUMMARY
-#           #  Deployment Summary
+      # =================================================================
+      # Deploy Application to S3
+      # =================================================================
+      - name: Enhanced S3 Deployment
+        run: |
+          S3_BUCKET="${{ steps.outputs.outputs.s3_bucket }}"
           
-#           **Environment:** $ENVIRONMENT  
-#           **Status:** ${{ job.status }}  
-#           **Application URL:** ${{ steps.outputs.outputs.website_url }}  
-#           **S3 Bucket:** ${{ steps.outputs.outputs.s3_bucket }}  
-#           **CloudFront ID:** ${{ steps.outputs.outputs.cloudfront_id }}  
-#           **Branch:** ${{ github.ref_name }}  
-#           **Commit:** ${{ github.sha }}  
-#           **Deployed by:** ${{ github.actor }}  
-#           **Requires Approval:** ${{ needs.setup.outputs.requires_approval }}  
-#           **Is Production:** ${{ needs.setup.outputs.is_production }}
+          echo "Deploying to S3 bucket: $S3_BUCKET"
           
-#           ##  Infrastructure Features
-#           -  CloudFront CDN with optimized caching
-#           -  WAF protection: ${{ needs.setup.outputs.environment != 'dev' && ' Enabled' || ' Disabled' }}
-#           -  Real User Monitoring: ${{ needs.setup.outputs.is_production == 'true' && ' Enabled' || ' Disabled' }}
-#           -  Cost monitoring: ${{ needs.setup.outputs.is_production == 'true' && ' Enabled' || ' Disabled' }}
-#           -  Access logging: ${{ needs.setup.outputs.environment != 'dev' && ' Enabled' || ' Disabled' }}
-#           -  Automated rollback: ${{ needs.setup.outputs.is_production == 'true' && ' Enabled' || ' Disabled' }}
+          # =============================================================
+          # Verify Build Contents
+          # =============================================================
+          echo "Build contents:"
+          ls -la build/
           
-#           ##  Quick Links
-#           -  [Application](${{ steps.outputs.outputs.website_url }})
-#           -  [CloudWatch Dashboard](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#dashboards:)
-#           -  [Cost Dashboard](https://console.aws.amazon.com/billing/home#/bills)
-#           EOF
+          # =============================================================
+          # Determine Deployment Path
+          # =============================================================
+          # Handle different Angular build outputs (SSR vs standard)
+          if [ -d "build/browser" ]; then
+            echo "Angular SSR detected - deploying from browser/ directory"
+            DEPLOY_PATH="build/browser"
+          elif [ -f "build/index.html" ]; then
+            echo "Standard Angular build detected"
+            DEPLOY_PATH="build"
+          else
+            echo "ERROR: Neither build/browser nor build/index.html found!"
+            exit 1
+          fi
+          
+          # =============================================================
+          # Create Deployment Metadata (Production Only)
+          # =============================================================
+          if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
+            cat > "$DEPLOY_PATH/deployment-info.json" << EOF
+          {
+            "version": "${{ github.sha }}",
+            "environment": "$ENVIRONMENT",
+            "deployedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "deployedBy": "${{ github.actor }}",
+            "branch": "${{ github.ref_name }}",
+            "buildNumber": "${{ github.run_number }}",
+            "deploymentMethod": "${{ needs.setup.outputs.is_manual_dispatch == 'true' && 'Manual Dispatch' || 'Automated' }}",
+            "manualApproval": "${{ needs.setup.outputs.manual_approval_received }}"
+          }
+          EOF
+          fi
+          
+          # =============================================================
+          # Deploy with Optimized Cache Headers
+          # =============================================================
+          echo "Syncing files to S3..."
+          
+          # Deploy static assets with long cache (1 year)
+          # These files have hashed names and can be cached indefinitely
+          aws s3 sync "$DEPLOY_PATH/" s3://$S3_BUCKET/ --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "*.html" --exclude "*.js" --exclude "*.css" \
+            --exclude "deployment-info.json"
+          
+          # Deploy dynamic content with short cache
+          # HTML, JS, CSS files need to be checked for updates
+          aws s3 sync "$DEPLOY_PATH/" s3://$S3_BUCKET/ --delete \
+            --cache-control "public, max-age=0, must-revalidate" \
+            --include "*.html" --include "*.js" --include "*.css" \
+            --include "deployment-info.json"
+          
+          echo "S3 deployment completed successfully"
+
+      # =================================================================
+      # Invalidate CloudFront Cache
+      # =================================================================
+      - name: Enhanced CloudFront Cache Invalidation
+        if: success()
+        run: |
+          CLOUDFRONT_ID="${{ steps.outputs.outputs.cloudfront_id }}"
+          
+          if [[ -z "$CLOUDFRONT_ID" ]]; then
+            echo "CloudFront ID not available. Skipping invalidation."
+            exit 0
+          fi
+
+          echo "Invalidating CloudFront distribution: $CLOUDFRONT_ID"
+
+          # =============================================================
+          # Create Cache Invalidation
+          # =============================================================
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id "$CLOUDFRONT_ID" \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+
+          echo "Cache invalidation created: $INVALIDATION_ID"
+          
+          # =============================================================
+          # Wait for Invalidation (Production Only)
+          # =============================================================
+          # For production, wait for invalidation to complete to ensure users see updates
+          if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
+            echo "Waiting for cache invalidation to complete..."
+            aws cloudfront wait invalidation-completed \
+              --distribution-id "$CLOUDFRONT_ID" \
+              --id "$INVALIDATION_ID" \
+              --cli-read-timeout 300 || echo "Invalidation wait timed out"
+          fi
+
+      # =================================================================
+      # Verify Deployment
+      # =================================================================
+      - name: Enhanced Deployment Verification
+        run: |
+          echo "Verifying deployment..."
+          
+          DOMAIN="${{ steps.outputs.outputs.cloudfront_domain }}"
+          WEBSITE_URL="https://$DOMAIN"
+          
+          # =============================================================
+          # Wait for CDN Propagation
+          # =============================================================
+          sleep 30
+          
+          # =============================================================
+          # Basic Health Check
+          # =============================================================
+          RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" $WEBSITE_URL)
+          
+          if [[ "$RESPONSE_CODE" == "200" ]]; then
+            echo "Application is responding correctly (HTTP $RESPONSE_CODE)"
+          else
+            echo "Application returned HTTP $RESPONSE_CODE (may need propagation time)"
+          fi
+          
+          # =============================================================
+          # Production-Specific Verification
+          # =============================================================
+          if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
+            echo "Running production-specific health checks..."
+            
+            # Check deployment metadata endpoint
+            DEPLOYMENT_INFO=$(curl -s "$WEBSITE_URL/deployment-info.json" || echo "")
+            if [[ -n "$DEPLOYMENT_INFO" ]]; then
+              echo "Deployment info: $DEPLOYMENT_INFO"
+            fi
+            
+            # Verify security headers
+            SECURITY_HEADERS=$(curl -s -I $WEBSITE_URL | grep -E "(X-Content-Type-Options|X-Frame-Options)" || echo "")
+            if [[ -n "$SECURITY_HEADERS" ]]; then
+              echo "Security headers verified"
+            fi
+          fi
+
+      # =================================================================
+      # Send Success Notification
+      # =================================================================
+      - name: Send Success Notification
+        if: success()
+        run: |
+          WEBSITE_URL="${{ steps.outputs.outputs.website_url }}"
+          
+          # Determine deployment method for notification
+          if [[ "${{ needs.setup.outputs.is_manual_dispatch }}" == "true" ]]; then
+            DEPLOY_METHOD="Manual Dispatch"
+            APPROVAL_INFO="Approved via workflow input"
+          else
+            DEPLOY_METHOD="Automated Push"
+            APPROVAL_INFO="Environment protection rules"
+          fi
+          
+          # =============================================================
+          # Send Slack Success Notification
+          # =============================================================
+          if [[ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data "{
+                \"text\": \"Deployment to $ENVIRONMENT completed successfully!\",
+                \"attachments\": [{
+                  \"color\": \"good\",
+                  \"fields\": [
+                    {\"title\": \"Environment\", \"value\": \"$ENVIRONMENT\", \"short\": true},
+                    {\"title\": \"URL\", \"value\": \"$WEBSITE_URL\", \"short\": true},
+                    {\"title\": \"Version\", \"value\": \"${{ github.sha }}\", \"short\": true},
+                    {\"title\": \"Deployed by\", \"value\": \"${{ github.actor }}\", \"short\": true},
+                    {\"title\": \"Method\", \"value\": \"$DEPLOY_METHOD\", \"short\": true},
+                    {\"title\": \"Approval\", \"value\": \"$APPROVAL_INFO\", \"short\": true}
+                  ]
+                }]
+              }" \
+              "${{ secrets.SLACK_WEBHOOK_URL }}"
+          fi
+          
+          echo "Deployment completed successfully!"
+
+      # =================================================================
+      # Send Failure Notification
+      # =================================================================
+      - name: Send Failure Notification
+        if: failure()
+        run: |
+          # Determine deployment method for notification
+          if [[ "${{ needs.setup.outputs.is_manual_dispatch }}" == "true" ]]; then
+            DEPLOY_METHOD="Manual Dispatch"
+          else
+            DEPLOY_METHOD="Automated Push"
+          fi
+          
+          # =============================================================
+          # Send Slack Failure Notification
+          # =============================================================
+          if [[ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data "{
+                \"text\": \"Deployment to $ENVIRONMENT failed!\",
+                \"attachments\": [{
+                  \"color\": \"danger\",
+                  \"fields\": [
+                    {\"title\": \"Environment\", \"value\": \"$ENVIRONMENT\", \"short\": true},
+                    {\"title\": \"Branch\", \"value\": \"${{ github.ref_name }}\", \"short\": true},
+                    {\"title\": \"Actor\", \"value\": \"${{ github.actor }}\", \"short\": true},
+                    {\"title\": \"Method\", \"value\": \"$DEPLOY_METHOD\", \"short\": true},
+                    {\"title\": \"Run\", \"value\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\", \"short\": true}
+                  ]
+                }]
+              }" \
+              "${{ secrets.SLACK_WEBHOOK_URL }}"
+          fi
+
+      # =================================================================
+      # Generate Deployment Summary Report
+      # =================================================================
+      - name: Enhanced Deployment Summary
+        if: always()
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          # Deployment Summary
+          
+          **Environment:** $ENVIRONMENT  
+          **Status:** ${{ job.status }}  
+          **Deployment Method:** ${{ needs.setup.outputs.is_manual_dispatch == 'true' && 'Manual Dispatch' || 'Automated Push' }}  
+          **Application URL:** ${{ steps.outputs.outputs.website_url }}  
+          **S3 Bucket:** ${{ steps.outputs.outputs.s3_bucket }}  
+          **CloudFront ID:** ${{ steps.outputs.outputs.cloudfront_id }}  
+          **Branch:** ${{ github.ref_name }}  
+          **Commit:** ${{ github.sha }}  
+          **Deployed by:** ${{ github.actor }}  
+          **Manual Approval:** ${{ needs.setup.outputs.manual_approval_received }}  
+          **Environment Approval:** ${{ needs.approval.result }}  
+          **Is Production:** ${{ needs.setup.outputs.is_production }}
+          
+          ## Infrastructure Features
+          - CloudFront CDN with HTTP-compatible caching
+          - ${{ needs.setup.outputs.environment != 'dev' && 'WAF protection enabled' || 'WAF protection disabled' }}
+          - ${{ needs.setup.outputs.is_production == 'true' && 'Real User Monitoring enabled' || 'Real User Monitoring disabled' }}
+          - ${{ needs.setup.outputs.is_production == 'true' && 'Cost monitoring enabled' || 'Cost monitoring disabled' }}
+          - ${{ needs.setup.outputs.environment != 'dev' && 'Access logging enabled' || 'Access logging disabled' }}
+          - ${{ needs.setup.outputs.is_production == 'true' && 'Automated rollback enabled' || 'Automated rollback disabled' }}
+          
+          ## Deployment Options Used
+          - **Force Rebuild:** ${{ github.event.inputs.force_rebuild || 'false' }}
+          - **Skip Tests:** ${{ github.event.inputs.skip_tests || 'false' }}
+          - **Manual Trigger:** ${{ needs.setup.outputs.is_manual_dispatch }}
+          
+          ## Quick Links
+          - [Application](${{ steps.outputs.outputs.website_url }})
+          - [CloudWatch Dashboard](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#dashboards:)
+          - [Cost Dashboard](https://console.aws.amazon.com/billing/home#/bills)
+          - [Re-run Workflow](${{ github.server_url }}/${{ github.repository }}/actions/workflows/frontend-ci-cd.yml)
+          EOF

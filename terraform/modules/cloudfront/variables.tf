@@ -48,10 +48,17 @@ variable "waf_web_acl_id" {
   default     = ""
 }
 
-variable "api_endpoint" {
-  description = "Backend API endpoint for CSP headers"
+# NEW: Dedicated variable for ALB domain (ADDED FROM DEV CONFIG)
+variable "alb_domain_name" {
+  description = "ALB domain name for API origin"
   type        = string
-  default     = "https://api.example.com"
+  default     = "cineverse-prod-service-alb-964667856.eu-west-1.elb.amazonaws.com"  # Set this to your production ALB domain
+}
+
+variable "api_endpoint" {
+  description = "Backend API endpoint for CSP headers (deprecated - use alb_domain_name)"
+  type        = string
+  default     = ""
 }
 
 variable "tags" {

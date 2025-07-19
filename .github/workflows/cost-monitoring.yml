@@ -1,482 +1,475 @@
-# name: Cost Monitoring and Optimization
+name: Cost Monitoring and Optimization
 
-# on:
-#   schedule:
-#     # Run weekly on Monday at 8 AM UTC
-#     - cron: '0 8 * * MON'
-#   # Allow manual trigger
-#   workflow_dispatch:
-#     inputs:
-#       environment:
-#         description: 'Environment to analyze costs for'
-#         required: true
-#         default: 'prod'
-#         type: choice
-#         options:
-#           - dev
-#           - staging
-#           - prod
-#           - all
+on:
+  schedule:
+    # Run weekly on Monday at 8 AM UTC
+    - cron: '0 8 * * MON'
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to analyze costs for'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+          - all
 
-# env:
-#   AWS_REGION: 'eu-west-1'
+jobs:
+  cost-analysis:
+    name: Cost Analysis and Optimization
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        environment: 
+          - ${{ github.event.inputs.environment == 'all' && 'dev' || github.event.inputs.environment || 'prod' }}
+          - ${{ github.event.inputs.environment == 'all' && 'staging' || '' }}
+          - ${{ github.event.inputs.environment == 'all' && 'prod' || '' }}
+      fail-fast: false
+    steps:
+      - name: Skip empty environment
+        if: matrix.environment == ''
+        run: |
+          echo "Skipping empty environment"
+          exit 0
 
-# jobs:
-#   cost-analysis:
-#     name: Cost Analysis and Optimization
-#     runs-on: self-hosted
-#     strategy:
-#       matrix:
-#         environment: 
-#           - ${{ github.event.inputs.environment == 'all' && 'dev' || github.event.inputs.environment || 'prod' }}
-#           - ${{ github.event.inputs.environment == 'all' && 'staging' || '' }}
-#           - ${{ github.event.inputs.environment == 'all' && 'prod' || '' }}
-#       fail-fast: false
-#     steps:
-#       - name: Skip empty environment
-#         if: matrix.environment == ''
-#         run: |
-#           echo "Skipping empty environment"
-#           exit 0
+      - uses: actions/checkout@v4
 
-#       - uses: actions/checkout@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v4
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: ${{ env.AWS_REGION }}
+      - name: Install Required Tools
+        run: |
+          # Install AWS CLI if not present
+          if ! command -v aws &> /dev/null; then
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+          fi
+          
+          # Install jq for JSON processing
+          sudo apt-get update && sudo apt-get install -y jq
 
-#       - name: Install Required Tools
-#         run: |
-#           # Install AWS CLI if not present
-#           if ! command -v aws &> /dev/null; then
-#             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-#             unzip awscliv2.zip
-#             sudo ./aws/install
-#           fi
+      - name: Get Cost and Usage Data
+        id: cost-data
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
+        run: |
+          echo " Analyzing costs for $ENVIRONMENT environment"
           
-#           # Install jq for JSON processing
-#           sudo apt-get update && sudo apt-get install -y jq
+          # Set date range (last 30 days)
+          END_DATE=$(date +%Y-%m-%d)
+          START_DATE=$(date -d '30 days ago' +%Y-%m-%d)
+          
+          echo " Date range: $START_DATE to $END_DATE"
+          
+          # Get cost and usage data filtered by environment tags
+          COST_DATA=$(aws ce get-cost-and-usage \
+            --time-period Start=$START_DATE,End=$END_DATE \
+            --granularity MONTHLY \
+            --metrics BlendedCost \
+            --group-by Type=DIMENSION,Key=SERVICE \
+            --filter '{
+              "Tags": {
+                "Key": "Environment",
+                "Values": ["'$ENVIRONMENT'"],
+                "MatchOptions": ["EQUALS"]
+              }
+            }' \
+            --output json)
+          
+          echo "$COST_DATA" > cost-data-$ENVIRONMENT.json
+          
+          # Extract total cost
+          TOTAL_COST=$(echo "$COST_DATA" | jq -r '.ResultsByTime[0].Total.BlendedCost.Amount // "0"')
+          echo "total_cost=$TOTAL_COST" >> $GITHUB_OUTPUT
+          
+          # Get service breakdown
+          SERVICE_COSTS=$(echo "$COST_DATA" | jq -r '.ResultsByTime[0].Groups[] | "\(.Keys[0]): $\(.Metrics.BlendedCost.Amount)"' | head -10)
+          echo "service_costs<<EOF" >> $GITHUB_OUTPUT
+          echo "$SERVICE_COSTS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo " Total cost for $ENVIRONMENT: $TOTAL_COST USD"
 
-#       - name: Get Cost and Usage Data
-#         id: cost-data
-#         env:
-#           ENVIRONMENT: ${{ matrix.environment }}
-#         run: |
-#           echo " Analyzing costs for $ENVIRONMENT environment"
+      - name: Analyze Cost Trends
+        id: cost-trends
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
+        run: |
+          echo " Analyzing cost trends for $ENVIRONMENT"
           
-#           # Set date range (last 30 days)
-#           END_DATE=$(date +%Y-%m-%d)
-#           START_DATE=$(date -d '30 days ago' +%Y-%m-%d)
+          # Get cost data for the last 3 months for trend analysis
+          END_DATE=$(date +%Y-%m-%d)
+          START_DATE=$(date -d '90 days ago' +%Y-%m-%d)
           
-#           echo " Date range: $START_DATE to $END_DATE"
+          TREND_DATA=$(aws ce get-cost-and-usage \
+            --time-period Start=$START_DATE,End=$END_DATE \
+            --granularity MONTHLY \
+            --metrics BlendedCost \
+            --filter '{
+              "Tags": {
+                "Key": "Environment", 
+                "Values": ["'$ENVIRONMENT'"],
+                "MatchOptions": ["EQUALS"]
+              }
+            }' \
+            --output json)
           
-#           # Get cost and usage data filtered by environment tags
-#           COST_DATA=$(aws ce get-cost-and-usage \
-#             --time-period Start=$START_DATE,End=$END_DATE \
-#             --granularity MONTHLY \
-#             --metrics BlendedCost \
-#             --group-by Type=DIMENSION,Key=SERVICE \
-#             --filter '{
-#               "Tags": {
-#                 "Key": "Environment",
-#                 "Values": ["'$ENVIRONMENT'"],
-#                 "MatchOptions": ["EQUALS"]
-#               }
-#             }' \
-#             --output json)
+          echo "$TREND_DATA" > trend-data-$ENVIRONMENT.json
           
-#           echo "$COST_DATA" > cost-data-$ENVIRONMENT.json
+          # Calculate trend
+          COSTS=($(echo "$TREND_DATA" | jq -r '.ResultsByTime[].Total.BlendedCost.Amount'))
           
-#           # Extract total cost
-#           TOTAL_COST=$(echo "$COST_DATA" | jq -r '.ResultsByTime[0].Total.BlendedCost.Amount // "0"')
-#           echo "total_cost=$TOTAL_COST" >> $GITHUB_OUTPUT
-          
-#           # Get service breakdown
-#           SERVICE_COSTS=$(echo "$COST_DATA" | jq -r '.ResultsByTime[0].Groups[] | "\(.Keys[0]): $\(.Metrics.BlendedCost.Amount)"' | head -10)
-#           echo "service_costs<<EOF" >> $GITHUB_OUTPUT
-#           echo "$SERVICE_COSTS" >> $GITHUB_OUTPUT
-#           echo "EOF" >> $GITHUB_OUTPUT
-          
-#           echo " Total cost for $ENVIRONMENT: $TOTAL_COST USD"
-
-#       - name: Analyze Cost Trends
-#         id: cost-trends
-#         env:
-#           ENVIRONMENT: ${{ matrix.environment }}
-#         run: |
-#           echo " Analyzing cost trends for $ENVIRONMENT"
-          
-#           # Get cost data for the last 3 months for trend analysis
-#           END_DATE=$(date +%Y-%m-%d)
-#           START_DATE=$(date -d '90 days ago' +%Y-%m-%d)
-          
-#           TREND_DATA=$(aws ce get-cost-and-usage \
-#             --time-period Start=$START_DATE,End=$END_DATE \
-#             --granularity MONTHLY \
-#             --metrics BlendedCost \
-#             --filter '{
-#               "Tags": {
-#                 "Key": "Environment", 
-#                 "Values": ["'$ENVIRONMENT'"],
-#                 "MatchOptions": ["EQUALS"]
-#               }
-#             }' \
-#             --output json)
-          
-#           echo "$TREND_DATA" > trend-data-$ENVIRONMENT.json
-          
-#           # Calculate trend
-#           COSTS=($(echo "$TREND_DATA" | jq -r '.ResultsByTime[].Total.BlendedCost.Amount'))
-          
-#           if [ ${#COSTS[@]} -ge 2 ]; then
-#             CURRENT_MONTH=${COSTS[-1]}
-#             PREVIOUS_MONTH=${COSTS[-2]}
+          if [ ${#COSTS[@]} -ge 2 ]; then
+            CURRENT_MONTH=${COSTS[-1]}
+            PREVIOUS_MONTH=${COSTS[-2]}
             
-#             TREND=$(echo "scale=2; (($CURRENT_MONTH - $PREVIOUS_MONTH) / $PREVIOUS_MONTH) * 100" | bc -l 2>/dev/null || echo "0")
-#             echo "cost_trend=$TREND" >> $GITHUB_OUTPUT
+            TREND=$(echo "scale=2; (($CURRENT_MONTH - $PREVIOUS_MONTH) / $PREVIOUS_MONTH) * 100" | bc -l 2>/dev/null || echo "0")
+            echo "cost_trend=$TREND" >> $GITHUB_OUTPUT
             
-#             if (( $(echo "$TREND > 20" | bc -l) )); then
-#               echo "trend_status=🔴 High increase" >> $GITHUB_OUTPUT
-#             elif (( $(echo "$TREND > 10" | bc -l) )); then
-#               echo "trend_status=🟡 Moderate increase" >> $GITHUB_OUTPUT
-#             elif (( $(echo "$TREND < -10" | bc -l) )); then
-#               echo "trend_status=🟢 Significant decrease" >> $GITHUB_OUTPUT
-#             else
-#               echo "trend_status=🔵 Stable" >> $GITHUB_OUTPUT
-#             fi
-#           else
-#             echo "cost_trend=0" >> $GITHUB_OUTPUT
-#             echo "trend_status= Insufficient data" >> $GITHUB_OUTPUT
-#           fi
+            if (( $(echo "$TREND > 20" | bc -l) )); then
+              echo "trend_status=🔴 High increase" >> $GITHUB_OUTPUT
+            elif (( $(echo "$TREND > 10" | bc -l) )); then
+              echo "trend_status=🟡 Moderate increase" >> $GITHUB_OUTPUT
+            elif (( $(echo "$TREND < -10" | bc -l) )); then
+              echo "trend_status=🟢 Significant decrease" >> $GITHUB_OUTPUT
+            else
+              echo "trend_status=🔵 Stable" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "cost_trend=0" >> $GITHUB_OUTPUT
+            echo "trend_status= Insufficient data" >> $GITHUB_OUTPUT
+          fi
 
-#       - name: Get Resource Utilization
-#         id: utilization
-#         env:
-#           ENVIRONMENT: ${{ matrix.environment }}
-#         run: |
-#           echo " Checking resource utilization for $ENVIRONMENT"
+      - name: Get Resource Utilization
+        id: utilization
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
+        run: |
+          echo " Checking resource utilization for $ENVIRONMENT"
           
-#           # Check CloudFront usage
-#           CF_STATS=""
-#           CF_DISTRIBUTIONS=$(aws cloudfront list-distributions --query "DistributionList.Items[?Comment && contains(Comment, 'CineVerse') && contains(Comment, '$ENVIRONMENT')].Id" --output text)
+          # Check CloudFront usage
+          CF_STATS=""
+          CF_DISTRIBUTIONS=$(aws cloudfront list-distributions --query "DistributionList.Items[?Comment && contains(Comment, 'CineVerse') && contains(Comment, '$ENVIRONMENT')].Id" --output text)
           
-#           if [[ -n "$CF_DISTRIBUTIONS" ]]; then
-#             for DIST_ID in $CF_DISTRIBUTIONS; do
-#               # Get requests count for the last 7 days
-#               END_TIME=$(date -u +%Y-%m-%dT%H:%M:%S)
-#               START_TIME=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%S)
+          if [[ -n "$CF_DISTRIBUTIONS" ]]; then
+            for DIST_ID in $CF_DISTRIBUTIONS; do
+              # Get requests count for the last 7 days
+              END_TIME=$(date -u +%Y-%m-%dT%H:%M:%S)
+              START_TIME=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%S)
               
-#               REQUESTS=$(aws cloudwatch get-metric-statistics \
-#                 --namespace AWS/CloudFront \
-#                 --metric-name Requests \
-#                 --dimensions Name=DistributionId,Value=$DIST_ID \
-#                 --start-time $START_TIME \
-#                 --end-time $END_TIME \
-#                 --period 604800 \
-#                 --statistics Sum \
-#                 --query 'Datapoints[0].Sum' \
-#                 --output text 2>/dev/null || echo "0")
+              REQUESTS=$(aws cloudwatch get-metric-statistics \
+                --namespace AWS/CloudFront \
+                --metric-name Requests \
+                --dimensions Name=DistributionId,Value=$DIST_ID \
+                --start-time $START_TIME \
+                --end-time $END_TIME \
+                --period 604800 \
+                --statistics Sum \
+                --query 'Datapoints[0].Sum' \
+                --output text 2>/dev/null || echo "0")
               
-#               CF_STATS="Distribution $DIST_ID: ${REQUESTS:-0} requests (7 days)"
-#             done
-#           fi
+              CF_STATS="Distribution $DIST_ID: ${REQUESTS:-0} requests (7 days)"
+            done
+          fi
           
-#           echo "cloudfront_stats<<EOF" >> $GITHUB_OUTPUT
-#           echo "$CF_STATS" >> $GITHUB_OUTPUT
-#           echo "EOF" >> $GITHUB_OUTPUT
+          echo "cloudfront_stats<<EOF" >> $GITHUB_OUTPUT
+          echo "$CF_STATS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
           
-#           # Check S3 storage utilization
-#           S3_STATS=""
-#           S3_BUCKETS=$(aws s3api list-buckets --query "Buckets[?contains(Name, 'cineverse') && contains(Name, '$ENVIRONMENT')].Name" --output text)
+          # Check S3 storage utilization
+          S3_STATS=""
+          S3_BUCKETS=$(aws s3api list-buckets --query "Buckets[?contains(Name, 'cineverse') && contains(Name, '$ENVIRONMENT')].Name" --output text)
           
-#           if [[ -n "$S3_BUCKETS" ]]; then
-#             for BUCKET in $S3_BUCKETS; do
-#               # Get bucket size
-#               SIZE=$(aws cloudwatch get-metric-statistics \
-#                 --namespace AWS/S3 \
-#                 --metric-name BucketSizeBytes \
-#                 --dimensions Name=BucketName,Value=$BUCKET Name=StorageType,Value=StandardStorage \
-#                 --start-time $(date -u -d '2 days ago' +%Y-%m-%dT%H:%M:%S) \
-#                 --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
-#                 --period 86400 \
-#                 --statistics Average \
-#                 --query 'Datapoints[0].Average' \
-#                 --output text 2>/dev/null || echo "0")
+          if [[ -n "$S3_BUCKETS" ]]; then
+            for BUCKET in $S3_BUCKETS; do
+              # Get bucket size
+              SIZE=$(aws cloudwatch get-metric-statistics \
+                --namespace AWS/S3 \
+                --metric-name BucketSizeBytes \
+                --dimensions Name=BucketName,Value=$BUCKET Name=StorageType,Value=StandardStorage \
+                --start-time $(date -u -d '2 days ago' +%Y-%m-%dT%H:%M:%S) \
+                --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
+                --period 86400 \
+                --statistics Average \
+                --query 'Datapoints[0].Average' \
+                --output text 2>/dev/null || echo "0")
               
-#               if [[ "$SIZE" != "None" ]] && [[ "$SIZE" != "0" ]]; then
-#                 SIZE_MB=$(echo "scale=2; $SIZE / 1024 / 1024" | bc -l)
-#                 S3_STATS="$S3_STATS
-#           Bucket $BUCKET: ${SIZE_MB} MB"
-#               fi
-#             done
-#           fi
+              if [[ "$SIZE" != "None" ]] && [[ "$SIZE" != "0" ]]; then
+                SIZE_MB=$(echo "scale=2; $SIZE / 1024 / 1024" | bc -l)
+                S3_STATS="$S3_STATS
+          Bucket $BUCKET: ${SIZE_MB} MB"
+              fi
+            done
+          fi
           
-#           echo "s3_stats<<EOF" >> $GITHUB_OUTPUT
-#           echo "$S3_STATS" >> $GITHUB_OUTPUT
-#           echo "EOF" >> $GITHUB_OUTPUT
+          echo "s3_stats<<EOF" >> $GITHUB_OUTPUT
+          echo "$S3_STATS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-#       - name: Generate Cost Optimization Recommendations
-#         id: recommendations
-#         env:
-#           ENVIRONMENT: ${{ matrix.environment }}
-#         run: |
-#           echo " Generating cost optimization recommendations for $ENVIRONMENT"
+      - name: Generate Cost Optimization Recommendations
+        id: recommendations
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
+        run: |
+          echo " Generating cost optimization recommendations for $ENVIRONMENT"
           
-#           RECOMMENDATIONS=""
-#           TOTAL_COST=${{ steps.cost-data.outputs.total_cost }}
+          RECOMMENDATIONS=""
+          TOTAL_COST=${{ steps.cost-data.outputs.total_cost }}
           
-#           # Analyze cost data and generate recommendations
-#           if (( $(echo "$TOTAL_COST > 100" | bc -l) )); then
-#             RECOMMENDATIONS="$RECOMMENDATIONS
-#           • High monthly cost detected ($$TOTAL_COST). Consider reviewing resource usage."
-#           fi
+          # Analyze cost data and generate recommendations
+          if (( $(echo "$TOTAL_COST > 100" | bc -l) )); then
+            RECOMMENDATIONS="$RECOMMENDATIONS
+          • High monthly cost detected ($$TOTAL_COST). Consider reviewing resource usage."
+          fi
           
-#           # Check for CloudFront optimization opportunities
-#           CF_COST=$(jq -r '.ResultsByTime[0].Groups[] | select(.Keys[0] == "Amazon CloudFront") | .Metrics.BlendedCost.Amount // "0"' cost-data-$ENVIRONMENT.json)
-#           if (( $(echo "$CF_COST > 50" | bc -l) )); then
-#             RECOMMENDATIONS="$RECOMMENDATIONS
-#           • CloudFront costs are high ($$CF_COST). Review cache policies and consider regional optimization."
-#           fi
+          # Check for CloudFront optimization opportunities
+          CF_COST=$(jq -r '.ResultsByTime[0].Groups[] | select(.Keys[0] == "Amazon CloudFront") | .Metrics.BlendedCost.Amount // "0"' cost-data-$ENVIRONMENT.json)
+          if (( $(echo "$CF_COST > 50" | bc -l) )); then
+            RECOMMENDATIONS="$RECOMMENDATIONS
+          • CloudFront costs are high ($$CF_COST). Review cache policies and consider regional optimization."
+          fi
           
-#           # Check for S3 optimization opportunities
-#           S3_COST=$(jq -r '.ResultsByTime[0].Groups[] | select(.Keys[0] == "Amazon Simple Storage Service") | .Metrics.BlendedCost.Amount // "0"' cost-data-$ENVIRONMENT.json)
-#           if (( $(echo "$S3_COST > 20" | bc -l) )); then
-#             RECOMMENDATIONS="$RECOMMENDATIONS
-#           • S3 storage costs are significant ($$S3_COST). Consider implementing lifecycle policies or Intelligent Tiering."
-#           fi
+          # Check for S3 optimization opportunities
+          S3_COST=$(jq -r '.ResultsByTime[0].Groups[] | select(.Keys[0] == "Amazon Simple Storage Service") | .Metrics.BlendedCost.Amount // "0"' cost-data-$ENVIRONMENT.json)
+          if (( $(echo "$S3_COST > 20" | bc -l) )); then
+            RECOMMENDATIONS="$RECOMMENDATIONS
+          • S3 storage costs are significant ($$S3_COST). Consider implementing lifecycle policies or Intelligent Tiering."
+          fi
           
-#           # Environment-specific recommendations
-#           case "$ENVIRONMENT" in
-#             "dev")
-#               RECOMMENDATIONS="$RECOMMENDATIONS
-#           • Consider shutting down development resources during off-hours to reduce costs."
-#               ;;
-#             "staging")
-#               RECOMMENDATIONS="$RECOMMENDATIONS
-#           • Review if staging environment resources can be scaled down when not in use."
-#               ;;
-#             "prod")
-#               RECOMMENDATIONS="$RECOMMENDATIONS
-#           • Consider Reserved Instances or Savings Plans for predictable workloads."
-#               ;;
-#           esac
+          # Environment-specific recommendations
+          case "$ENVIRONMENT" in
+            "dev")
+              RECOMMENDATIONS="$RECOMMENDATIONS
+          • Consider shutting down development resources during off-hours to reduce costs."
+              ;;
+            "staging")
+              RECOMMENDATIONS="$RECOMMENDATIONS
+          • Review if staging environment resources can be scaled down when not in use."
+              ;;
+            "prod")
+              RECOMMENDATIONS="$RECOMMENDATIONS
+          • Consider Reserved Instances or Savings Plans for predictable workloads."
+              ;;
+          esac
           
-#           # Check cost trend for additional recommendations
-#           TREND=${{ steps.cost-trends.outputs.cost_trend }}
-#           if (( $(echo "$TREND > 20" | bc -l) )); then
-#             RECOMMENDATIONS="$RECOMMENDATIONS
-#           • Cost increased by ${TREND}% from last month. Investigate recent changes."
-#           fi
+          # Check cost trend for additional recommendations
+          TREND=${{ steps.cost-trends.outputs.cost_trend }}
+          if (( $(echo "$TREND > 20" | bc -l) )); then
+            RECOMMENDATIONS="$RECOMMENDATIONS
+          • Cost increased by ${TREND}% from last month. Investigate recent changes."
+          fi
           
-#           echo "recommendations<<EOF" >> $GITHUB_OUTPUT
-#           echo "$RECOMMENDATIONS" >> $GITHUB_OUTPUT
-#           echo "EOF" >> $GITHUB_OUTPUT
+          echo "recommendations<<EOF" >> $GITHUB_OUTPUT
+          echo "$RECOMMENDATIONS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-#       - name: Check Budget Alerts
-#         id: budget-check
-#         env:
-#           ENVIRONMENT: ${{ matrix.environment }}
-#         run: |
-#           echo " Checking budget status for $ENVIRONMENT"
+      - name: Check Budget Alerts
+        id: budget-check
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
+        run: |
+          echo " Checking budget status for $ENVIRONMENT"
           
-#           # Check if budget exists
-#           BUDGET_NAME="cineverse-$ENVIRONMENT-budget"
-#           BUDGET_EXISTS=$(aws budgets describe-budget \
-#             --account-id $(aws sts get-caller-identity --query Account --output text) \
-#             --budget-name "$BUDGET_NAME" \
-#             --query 'Budget.BudgetName' \
-#             --output text 2>/dev/null || echo "None")
+          # Check if budget exists
+          BUDGET_NAME="cineverse-$ENVIRONMENT-budget"
+          BUDGET_EXISTS=$(aws budgets describe-budget \
+            --account-id $(aws sts get-caller-identity --query Account --output text) \
+            --budget-name "$BUDGET_NAME" \
+            --query 'Budget.BudgetName' \
+            --output text 2>/dev/null || echo "None")
           
-#           if [[ "$BUDGET_EXISTS" != "None" ]]; then
-#             # Get budget details
-#             BUDGET_LIMIT=$(aws budgets describe-budget \
-#               --account-id $(aws sts get-caller-identity --query Account --output text) \
-#               --budget-name "$BUDGET_NAME" \
-#               --query 'Budget.BudgetLimit.Amount' \
-#               --output text)
+          if [[ "$BUDGET_EXISTS" != "None" ]]; then
+            # Get budget details
+            BUDGET_LIMIT=$(aws budgets describe-budget \
+              --account-id $(aws sts get-caller-identity --query Account --output text) \
+              --budget-name "$BUDGET_NAME" \
+              --query 'Budget.BudgetLimit.Amount' \
+              --output text)
             
-#             CURRENT_SPEND=${{ steps.cost-data.outputs.total_cost }}
-#             USAGE_PERCENT=$(echo "scale=2; ($CURRENT_SPEND / $BUDGET_LIMIT) * 100" | bc -l)
+            CURRENT_SPEND=${{ steps.cost-data.outputs.total_cost }}
+            USAGE_PERCENT=$(echo "scale=2; ($CURRENT_SPEND / $BUDGET_LIMIT) * 100" | bc -l)
             
-#             echo "budget_limit=$BUDGET_LIMIT" >> $GITHUB_OUTPUT
-#             echo "usage_percent=$USAGE_PERCENT" >> $GITHUB_OUTPUT
+            echo "budget_limit=$BUDGET_LIMIT" >> $GITHUB_OUTPUT
+            echo "usage_percent=$USAGE_PERCENT" >> $GITHUB_OUTPUT
             
-#             if (( $(echo "$USAGE_PERCENT > 80" | bc -l) )); then
-#               echo "budget_status=🔴 Over 80% of budget used" >> $GITHUB_OUTPUT
-#             elif (( $(echo "$USAGE_PERCENT > 60" | bc -l) )); then
-#               echo "budget_status=🟡 Over 60% of budget used" >> $GITHUB_OUTPUT
-#             else
-#               echo "budget_status=🟢 Within budget" >> $GITHUB_OUTPUT
-#             fi
-#           else
-#             echo "budget_status=⚪ No budget configured" >> $GITHUB_OUTPUT
-#             echo "budget_limit=0" >> $GITHUB_OUTPUT
-#             echo "usage_percent=0" >> $GITHUB_OUTPUT
-#           fi
+            if (( $(echo "$USAGE_PERCENT > 80" | bc -l) )); then
+              echo "budget_status=🔴 Over 80% of budget used" >> $GITHUB_OUTPUT
+            elif (( $(echo "$USAGE_PERCENT > 60" | bc -l) )); then
+              echo "budget_status=🟡 Over 60% of budget used" >> $GITHUB_OUTPUT
+            else
+              echo "budget_status=🟢 Within budget" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "budget_status=⚪ No budget configured" >> $GITHUB_OUTPUT
+            echo "budget_limit=0" >> $GITHUB_OUTPUT
+            echo "usage_percent=0" >> $GITHUB_OUTPUT
+          fi
 
-#       - name: Trigger Cost Optimizer Lambda
-#         if: matrix.environment == 'prod'
-#         env:
-#           ENVIRONMENT: ${{ matrix.environment }}
-#         run: |
-#           echo " Triggering cost optimizer Lambda for $ENVIRONMENT"
+      - name: Trigger Cost Optimizer Lambda
+        if: matrix.environment == 'prod'
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
+        run: |
+          echo " Triggering cost optimizer Lambda for $ENVIRONMENT"
           
-#           # Find and invoke the cost optimizer Lambda
-#           LAMBDA_NAME="cineverse-$ENVIRONMENT-cost-optimizer"
+          # Find and invoke the cost optimizer Lambda
+          LAMBDA_NAME="cineverse-$ENVIRONMENT-cost-optimizer"
           
-#           if aws lambda get-function --function-name "$LAMBDA_NAME" > /dev/null 2>&1; then
-#             aws lambda invoke \
-#               --function-name "$LAMBDA_NAME" \
-#               --payload '{}' \
-#               /tmp/cost-optimizer-response.json
+          if aws lambda get-function --function-name "$LAMBDA_NAME" > /dev/null 2>&1; then
+            aws lambda invoke \
+              --function-name "$LAMBDA_NAME" \
+              --payload '{}' \
+              /tmp/cost-optimizer-response.json
             
-#             echo " Cost optimizer Lambda invoked successfully"
-#             cat /tmp/cost-optimizer-response.json
-#           else
-#             echo " Cost optimizer Lambda not found: $LAMBDA_NAME"
-#           fi
+            echo " Cost optimizer Lambda invoked successfully"
+            cat /tmp/cost-optimizer-response.json
+          else
+            echo " Cost optimizer Lambda not found: $LAMBDA_NAME"
+          fi
 
-#       - name: Upload Cost Reports
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: cost-report-${{ matrix.environment }}-${{ github.run_number }}
-#           path: |
-#             cost-data-${{ matrix.environment }}.json
-#             trend-data-${{ matrix.environment }}.json
-#           retention-days: 90
+      - name: Upload Cost Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: cost-report-${{ matrix.environment }}-${{ github.run_number }}
+          path: |
+            cost-data-${{ matrix.environment }}.json
+            trend-data-${{ matrix.environment }}.json
+          retention-days: 90
 
-#       - name: Send Cost Report Notification
-#         env:
-#           ENVIRONMENT: ${{ matrix.environment }}
-#         run: |
-#           echo " Sending cost report notification for $ENVIRONMENT"
+      - name: Send Cost Report Notification
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
+        run: |
+          echo " Sending cost report notification for $ENVIRONMENT"
           
-#           TOTAL_COST=${{ steps.cost-data.outputs.total_cost }}
-#           TREND=${{ steps.cost-trends.outputs.cost_trend }}
-#           TREND_STATUS=${{ steps.cost-trends.outputs.trend_status }}
-#           BUDGET_STATUS=${{ steps.budget-check.outputs.budget_status }}
+          TOTAL_COST=${{ steps.cost-data.outputs.total_cost }}
+          TREND=${{ steps.cost-trends.outputs.cost_trend }}
+          TREND_STATUS=${{ steps.cost-trends.outputs.trend_status }}
+          BUDGET_STATUS=${{ steps.budget-check.outputs.budget_status }}
           
-#           # Send Slack notification
-#           if [[ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]]; then
-#             # Determine color based on cost trend and budget status
-#             if [[ "$BUDGET_STATUS" == *"Over 80%"* ]] || (( $(echo "$TREND > 30" | bc -l 2>/dev/null || echo 0) )); then
-#               COLOR="danger"
-#               EMOJI=""
-#             elif [[ "$BUDGET_STATUS" == *"Over 60%"* ]] || (( $(echo "$TREND > 15" | bc -l 2>/dev/null || echo 0) )); then
-#               COLOR="warning" 
-#               EMOJI=""
-#             else
-#               COLOR="good"
-#               EMOJI=""
-#             fi
+          # Send Slack notification
+          if [[ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]]; then
+            # Determine color based on cost trend and budget status
+            if [[ "$BUDGET_STATUS" == *"Over 80%"* ]] || (( $(echo "$TREND > 30" | bc -l 2>/dev/null || echo 0) )); then
+              COLOR="danger"
+              EMOJI=""
+            elif [[ "$BUDGET_STATUS" == *"Over 60%"* ]] || (( $(echo "$TREND > 15" | bc -l 2>/dev/null || echo 0) )); then
+              COLOR="warning" 
+              EMOJI=""
+            else
+              COLOR="good"
+              EMOJI=""
+            fi
             
-#             curl -X POST -H 'Content-type: application/json' \
-#               --data "{
-#                 \"text\": \"$EMOJI Weekly Cost Report - $ENVIRONMENT\",
-#                 \"attachments\": [{
-#                   \"color\": \"$COLOR\",
-#                   \"title\": \"Cost Analysis Summary\",
-#                   \"fields\": [
-#                     {\"title\": \"Environment\", \"value\": \"$ENVIRONMENT\", \"short\": true},
-#                     {\"title\": \"Monthly Cost\", \"value\": \"$$TOTAL_COST\", \"short\": true},
-#                     {\"title\": \"Trend\", \"value\": \"$TREND_STATUS (${TREND}%)\", \"short\": true},
-#                     {\"title\": \"Budget Status\", \"value\": \"$BUDGET_STATUS\", \"short\": true}
-#                   ],
-#                   \"text\": \"Service Breakdown:\\n\`\`\`\\n${{ steps.cost-data.outputs.service_costs }}\\n\`\`\`\\n\\nRecommendations:\\n${{ steps.recommendations.outputs.recommendations }}\"
-#                 }]
-#               }" \
-#               "${{ secrets.SLACK_WEBHOOK_URL }}"
-#           fi
+            curl -X POST -H 'Content-type: application/json' \
+              --data "{
+                \"text\": \"$EMOJI Weekly Cost Report - $ENVIRONMENT\",
+                \"attachments\": [{
+                  \"color\": \"$COLOR\",
+                  \"title\": \"Cost Analysis Summary\",
+                  \"fields\": [
+                    {\"title\": \"Environment\", \"value\": \"$ENVIRONMENT\", \"short\": true},
+                    {\"title\": \"Monthly Cost\", \"value\": \"$$TOTAL_COST\", \"short\": true},
+                    {\"title\": \"Trend\", \"value\": \"$TREND_STATUS (${TREND}%)\", \"short\": true},
+                    {\"title\": \"Budget Status\", \"value\": \"$BUDGET_STATUS\", \"short\": true}
+                  ],
+                  \"text\": \"Service Breakdown:\\n\`\`\`\\n${{ steps.cost-data.outputs.service_costs }}\\n\`\`\`\\n\\nRecommendations:\\n${{ steps.recommendations.outputs.recommendations }}\"
+                }]
+              }" \
+              "${{ secrets.SLACK_WEBHOOK_URL }}"
+          fi
 
-#       - name: Create Cost Optimization Issue
-#         if: steps.cost-trends.outputs.cost_trend > 25 && matrix.environment == 'prod'
-#         uses: actions/github-script@v7
-#         with:
-#           script: |
-#             const costTrend = ${{ steps.cost-trends.outputs.cost_trend }};
-#             const totalCost = ${{ steps.cost-data.outputs.total_cost }};
+      - name: Create Cost Optimization Issue
+        if: steps.cost-trends.outputs.cost_trend > 25 && matrix.environment == 'prod'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const costTrend = ${{ steps.cost-trends.outputs.cost_trend }};
+            const totalCost = ${{ steps.cost-data.outputs.total_cost }};
             
-#             // Check if similar issue already exists
-#             const { data: issues } = await github.rest.issues.listForRepo({
-#               owner: context.repo.owner,
-#               repo: context.repo.repo,
-#               labels: ['cost-optimization', 'production'],
-#               state: 'open'
-#             });
+            // Check if similar issue already exists
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['cost-optimization', 'production'],
+              state: 'open'
+            });
             
-#             if (issues.length === 0) {
-#               await github.rest.issues.create({
-#                 owner: context.repo.owner,
-#                 repo: context.repo.repo,
-#                 title: ` High Cost Increase Detected in Production (${costTrend}%)`,
-#                 body: `## Cost Optimization Alert
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: ` High Cost Increase Detected in Production (${costTrend}%)`,
+                body: `## Cost Optimization Alert
                 
-#                 **Environment:** Production
-#                 **Cost Increase:** ${costTrend}%
-#                 **Current Monthly Cost:** $${totalCost}
-#                 **Detection Time:** ${new Date().toISOString()}
+                **Environment:** Production
+                **Cost Increase:** ${costTrend}%
+                **Current Monthly Cost:** $${totalCost}
+                **Detection Time:** ${new Date().toISOString()}
                 
-#                 ### Service Breakdown:
-#                 \`\`\`
-#                 ${{ steps.cost-data.outputs.service_costs }}
-#                 \`\`\`
+                ### Service Breakdown:
+                \`\`\`
+                ${{ steps.cost-data.outputs.service_costs }}
+                \`\`\`
                 
-#                 ### Recommendations:
-#                 ${{ steps.recommendations.outputs.recommendations }}
+                ### Recommendations:
+                ${{ steps.recommendations.outputs.recommendations }}
                 
-#                 ### Action Items:
-#                 - [ ] Review cost increase drivers
-#                 - [ ] Analyze resource utilization
-#                 - [ ] Implement cost optimization measures
-#                 - [ ] Update budgets if necessary
-#                 - [ ] Monitor for next billing cycle
+                ### Action Items:
+                - [ ] Review cost increase drivers
+                - [ ] Analyze resource utilization
+                - [ ] Implement cost optimization measures
+                - [ ] Update budgets if necessary
+                - [ ] Monitor for next billing cycle
                 
-#                 ### Useful Links:
-#                 - [AWS Cost Explorer](https://console.aws.amazon.com/cost-reports/home)
-#                 - [Cost Report Workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-#                 `,
-#                 labels: ['cost-optimization', 'production', 'monitoring']
-#               });
-#             }
+                ### Useful Links:
+                - [AWS Cost Explorer](https://console.aws.amazon.com/cost-reports/home)
+                - [Cost Report Workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+                `,
+                labels: ['cost-optimization', 'production', 'monitoring']
+              });
+            }
 
-#       - name: Summary Report
-#         if: always()
-#         env:
-#           ENVIRONMENT: ${{ matrix.environment }}
-#         run: |
-#           cat << EOF >> $GITHUB_STEP_SUMMARY
-#           #  Cost Analysis Report - $ENVIRONMENT
+      - name: Summary Report
+        if: always()
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          #  Cost Analysis Report - $ENVIRONMENT
           
-#           **Analysis Date:** $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)  
-#           **Total Monthly Cost:** $${{ steps.cost-data.outputs.total_cost }}  
-#           **Cost Trend:** ${{ steps.cost-trends.outputs.trend_status }} (${{ steps.cost-trends.outputs.cost_trend }}%)  
-#           **Budget Status:** ${{ steps.budget-check.outputs.budget_status }}
+          **Analysis Date:** $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)  
+          **Total Monthly Cost:** $${{ steps.cost-data.outputs.total_cost }}  
+          **Cost Trend:** ${{ steps.cost-trends.outputs.trend_status }} (${{ steps.cost-trends.outputs.cost_trend }}%)  
+          **Budget Status:** ${{ steps.budget-check.outputs.budget_status }}
           
-#           ##  Service Breakdown
-#           \`\`\`
-#           ${{ steps.cost-data.outputs.service_costs }}
-#           \`\`\`
+          ##  Service Breakdown
+          \`\`\`
+          ${{ steps.cost-data.outputs.service_costs }}
+          \`\`\`
           
-#           ##  Resource Utilization
+          ##  Resource Utilization
           
-#           ### CloudFront
-#           \`\`\`
-#           ${{ steps.utilization.outputs.cloudfront_stats }}
-#           \`\`\`
+          ### CloudFront
+          \`\`\`
+          ${{ steps.utilization.outputs.cloudfront_stats }}
+          \`\`\`
           
-#           ### S3 Storage
-#           \`\`\`
-#           ${{ steps.utilization.outputs.s3_stats }}
-#           \`\`\`
+          ### S3 Storage
+          \`\`\`
+          ${{ steps.utilization.outputs.s3_stats }}
+          \`\`\`
           
-#           ##  Optimization Recommendations
-#           ${{ steps.recommendations.outputs.recommendations }}
+          ##  Optimization Recommendations
+          ${{ steps.recommendations.outputs.recommendations }}
           
-#           ##  Quick Links
-#           - [AWS Cost Explorer](https://console.aws.amazon.com/cost-reports/home)
-#           - [AWS Budgets](https://console.aws.amazon.com/billing/home#/budgets)
-#           - [Cost Anomaly Detection](https://console.aws.amazon.com/cost-reports/home#/anomaly-detection)
-#           EOF
+          EOF

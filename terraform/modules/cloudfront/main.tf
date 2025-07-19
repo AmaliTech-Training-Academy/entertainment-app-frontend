@@ -18,45 +18,72 @@ resource "aws_cloudfront_distribution" "website" {
     }
   }
 
+  # Origin for S3 static site
   origin {
     domain_name              = var.s3_bucket_domain_name
     origin_id                = "S3-${var.s3_bucket_id}"
     origin_access_control_id = var.origin_access_control_id
   }
 
-  # Enhanced default cache behavior with optimized TTL
+  # Origin for API (ALB) - ADDED FROM DEV CONFIG
+  origin {
+    domain_name = var.alb_domain_name
+    origin_id   = "API-ALB"
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  # Default cache behavior - CHANGED TO ALLOW HTTP
   default_cache_behavior {
     allowed_methods            = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"  # CHANGED from "redirect-to-https"
     cache_policy_id            = aws_cloudfront_cache_policy.spa.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
 
-  # Optimized cache behavior for static assets with longer TTL
+  # Optimized cache behavior for static assets - CHANGED TO ALLOW HTTP
   ordered_cache_behavior {
     path_pattern               = "/assets/*"
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"  # CHANGED from "redirect-to-https"
     cache_policy_id            = aws_cloudfront_cache_policy.static_assets.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
 
-  # Additional cache behavior for CSS/JS files
+  # API behavior - ADDED FROM DEV CONFIG
+  ordered_cache_behavior {
+    path_pattern               = "/api/*"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "API-ALB"
+    compress                   = true
+    viewer_protocol_policy     = "allow-all"  # Allow HTTP for API calls
+    cache_policy_id            = aws_cloudfront_cache_policy.spa.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Additional cache behavior for CSS/JS files - CHANGED TO ALLOW HTTP
   ordered_cache_behavior {
     path_pattern               = "*.css"
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"  # CHANGED from "redirect-to-https"
     cache_policy_id            = aws_cloudfront_cache_policy.static_assets.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
@@ -68,20 +95,20 @@ resource "aws_cloudfront_distribution" "website" {
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"  # CHANGED from "redirect-to-https"
     cache_policy_id            = aws_cloudfront_cache_policy.static_assets.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
 
-  # Cache behavior for images with very long TTL
+  # Cache behavior for images - CHANGED TO ALLOW HTTP
   ordered_cache_behavior {
     path_pattern               = "*.{jpg,jpeg,png,gif,ico,svg,webp}"
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"  # CHANGED from "redirect-to-https"
     cache_policy_id            = aws_cloudfront_cache_policy.images.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
@@ -279,10 +306,10 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
   }
 }
 
-# Enhanced Response Headers Policy for Security
+# Response headers policy - HSTS removed for HTTP compatibility (UPDATED FROM DEV)
 resource "aws_cloudfront_response_headers_policy" "security" {
   name    = "cineverse-${var.environment}-security-headers"
-  comment = "Enhanced security headers for CineVerse frontend - ${var.environment}"
+  comment = "Security headers for CineVerse frontend (HTTP compatible) - ${var.environment}"
 
   cors_config {
     access_control_allow_credentials = false
@@ -303,12 +330,8 @@ resource "aws_cloudfront_response_headers_policy" "security" {
   }
 
   security_headers_config {
-    strict_transport_security {
-      access_control_max_age_sec = 31536000
-      include_subdomains         = true
-      override                   = true
-    }
-
+    # HSTS removed - conflicts with allow-all HTTP policy (SAME AS DEV)
+    
     content_type_options {
       override = true
     }
@@ -323,8 +346,9 @@ resource "aws_cloudfront_response_headers_policy" "security" {
       override        = true
     }
 
+    # UPDATED CSP to allow HTTP connections to ALB (SAME AS DEV)
     content_security_policy {
-      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ${var.api_endpoint}; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';"
+      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://${var.alb_domain_name} https://${var.alb_domain_name}; media-src 'self';"
       override = true
     }
   }
