@@ -26,7 +26,7 @@ interface SearchFilters {
   providedIn: 'root',
 })
 export class AdvancedSearchService {
-  private apiUrl = `${environment.apiBaseUrl}/movies`;
+  private apiUrl = `${environment.apiUrl}/movies`;
 
   constructor(private http: HttpClient) {}
 
@@ -47,7 +47,6 @@ export class AdvancedSearchService {
         imageUrl: '../../../assets/images/movie.png',
         isBookmarked: false,
       },
-      // ... include all your mock movies here
     ];
 
     let results = [...mockMovies];
@@ -76,7 +75,7 @@ export class AdvancedSearchService {
       results = results.filter((movie) => movie.year === filters.year);
     }
 
-    return of(results).pipe(delay(300)); // Simulate network delay
+    return of(results).pipe(delay(300));
   }
 
   getFilterOptions(): Observable<{
