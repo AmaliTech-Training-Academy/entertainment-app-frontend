@@ -134,7 +134,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "access_logs" {
   }
 }
 
-# Lifecycle for access logs
+# Lifecycle for access logs - FIXED
 resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
   count  = var.enable_access_logging ? 1 : 0
   bucket = aws_s3_bucket.access_logs[0].id
@@ -142,6 +142,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
   rule {
     id     = "access_log_retention"
     status = "Enabled"
+
+    # Add filter to apply rule to all objects
+    filter {
+      prefix = ""
+    }
 
     expiration {
       days = var.environment == "prod" ? 90 : 30
@@ -171,10 +176,10 @@ resource "aws_cloudfront_origin_access_control" "website" {
   signing_protocol                  = "sigv4"
 }
 
-# CloudTrail for S3 object-level monitoring (production feature)
+# CloudTrail for complete S3 monitoring (production feature) - FIXED WITH RECOMMENDED APPROACH
 resource "aws_cloudtrail" "s3_monitoring" {
   count                         = var.environment == "prod" ? 1 : 0
-  name                          = "${var.bucket_name}-object-monitoring"
+  name                          = "${var.bucket_name}-monitoring"
   s3_bucket_name               = aws_s3_bucket.cloudtrail_logs[0].bucket
   include_global_service_events = false
   is_multi_region_trail        = false
@@ -182,17 +187,16 @@ resource "aws_cloudtrail" "s3_monitoring" {
 
   event_selector {
     read_write_type                 = "All"
-    include_management_events       = false
+    include_management_events       = true  # CHANGED: Enable bucket-level monitoring
     
+    # Monitor S3 object-level events
     data_resource {
       type   = "AWS::S3::Object"
       values = ["${aws_s3_bucket.website.arn}/*"]
     }
     
-    data_resource {
-      type   = "AWS::S3::Bucket"
-      values = [aws_s3_bucket.website.arn]
-    }
+    # REMOVED: AWS::S3::Bucket data resource (not valid)
+    # Bucket-level operations are now covered by include_management_events = true
   }
 
   tags = var.tags
