@@ -11,7 +11,7 @@ resource "aws_budgets_budget" "cost_budget" {
     comparison_operator        = "GREATER_THAN"
     threshold                 = 80
     threshold_type            = "PERCENTAGE"
-    notification_type         = "ACTUAL"
+    notification_type          = "ACTUAL"
     subscriber_email_addresses = []
     subscriber_sns_topic_arns  = [var.sns_topic_arn]
   }
@@ -272,11 +272,11 @@ resource "aws_iam_role_policy" "cost_optimizer" {
   })
 }
 
-# EventBridge rule to trigger cost optimization weekly
+# EventBridge rule to trigger cost optimization weekly - FIXED
 resource "aws_cloudwatch_event_rule" "cost_optimization_schedule" {
   name                = "${var.project_name}-${var.environment}-cost-optimization"
   description         = "Trigger cost optimization analysis weekly"
-  schedule_expression = "cron(0 9 * * MON *)"
+  schedule_expression = "cron(0 9 ? * MON *)"  # FIXED: 9 AM every Monday
 
   tags = var.tags
 }

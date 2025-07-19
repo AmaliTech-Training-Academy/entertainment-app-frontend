@@ -263,9 +263,22 @@ resource "aws_wafv2_web_acl" "main" {
   }
 }
 
-# Enhanced CloudWatch Log Group with simpler naming - FIXED
+# Data source for current AWS account
+data "aws_caller_identity" "current" {
+  provider = aws.us_east_1
+}
+
+# Random suffix for resource uniqueness
+resource "random_string" "policy_suffix" {
+  length  = 8
+  special = false
+  upper   = false
+}
+
+# CloudWatch Log Group - OPTIONAL with variable control
 resource "aws_cloudwatch_log_group" "waf" {
-  name              = "/aws/wafv2/cineverse-${var.environment}-waf-logs"  # CHANGED: Simpler name
+  count             = var.enable_waf_logging ? 1 : 0
+  name              = "/aws/wafv2/cineverse-${var.environment}-waf"
   retention_in_days = var.is_production ? 90 : var.log_retention_days
   
   provider = aws.us_east_1
@@ -273,12 +286,9 @@ resource "aws_cloudwatch_log_group" "waf" {
   tags = var.tags
 }
 
-# CloudWatch Log Resource Policy for WAF - MOVED BEFORE logging config
-data "aws_caller_identity" "current" {
-  provider = aws.us_east_1
-}
-
+# CloudWatch Log Resource Policy - OPTIONAL
 resource "aws_cloudwatch_log_resource_policy" "waf_logging" {
+  count       = var.enable_waf_logging ? 1 : 0
   policy_name = "AWSWAFLoggingPolicy-${var.environment}-${random_string.policy_suffix.result}"
 
   policy_document = jsonencode({
@@ -299,26 +309,22 @@ resource "aws_cloudwatch_log_resource_policy" "waf_logging" {
   })
 
   provider = aws.us_east_1
+
+  depends_on = [aws_cloudwatch_log_group.waf]
 }
 
-# Random suffix for policy name uniqueness
-resource "random_string" "policy_suffix" {
-  length  = 8
-  special = false
-  upper   = false
-}
-
-# Enhanced WAF Logging Configuration - with correct dependencies
+# WAF Logging Configuration - OPTIONAL with proper timing
 resource "aws_wafv2_web_acl_logging_configuration" "main" {
+  count                   = var.enable_waf_logging ? 1 : 0
   resource_arn            = aws_wafv2_web_acl.main.arn
-  log_destination_configs = ["${aws_cloudwatch_log_group.waf.arn}:*"]
+  log_destination_configs = ["${aws_cloudwatch_log_group.waf[0].arn}:*"]
 
   provider = aws.us_east_1
 
   depends_on = [
     aws_wafv2_web_acl.main,
     aws_cloudwatch_log_group.waf,
-    aws_cloudwatch_log_resource_policy.waf_logging  # Ensure policy exists first
+    aws_cloudwatch_log_resource_policy.waf_logging
   ]
 
   redacted_fields {
@@ -345,5 +351,10 @@ resource "aws_wafv2_web_acl_logging_configuration" "main" {
 
   lifecycle {
     create_before_destroy = true
+  }
+
+  # Add explicit timing delay to ensure resources are ready
+  provisioner "local-exec" {
+    command = "sleep 30"
   }
 }

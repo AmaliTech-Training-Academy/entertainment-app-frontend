@@ -9,7 +9,7 @@ variable "environment" {
 }
 
 variable "rate_limit" {
-  description = "Rate limit for WAF"
+  description = "Rate limit for WAF (requests per 5 minutes)"
   type        = number
   default     = 2000
 }
@@ -21,7 +21,7 @@ variable "blocked_countries" {
 }
 
 variable "log_retention_days" {
-  description = "Log retention days"
+  description = "Number of days to retain WAF logs"
   type        = number
   default     = 30
 }
@@ -39,14 +39,13 @@ variable "enable_waf" {
 }
 
 variable "enable_waf_logging" {
-  description = "Enable WAF logging to CloudWatch"
+  description = "Enable WAF logging to CloudWatch (can be disabled to avoid deployment issues)"
   type        = bool
-  default     = true
+  default     = false  # CHANGED: Start with false to avoid ARN issues during initial deployment
 }
 
-# New variable for production-specific features
 variable "is_production" {
-  description = "Whether this is a production environment"
+  description = "Whether this is a production environment (enables additional security rules)"
   type        = bool
   default     = false
 }
