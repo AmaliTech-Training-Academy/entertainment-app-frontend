@@ -461,7 +461,7 @@ jobs:
               npm run build -- --configuration=staging ;;
             "prod")    
               # Full production build with all optimizations
-              npm run build -- --configuration=production --optimization --aot --build-optimizer ;;
+              npm run build -- --configuration=production ;;
             *)         
               echo "Unknown environment: $ENV" && exit 1 ;;
           esac
