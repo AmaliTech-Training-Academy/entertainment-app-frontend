@@ -8,7 +8,8 @@ import { AdminMetrics } from '../../../models/admin-metrics';
   providedIn: 'root',
 })
 export class AdminService {
-  private readonly BASE_URL = '/api/v1/admin';
+  private readonly BASE_URL =
+    'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/admin';
 
   constructor(private http: HttpClient) {}
 
