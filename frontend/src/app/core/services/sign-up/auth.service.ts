@@ -8,7 +8,6 @@ export interface RegisterPayload {
   lastName: string;
   email: string;
   password: string;
-  // Add other fields if required by your backend
 }
 
 @Injectable({
@@ -21,6 +20,4 @@ export class AuthService {
   register(payload: RegisterPayload): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/v1/auth/register`, payload);
   }
-
-  // You can add other API methods here (login, etc.)
 }

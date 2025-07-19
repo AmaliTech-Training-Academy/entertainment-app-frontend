@@ -18,7 +18,7 @@ interface CommentApiResponse {
   providedIn: 'root',
 })
 export class CommentService {
-  private apiUrl = environment.apiUrlDev;
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private http: HttpClient,

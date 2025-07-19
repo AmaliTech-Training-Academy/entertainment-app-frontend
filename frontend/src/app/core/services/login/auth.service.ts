@@ -9,7 +9,7 @@ import { environment } from '../../../../environments/environment';
 export class AuthService {
   private baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { console.log(this.baseUrl)}
 
   login(email: string, password: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/v1/auth/login`, { email, password });

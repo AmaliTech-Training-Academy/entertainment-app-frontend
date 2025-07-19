@@ -9,7 +9,7 @@ import { ErrorHandlerService } from '../error-handler/error-handler.service';
   providedIn: 'root',
 })
 export class MediaDetailsService {
-  private apiUrl = environment.apiUrlDev;
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private http: HttpClient,
