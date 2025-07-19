@@ -40,13 +40,18 @@ resource "aws_s3_bucket_public_access_block" "cloudfront_logs" {
   restrict_public_buckets = true
 }
 
-# Lifecycle configuration for log retention
+# Lifecycle configuration for log retention - FIXED
 resource "aws_s3_bucket_lifecycle_configuration" "cloudfront_logs" {
   bucket = aws_s3_bucket.cloudfront_logs.id
 
   rule {
     id     = "log_retention"
     status = "Enabled"
+
+    # Add filter to apply rule to all objects
+    filter {
+      prefix = ""
+    }
 
     expiration {
       days = var.environment == "prod" ? 365 : 90
@@ -104,13 +109,18 @@ resource "aws_s3_bucket_public_access_block" "s3_access_logs" {
   restrict_public_buckets = true
 }
 
-# Lifecycle configuration for S3 access logs
+# Lifecycle configuration for S3 access logs - FIXED
 resource "aws_s3_bucket_lifecycle_configuration" "s3_access_logs" {
   bucket = aws_s3_bucket.s3_access_logs.id
 
   rule {
     id     = "s3_log_retention"
     status = "Enabled"
+
+    # Add filter to apply rule to all objects
+    filter {
+      prefix = ""
+    }
 
     expiration {
       days = var.environment == "prod" ? 180 : 60
@@ -165,6 +175,7 @@ import json
 import boto3
 import gzip
 import base64
+import os
 from datetime import datetime
 
 def handler(event, context):
@@ -209,10 +220,11 @@ def handler(event, context):
             # Send log events
             log_events = []
             for entry in log_entries[:50]:  # CloudWatch Logs limit
-                log_events.append({
-                    'timestamp': int(datetime.now().timestamp() * 1000),
-                    'message': entry
-                })
+                if entry.strip():  # Only process non-empty lines
+                    log_events.append({
+                        'timestamp': int(datetime.now().timestamp() * 1000),
+                        'message': entry
+                    })
             
             if log_events:
                 logs_client.put_log_events(

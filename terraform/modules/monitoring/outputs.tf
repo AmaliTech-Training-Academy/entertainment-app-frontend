@@ -21,7 +21,7 @@ output "rum_app_monitor_name" {
 
 output "canary_arn" {
   description = "CloudWatch Synthetics Canary ARN"
-  value       = var.environment == "prod" ? aws_cloudwatch_synthetic_canary.health_check[0].arn : null
+  value       = var.environment == "prod" ? aws_synthetics_canary.health_check[0].arn : null
 }
 
 output "alarm_arns" {
