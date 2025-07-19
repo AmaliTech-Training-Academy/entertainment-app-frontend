@@ -48,6 +48,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "rollback_artifacts" {
     id     = "rollback_retention"
     status = "Enabled"
 
+    filter {
+      prefix = ""
+    }
+
     expiration {
       days = 30  # Keep rollback artifacts for 30 days
     }

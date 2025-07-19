@@ -19,10 +19,10 @@ variable "project_name" {
   default     = "cineverse"
 }
 
-variable "domain_name" {
-  description = "Domain name for the application"
+variable "alb_domain_name" {
+  description = "ALB domain name for API origin"
   type        = string
-  default     = ""
+  default     = "cineverse-prod-service-alb-964667856.eu-west-1.elb.amazonaws.com"  # Set this to your production ALB domain
 }
 
 variable "enable_waf" {
@@ -40,7 +40,7 @@ variable "enable_monitoring" {
 variable "api_endpoint" {
   description = "Backend API endpoint URL"
   type        = string
-  default     = ""
+  default     = "http://cineverse-prod-service-alb-964667856.eu-west-1.elb.amazonaws.com"
 }
 
 variable "tags" {
