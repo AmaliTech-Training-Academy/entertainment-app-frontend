@@ -476,7 +476,7 @@ resource "aws_iam_role" "canary" {
   tags = var.tags
 }
 
-# IAM policy for CloudWatch Synthetics
+# Enhanced IAM policy for CloudWatch Synthetics - FIXED with comprehensive permissions
 resource "aws_iam_role_policy" "canary" {
   count = var.environment == "prod" ? 1 : 0
   name  = "${var.project_name}-${var.environment}-canary-policy"
@@ -521,13 +521,17 @@ resource "aws_iam_role_policy" "canary" {
             "cloudwatch:namespace" = "CloudWatchSynthetics"
           }
         }
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "synthetics:*"
+        ]
+        Resource = "*"
       }
     ]
   })
 }
 
-resource "aws_iam_role_policy_attachment" "canary_execution" {
-  count      = var.environment == "prod" ? 1 : 0
-  role       = aws_iam_role.canary[0].name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchSyntheticsExecutionRolePolicy"
-}
+# REMOVED: AWS managed policy attachment that was causing the error
+# The custom policy above includes all necessary permissions for CloudWatch Synthetics
