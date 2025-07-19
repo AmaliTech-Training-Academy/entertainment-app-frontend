@@ -6,7 +6,7 @@
 #
 # Key Features:
 # - Multi-environment support (dev, staging, prod)
-# - Manual approval system via workflow_dispatch
+# - Universal approval system for all trigger types
 # - Environment protection rules for production/staging
 # - Comprehensive security scanning
 # - Infrastructure as Code with Terraform
@@ -14,8 +14,8 @@
 # - Enhanced monitoring and notifications
 #
 # Environments:
-# - dev: Development environment with relaxed security
-# - staging: Pre-production environment with full security
+# - dev: Development environment with auto-approval
+# - staging: Pre-production environment with environment protection
 # - prod: Production environment with enhanced protections
 # =============================================================================
 
@@ -189,63 +189,207 @@ jobs:
           echo "Requires Environment Approval: $([ "$BRANCH" == "prod" ] || [ "$BRANCH" == "staging" ] && echo "true" || echo "false")"
 
   # =============================================================================
-  # Job 2: Manual Approval Validation
+  # Job 2: Universal Approval Validation (Runs for All Triggers)
   # =============================================================================
-  # This job validates manual approval inputs when workflow is triggered manually
-  # It provides an additional safety check before proceeding with deployment
-  manual_approval_check:
-    name: Manual Approval Validation
+  # This job validates approval for ALL trigger types with different logic:
+  # - Manual Dispatch: Check workflow inputs
+  # - Push: Auto-approve dev, require environment protection for staging/prod
+  # - PR: Validation only (no deployment)
+  approval_validation:
+    name: Approval Validation
     runs-on: self-hosted
     needs: [setup]
     
-    # Only run this job for manual dispatches
-    if: needs.setup.outputs.is_manual_dispatch == 'true'
+    # Always run if setup succeeded (regardless of trigger type)
+    if: always() && needs.setup.result == 'success'
+    
+    # Outputs for downstream jobs
+    outputs:
+      approval_status: ${{ steps.validate.outputs.approval_status }}
+      approval_method: ${{ steps.validate.outputs.approval_method }}
+      can_deploy: ${{ steps.validate.outputs.can_deploy }}
     
     steps:
-      - name: Validate Manual Approval
+      - name: Debug Trigger Context
         run: |
-          APPROVAL="${{ github.event.inputs.approve_deployment }}"
-          ENVIRONMENT="${{ github.event.inputs.environment }}"
-          
-          echo "Validating Manual Approval"
-          echo "Environment: $ENVIRONMENT"
-          echo "Approval Status: $APPROVAL"
+          echo "=== APPROVAL VALIDATION DEBUG ==="
+          echo "Event name: ${{ github.event_name }}"
+          echo "Ref name: ${{ github.ref_name }}"
           echo "Actor: ${{ github.actor }}"
-          echo "Triggered at: $(date)"
-          
-          # =================================================================
-          # Validate Approval Status
-          # =================================================================
-          # If deployment wasn't explicitly approved, block execution
-          # This prevents accidental deployments from manual triggers
-          if [[ "$APPROVAL" != "yes" ]]; then
-            echo ""
-            echo "DEPLOYMENT BLOCKED"
-            echo "Reason: Manual approval not provided"
-            echo "Required action: Re-run workflow and select 'yes' for approval"
-            echo ""
-            exit 1
-          fi
-          
+          echo "Is manual dispatch: ${{ needs.setup.outputs.is_manual_dispatch }}"
+          echo "Environment: ${{ needs.setup.outputs.environment }}"
+          echo "Should deploy: ${{ needs.setup.outputs.should_deploy }}"
+          echo "Requires approval: ${{ needs.setup.outputs.requires_approval }}"
           echo ""
-          echo "MANUAL APPROVAL VALIDATED"
-          echo "Proceeding with deployment to $ENVIRONMENT"
-          echo "Approved by: ${{ github.actor }}"
+          echo "=== MANUAL DISPATCH INPUTS (if applicable) ==="
+          echo "Input environment: '${{ github.event.inputs.environment }}'"
+          echo "Input approval: '${{ github.event.inputs.approve_deployment }}'"
+          echo "Force rebuild: '${{ github.event.inputs.force_rebuild }}'"
+          echo "Skip tests: '${{ github.event.inputs.skip_tests }}'"
+          echo ""
+      
+      - name: Universal Approval Validation
+        id: validate
+        run: |
+          EVENT_NAME="${{ github.event_name }}"
+          ENVIRONMENT="${{ needs.setup.outputs.environment }}"
+          IS_MANUAL="${{ needs.setup.outputs.is_manual_dispatch }}"
+          SHOULD_DEPLOY="${{ needs.setup.outputs.should_deploy }}"
+          
+          echo "=== UNIVERSAL APPROVAL VALIDATION ==="
+          echo "Trigger: $EVENT_NAME"
+          echo "Environment: $ENVIRONMENT"
+          echo "Should Deploy: $SHOULD_DEPLOY"
+          echo ""
           
           # =================================================================
-          # Additional Production Validation
+          # Handle Different Trigger Types
           # =================================================================
-          # For production deployments, provide extra warnings and validation
+          
+          case "$EVENT_NAME" in
+            # ---------------------------------------------------------
+            # Manual Dispatch - Check Workflow Inputs
+            # ---------------------------------------------------------
+            "workflow_dispatch")
+              echo "🔧 MANUAL DISPATCH VALIDATION"
+              MANUAL_APPROVAL="${{ github.event.inputs.approve_deployment }}"
+              
+              if [[ "$MANUAL_APPROVAL" == "yes" ]]; then
+                echo "✅ Manual approval received via workflow input"
+                echo "approval_status=approved" >> $GITHUB_OUTPUT
+                echo "approval_method=manual_workflow_input" >> $GITHUB_OUTPUT
+                echo "can_deploy=true" >> $GITHUB_OUTPUT
+              else
+                echo "❌ Manual approval NOT received"
+                echo "approval_status=denied" >> $GITHUB_OUTPUT
+                echo "approval_method=manual_workflow_input" >> $GITHUB_OUTPUT
+                echo "can_deploy=false" >> $GITHUB_OUTPUT
+                
+                echo ""
+                echo "DEPLOYMENT BLOCKED"
+                echo "Reason: Manual approval not provided in workflow input"
+                echo "Action: Re-run workflow and select 'yes' for approval"
+                exit 1
+              fi
+              ;;
+            
+            # ---------------------------------------------------------
+            # Push Event - Auto-approve based on environment
+            # ---------------------------------------------------------
+            "push")
+              echo "📤 PUSH EVENT VALIDATION"
+              
+              case "$ENVIRONMENT" in
+                "dev")
+                  echo "✅ Auto-approving DEV environment push"
+                  echo "approval_status=auto_approved" >> $GITHUB_OUTPUT
+                  echo "approval_method=auto_dev_environment" >> $GITHUB_OUTPUT
+                  echo "can_deploy=true" >> $GITHUB_OUTPUT
+                  ;;
+                "staging"|"prod")
+                  echo "⚠️  $ENVIRONMENT requires environment protection"
+                  echo "approval_status=pending_environment_protection" >> $GITHUB_OUTPUT
+                  echo "approval_method=github_environment_protection" >> $GITHUB_OUTPUT
+                  echo "can_deploy=true" >> $GITHUB_OUTPUT
+                  
+                  echo ""
+                  echo "ENVIRONMENT PROTECTION REQUIRED"
+                  echo "Environment: $ENVIRONMENT"
+                  echo "Protection: GitHub Environment approval required"
+                  echo "Note: Deployment will wait for environment approval"
+                  ;;
+                *)
+                  echo "❌ Unknown environment: $ENVIRONMENT"
+                  echo "approval_status=denied" >> $GITHUB_OUTPUT
+                  echo "approval_method=unknown_environment" >> $GITHUB_OUTPUT
+                  echo "can_deploy=false" >> $GITHUB_OUTPUT
+                  exit 1
+                  ;;
+              esac
+              ;;
+            
+            # ---------------------------------------------------------
+            # Pull Request - Validation Only (No Deployment)
+            # ---------------------------------------------------------
+            "pull_request")
+              echo "🔍 PULL REQUEST VALIDATION"
+              echo "approval_status=validation_only" >> $GITHUB_OUTPUT
+              echo "approval_method=pull_request_validation" >> $GITHUB_OUTPUT
+              echo "can_deploy=false" >> $GITHUB_OUTPUT
+              
+              echo ""
+              echo "PULL REQUEST VALIDATION MODE"
+              echo "Purpose: Code validation and testing only"
+              echo "Deployment: Disabled for pull requests"
+              echo "Action: Merge PR to trigger deployment"
+              ;;
+            
+            # ---------------------------------------------------------
+            # Unknown Trigger Type
+            # ---------------------------------------------------------
+            *)
+              echo "❌ Unknown trigger type: $EVENT_NAME"
+              echo "approval_status=denied" >> $GITHUB_OUTPUT
+              echo "approval_method=unknown_trigger" >> $GITHUB_OUTPUT
+              echo "can_deploy=false" >> $GITHUB_OUTPUT
+              exit 1
+              ;;
+          esac
+          
+          # =================================================================
+          # Additional Validation for Production
+          # =================================================================
           if [[ "$ENVIRONMENT" == "prod" ]]; then
             echo ""
-            echo "PRODUCTION DEPLOYMENT APPROVED"
-            echo "Extra caution required for production deployment"
-            echo "Pre-deployment checklist:"
-            echo "   Manual approval received"
-            echo "   Actor validated: ${{ github.actor }}"
-            echo "   Environment confirmed: $ENVIRONMENT"
-            echo ""
+            echo "🚨 PRODUCTION DEPLOYMENT DETECTED"
+            echo "Extra validation required for production:"
+            echo "   ✓ Actor: ${{ github.actor }}"
+            echo "   ✓ Trigger: $EVENT_NAME"
+            echo "   ✓ Branch: ${{ github.ref_name }}"
+            echo "   ✓ Time: $(date)"
+            
+            # For production manual dispatch, add extra warnings
+            if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+              echo ""
+              echo "⚠️  PRODUCTION MANUAL DEPLOYMENT"
+              echo "Please confirm:"
+              echo "   - All tests have passed"
+              echo "   - Security scan completed"
+              echo "   - Stakeholders notified"
+              echo "   - Rollback plan ready"
+            fi
           fi
+          
+          # =================================================================
+          # Final Summary
+          # =================================================================
+          echo ""
+          echo "=== APPROVAL VALIDATION SUMMARY ==="
+          echo "Status: $(grep 'approval_status=' $GITHUB_OUTPUT | cut -d'=' -f2)"
+          echo "Method: $(grep 'approval_method=' $GITHUB_OUTPUT | cut -d'=' -f2)"
+          echo "Can Deploy: $(grep 'can_deploy=' $GITHUB_OUTPUT | cut -d'=' -f2)"
+      
+      - name: Production Safety Check
+        if: needs.setup.outputs.is_production == 'true'
+        run: |
+          echo "🔒 PRODUCTION SAFETY CHECK"
+          echo ""
+          echo "This is a PRODUCTION deployment!"
+          echo "Environment: ${{ needs.setup.outputs.environment }}"
+          echo "Trigger: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Approval Method: ${{ steps.validate.outputs.approval_method }}"
+          echo ""
+          
+          # Additional production-specific validations
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ github.event.inputs.skip_tests }}" == "true" ]]; then
+              echo "⚠️  WARNING: Tests are being skipped for PRODUCTION!"
+              echo "This is NOT recommended for production deployments."
+            fi
+          fi
+          
+          echo "✓ Production safety check completed"
 
   # =============================================================================
   # Job 3: Security Scanning and Vulnerability Assessment
@@ -255,15 +399,13 @@ jobs:
   security:
     name: Security Scan
     runs-on: self-hosted
-    needs: [setup, manual_approval_check]
+    needs: [setup, approval_validation]
     
-    # Run if setup succeeded and either:
-    # - Not a manual dispatch, OR
-    # - Manual dispatch with successful approval validation
+    # Run if setup succeeded and approval validation passed
     if: |
       always() && 
       needs.setup.result == 'success' &&
-      (needs.setup.outputs.is_manual_dispatch == 'false' || needs.manual_approval_check.result == 'success')
+      needs.approval_validation.result == 'success'
     
     steps:
       # Checkout code for security scanning
@@ -352,15 +494,13 @@ jobs:
   build:
     name: Build & Test
     runs-on: self-hosted
-    needs: [setup, manual_approval_check]
+    needs: [setup, approval_validation]
     
-    # Run if setup succeeded and either:
-    # - Not a manual dispatch, OR
-    # - Manual dispatch with successful approval validation
+    # Run if setup succeeded and approval validation passed
     if: |
       always() && 
       needs.setup.result == 'success' &&
-      (needs.setup.outputs.is_manual_dispatch == 'false' || needs.manual_approval_check.result == 'success')
+      needs.approval_validation.result == 'success'
     
     steps:
       # Checkout source code
@@ -382,58 +522,6 @@ jobs:
       - name: Install Dependencies
         working-directory: frontend
         run: npm ci  # Clean install for reproducible builds
-
-      # # =================================================================
-      # # Setup Test Environment
-      # # =================================================================
-      # # Install browser for headless testing (skip if tests are disabled)
-      # - name: Install Chromium for Headless Tests
-      #   if: github.event.inputs.skip_tests != 'true'
-      #   run: sudo apt-get update && sudo apt-get install -y chromium-browser
-
-      # # =================================================================
-      # # Run Frontend Tests
-      # # =================================================================
-      # # Execute unit tests and generate coverage reports
-      # - name: Run Frontend Tests
-      #   if: github.event.inputs.skip_tests != 'true'
-      #   working-directory: frontend
-      #   env:
-      #     CHROME_BIN: /usr/bin/chromium-browser
-      #   run: |
-      #     npm test -- --no-watch --browsers=ChromeHeadless --code-coverage
-      #   # Allow non-production environments to continue even if tests fail
-      #   continue-on-error: ${{ needs.setup.outputs.is_production != 'true' }}
-
-      # # =================================================================
-      # # Test Skip Warning
-      # # =================================================================
-      # # Warn when tests are skipped, especially for production
-      # - name: Skip Tests Warning
-      #   if: github.event.inputs.skip_tests == 'true'
-      #   run: |
-      #     echo "WARNING: Tests skipped via manual input"
-      #     echo "This is NOT recommended for production deployments"
-      #     if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
-      #       echo "CRITICAL: Tests skipped for PRODUCTION deployment!"
-      #       echo "Consider re-running with tests enabled"
-      #     fi
-
-      # # =================================================================
-      # # Production-Specific Enhanced Testing
-      # # =================================================================
-      # # Run additional tests and validations for production builds
-      # - name: Production-Only Enhanced Testing
-      #   if: needs.setup.outputs.is_production == 'true' && github.event.inputs.skip_tests != 'true'
-      #   working-directory: frontend
-      #   run: |
-      #     echo "Running enhanced tests for production..."
-      #     npm run test:ci -- --browsers=ChromeHeadless --code-coverage --watch=false
-          
-      #     # Verify code coverage report generation
-      #     if [ -f coverage/lcov.info ]; then
-      #       echo "Code coverage report generated"
-      #     fi
 
       # =================================================================
       # Build Application for Target Environment
@@ -517,10 +605,14 @@ jobs:
   plan:
     name: Infrastructure Plan
     runs-on: self-hosted
-    needs: [setup, build, security]
+    needs: [setup, build, security, approval_validation]
     
-    # Only run if build and security jobs completed successfully
-    if: always() && needs.build.result == 'success' && needs.security.result == 'success'
+    # Only run if build and security jobs completed successfully AND approval passed
+    if: |
+      always() && 
+      needs.build.result == 'success' && 
+      needs.security.result == 'success' &&
+      needs.approval_validation.outputs.can_deploy == 'true'
     
     env:
       ENVIRONMENT: ${{ needs.setup.outputs.environment }}
@@ -546,6 +638,8 @@ jobs:
           echo "should_deploy: ${{ needs.setup.outputs.should_deploy }}"
           echo "is_production: ${{ needs.setup.outputs.is_production }}"
           echo "is_manual_dispatch: ${{ needs.setup.outputs.is_manual_dispatch }}"
+          echo "approval_status: ${{ needs.approval_validation.outputs.approval_status }}"
+          echo "can_deploy: ${{ needs.approval_validation.outputs.can_deploy }}"
       
       # =================================================================
       # Setup Terraform
@@ -582,7 +676,7 @@ jobs:
           cat > environments/$ENVIRONMENT/backend.hcl << EOF
           bucket         = "cineverse-terraform-state-$ENVIRONMENT"
           key            = "frontend/$ENVIRONMENT/terraform.tfstate"
-          region         = "${{ env.AWS_REGION }}"
+          region         = "${{ secrets.AWS_REGION }}"
           encrypt        = true
           dynamodb_table = "cineverse-terraform-locks"
           EOF
@@ -627,7 +721,7 @@ jobs:
           # Basic configuration
           environment      = "$ENVIRONMENT"
           project_name     = "cineverse"
-          aws_region       = "${{ env.AWS_REGION }}"
+          aws_region       = "${{ secrets.AWS_REGION }}"
           
           # Security configuration
           enable_waf       = $WAF_ENABLED
@@ -687,7 +781,7 @@ jobs:
           terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl" || {
             echo "Terraform init failed. Checking S3 bucket and DynamoDB table..."
             aws s3 ls s3://cineverse-terraform-state-$ENVIRONMENT || echo "S3 bucket cineverse-terraform-state-$ENVIRONMENT not found"
-            aws dynamodb describe-table --table-name cineverse-terraform-locks --region ${{ env.AWS_REGION }} || echo "DynamoDB table cineverse-terraform-locks not found"
+            aws dynamodb describe-table --table-name cineverse-terraform-locks --region ${{ secrets.AWS_REGION }} || echo "DynamoDB table cineverse-terraform-locks not found"
             exit 1
           }
           
@@ -786,22 +880,22 @@ jobs:
   # Job 6: Environment Protection Approval
   # =============================================================================
   # This job handles GitHub Environment protection rules for staging/production
-  # It only runs when manual approval hasn't already been received via workflow_dispatch
-  approval:
-    name: Environment Approval
+  # It only runs when environment protection is needed (not for manual approval or dev)
+  environment_approval:
+    name: Environment Protection
     runs-on: self-hosted
-    needs: [setup, plan]
+    needs: [setup, plan, approval_validation]
     
     # Run this job only when:
-    # - Environment requires approval (staging/prod)
+    # - Environment requires GitHub environment protection (staging/prod)
     # - Deployment should proceed
     # - Infrastructure planning succeeded
-    # - Manual approval wasn't already received via workflow_dispatch
+    # - Universal approval indicates environment protection is needed
     if: |
       needs.setup.outputs.requires_approval == 'true' && 
       needs.setup.outputs.should_deploy == 'true' && 
       needs.plan.result == 'success' &&
-      needs.setup.outputs.manual_approval_received == 'false'
+      needs.approval_validation.outputs.approval_method == 'github_environment_protection'
     
     # Use GitHub Environment protection rules
     environment: 
@@ -809,21 +903,23 @@ jobs:
       url: https://${{ needs.setup.outputs.environment }}.cineverse.com
     
     steps:
-      - name: Environment Approval Required
+      - name: Environment Protection Required
         run: |
-          echo "Environment-based approval required for ${{ needs.setup.outputs.environment }}"
-          echo "Deployment Details:"
-          echo "   Environment: ${{ needs.setup.outputs.environment }}"
-          echo "   Plan Changes: ${{ needs.plan.outputs.plan_changes }}"
-          echo "   Branch: ${{ github.ref_name }}"
-          echo "   Triggered by: ${{ github.actor }}"
-          echo "   Commit: ${{ github.sha }}"
-          echo "   Manual Dispatch: ${{ needs.setup.outputs.is_manual_dispatch }}"
+          echo "🛡️  ENVIRONMENT PROTECTION APPROVAL"
+          echo ""
+          echo "Environment: ${{ needs.setup.outputs.environment }}"
+          echo "Trigger: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Approval Method: ${{ needs.approval_validation.outputs.approval_method }}"
+          echo "Universal Approval Status: ${{ needs.approval_validation.outputs.approval_status }}"
+          echo ""
+          echo "This deployment requires GitHub Environment protection approval."
+          echo "Please review the deployment details and approve if ready to proceed."
           
           # Extra warnings for production deployments
           if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
             echo ""
-            echo "PRODUCTION DEPLOYMENT - Extra caution required!"
+            echo "🚨 PRODUCTION DEPLOYMENT - Extra caution required!"
             echo "   Security checks: ${{ needs.security.result }}"
             echo "   Build completed: ${{ needs.build.result }}"
             echo "   Infrastructure plan: ${{ needs.plan.result }}"
@@ -839,20 +935,22 @@ jobs:
   deploy:
     name: Deploy to ${{ needs.setup.outputs.environment }}
     runs-on: self-hosted
-    needs: [setup, plan, approval]
+    needs: [setup, plan, approval_validation, environment_approval]
     
     # Deploy when:
-    # - Deployment is approved
+    # - Deployment is approved via universal validation
     # - Infrastructure planning succeeded
-    # - Either no approval required, OR environment approval received, OR manual approval received
+    # - Either no environment approval required, OR environment approval received
     if: |
       always() && 
       needs.setup.outputs.should_deploy == 'true' && 
       needs.plan.result == 'success' && 
+      needs.approval_validation.outputs.can_deploy == 'true' &&
       (
         needs.setup.outputs.requires_approval == 'false' || 
-        needs.approval.result == 'success' ||
-        needs.setup.outputs.manual_approval_received == 'true'
+        needs.environment_approval.result == 'success' ||
+        needs.approval_validation.outputs.approval_method == 'manual_workflow_input' ||
+        needs.approval_validation.outputs.approval_method == 'auto_dev_environment'
       )
     
     # Use GitHub Environment for deployment tracking
@@ -870,16 +968,24 @@ jobs:
       # =================================================================
       - name: Pre-deployment Summary
         run: |
-          echo "Starting deployment with following configuration:"
-          echo "   Environment: $ENVIRONMENT"
-          echo "   Manual Dispatch: ${{ needs.setup.outputs.is_manual_dispatch }}"
-          echo "   Manual Approval: ${{ needs.setup.outputs.manual_approval_received }}"
-          echo "   Environment Approval: ${{ needs.approval.result }}"
-          echo "   Is Production: ${{ needs.setup.outputs.is_production }}"
-          echo "   Force Rebuild: ${{ github.event.inputs.force_rebuild }}"
-          echo "   Skip Tests: ${{ github.event.inputs.skip_tests }}"
-          echo "   Actor: ${{ github.actor }}"
-          echo "   Commit: ${{ github.sha }}"
+          echo "🚀 DEPLOYMENT SUMMARY"
+          echo ""
+          echo "Environment: $ENVIRONMENT"
+          echo "Trigger: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo ""
+          echo "=== APPROVAL CHAIN ==="
+          echo "Universal Approval: ${{ needs.approval_validation.outputs.approval_status }}"
+          echo "Approval Method: ${{ needs.approval_validation.outputs.approval_method }}"
+          echo "Can Deploy: ${{ needs.approval_validation.outputs.can_deploy }}"
+          echo "Environment Approval: ${{ needs.environment_approval.result || 'Not Required' }}"
+          echo "Manual Dispatch: ${{ needs.setup.outputs.is_manual_dispatch }}"
+          echo "Manual Approval: ${{ needs.setup.outputs.manual_approval_received }}"
+          echo "Force Rebuild: ${{ github.event.inputs.force_rebuild }}"
+          echo "Skip Tests: ${{ github.event.inputs.skip_tests }}"
+          echo ""
       
       # =================================================================
       # Setup Deployment Tools
@@ -894,7 +1000,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       # =================================================================
       # Send Deployment Start Notification (Production Only)
@@ -964,7 +1070,7 @@ jobs:
           cat > environments/$ENVIRONMENT/backend.hcl << EOF
           bucket         = "cineverse-terraform-state-$ENVIRONMENT"
           key            = "frontend/$ENVIRONMENT/terraform.tfstate"
-          region         = "${{ env.AWS_REGION }}"
+          region         = "${{ secrets.AWS_REGION }}"
           encrypt        = true
           dynamodb_table = "cineverse-terraform-locks"
           EOF
@@ -975,7 +1081,7 @@ jobs:
           cat > environments/$ENVIRONMENT/terraform.tfvars << EOF
           environment      = "$ENVIRONMENT"
           project_name     = "cineverse"
-          aws_region       = "${{ env.AWS_REGION }}"
+          aws_region       = "${{ secrets.AWS_REGION }}"
           alb_domain_name  = "$ALB_DOMAIN"
           api_endpoint     = "http://$ALB_DOMAIN"
           tags = {
@@ -1110,7 +1216,8 @@ jobs:
             "branch": "${{ github.ref_name }}",
             "buildNumber": "${{ github.run_number }}",
             "deploymentMethod": "${{ needs.setup.outputs.is_manual_dispatch == 'true' && 'Manual Dispatch' || 'Automated' }}",
-            "manualApproval": "${{ needs.setup.outputs.manual_approval_received }}"
+            "manualApproval": "${{ needs.setup.outputs.manual_approval_received }}",
+            "approvalMethod": "${{ needs.approval_validation.outputs.approval_method }}"
           }
           EOF
           fi
@@ -1233,7 +1340,7 @@ jobs:
             APPROVAL_INFO="Approved via workflow input"
           else
             DEPLOY_METHOD="Automated Push"
-            APPROVAL_INFO="Environment protection rules"
+            APPROVAL_INFO="${{ needs.approval_validation.outputs.approval_method }}"
           fi
           
           # =============================================================
@@ -1311,9 +1418,13 @@ jobs:
           **CloudFront ID:** ${{ steps.outputs.outputs.cloudfront_id }}  
           **Branch:** ${{ github.ref_name }}  
           **Commit:** ${{ github.sha }}  
-          **Deployed by:** ${{ github.actor }}  
+          **Deployed by:** ${{ github.actor }}
+          
+          ## Approval Chain
+          **Universal Approval:** ${{ needs.approval_validation.outputs.approval_status }}  
+          **Approval Method:** ${{ needs.approval_validation.outputs.approval_method }}  
           **Manual Approval:** ${{ needs.setup.outputs.manual_approval_received }}  
-          **Environment Approval:** ${{ needs.approval.result }}  
+          **Environment Approval:** ${{ needs.environment_approval.result || 'Not Required' }}  
           **Is Production:** ${{ needs.setup.outputs.is_production }}
           
           ## Infrastructure Features
