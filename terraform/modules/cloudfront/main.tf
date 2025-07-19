@@ -8,19 +8,35 @@ resource "aws_cloudfront_distribution" "website" {
   web_acl_id          = var.waf_web_acl_id != "" ? var.waf_web_acl_id : null
 
   aliases = var.domain_aliases
-
+  
+  # Origin for S3 static site
   origin {
     domain_name              = var.s3_bucket_domain_name
     origin_id                = "S3-${var.s3_bucket_id}"
     origin_access_control_id = var.origin_access_control_id
   }
+  
+  # Origin for API (ALB)
+  origin {
+    domain_name = var.alb_domain_name
+    origin_id   = "API-ALB"
 
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+
+  # Default cache behavior - allows both HTTP and HTTPS
   default_cache_behavior {
     allowed_methods            = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"
     cache_policy_id            = aws_cloudfront_cache_policy.spa.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
@@ -33,8 +49,21 @@ resource "aws_cloudfront_distribution" "website" {
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"
     cache_policy_id            = aws_cloudfront_cache_policy.static_assets.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # API behavior - allows both HTTP and HTTPS
+  ordered_cache_behavior {
+    path_pattern               = "/api/*"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "API-ALB"
+    compress                   = true
+    viewer_protocol_policy     = "allow-all"  # Changed from "https-only"
+    cache_policy_id            = aws_cloudfront_cache_policy.spa.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
@@ -189,7 +218,8 @@ resource "aws_cloudfront_response_headers_policy" "security" {
     }
 
     content_security_policy {
-      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ${var.api_endpoint}; media-src 'self';"
+      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://${var.alb_domain_name} https://${var.alb_domain_name}; media-src 'self';"
+
       override = true
     }
   }

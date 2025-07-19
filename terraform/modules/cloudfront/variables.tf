@@ -48,6 +48,12 @@ variable "waf_web_acl_id" {
   default     = ""
 }
 
+variable "alb_domain_name" {
+  description = "ALB domain name for API origin"
+  type        = string
+  default     = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
+}
+
 variable "api_endpoint" {
   description = "Backend API endpoint for CSP headers"
   type        = string
