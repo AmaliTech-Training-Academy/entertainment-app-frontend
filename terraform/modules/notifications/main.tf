@@ -1,3 +1,12 @@
+# Local values for email filtering and validation
+locals {
+  # Filter out empty, null, and invalid email addresses
+  valid_emails = [
+    for email in var.notification_emails : email
+    if email != null && email != "" && can(regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", email))
+  ]
+}
+
 # SNS Topic for notifications
 resource "aws_sns_topic" "alerts" {
   name = "${var.project_name}-${var.environment}-alerts"
@@ -25,17 +34,22 @@ resource "aws_sns_topic_policy" "alerts" {
   })
 }
 
-# Email subscriptions
+# Email subscriptions - FIXED with validation
 resource "aws_sns_topic_subscription" "email" {
-  count     = length(var.notification_emails)
+  count     = length(local.valid_emails)
   topic_arn = aws_sns_topic.alerts.arn
   protocol  = "email"
-  endpoint  = var.notification_emails[count.index]
+  endpoint  = local.valid_emails[count.index]
+
+  # Prevent errors during destroy
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Lambda function for Slack notifications
 resource "aws_lambda_function" "slack_notifier" {
-  count            = var.slack_webhook_url != "" ? 1 : 0
+  count            = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   filename         = data.archive_file.slack_notifier[0].output_path
   function_name    = "${var.project_name}-${var.environment}-slack-notifier"
   role            = aws_iam_role.slack_notifier[0].arn
@@ -57,7 +71,7 @@ resource "aws_lambda_function" "slack_notifier" {
 
 # Lambda code for Slack notifications
 data "archive_file" "slack_notifier" {
-  count       = var.slack_webhook_url != "" ? 1 : 0
+  count       = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   type        = "zip"
   output_path = "${path.module}/slack_notifier.zip"
   
@@ -157,7 +171,7 @@ EOF
 
 # IAM role for Slack notifier Lambda
 resource "aws_iam_role" "slack_notifier" {
-  count = var.slack_webhook_url != "" ? 1 : 0
+  count = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   name  = "${var.project_name}-${var.environment}-slack-notifier-role"
 
   assume_role_policy = jsonencode({
@@ -178,7 +192,7 @@ resource "aws_iam_role" "slack_notifier" {
 
 # IAM policy for Slack notifier Lambda
 resource "aws_iam_role_policy" "slack_notifier" {
-  count = var.slack_webhook_url != "" ? 1 : 0
+  count = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   name  = "${var.project_name}-${var.environment}-slack-notifier-policy"
   role  = aws_iam_role.slack_notifier[0].id
 
@@ -200,7 +214,7 @@ resource "aws_iam_role_policy" "slack_notifier" {
 
 # SNS subscription for Slack Lambda
 resource "aws_sns_topic_subscription" "slack" {
-  count     = var.slack_webhook_url != "" ? 1 : 0
+  count     = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   topic_arn = aws_sns_topic.alerts.arn
   protocol  = "lambda"
   endpoint  = aws_lambda_function.slack_notifier[0].arn
@@ -208,7 +222,7 @@ resource "aws_sns_topic_subscription" "slack" {
 
 # Lambda permission for SNS
 resource "aws_lambda_permission" "sns_slack" {
-  count         = var.slack_webhook_url != "" ? 1 : 0
+  count         = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.slack_notifier[0].function_name
@@ -225,7 +239,7 @@ resource "aws_sns_topic" "deployments" {
 
 # Lambda function for deployment notifications
 resource "aws_lambda_function" "deployment_notifier" {
-  count            = var.slack_webhook_url != "" ? 1 : 0
+  count            = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   filename         = data.archive_file.deployment_notifier[0].output_path
   function_name    = "${var.project_name}-${var.environment}-deployment-notifier"
   role            = aws_iam_role.deployment_notifier[0].arn
@@ -247,7 +261,7 @@ resource "aws_lambda_function" "deployment_notifier" {
 
 # Lambda code for deployment notifications
 data "archive_file" "deployment_notifier" {
-  count       = var.slack_webhook_url != "" ? 1 : 0
+  count       = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   type        = "zip"
   output_path = "${path.module}/deployment_notifier.zip"
   
@@ -342,7 +356,7 @@ EOF
 
 # IAM role for deployment notifier Lambda
 resource "aws_iam_role" "deployment_notifier" {
-  count = var.slack_webhook_url != "" ? 1 : 0
+  count = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   name  = "${var.project_name}-${var.environment}-deployment-notifier-role"
 
   assume_role_policy = jsonencode({
@@ -363,7 +377,7 @@ resource "aws_iam_role" "deployment_notifier" {
 
 # IAM policy for deployment notifier Lambda
 resource "aws_iam_role_policy" "deployment_notifier" {
-  count = var.slack_webhook_url != "" ? 1 : 0
+  count = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   name  = "${var.project_name}-${var.environment}-deployment-notifier-policy"
   role  = aws_iam_role.deployment_notifier[0].id
 
@@ -385,7 +399,7 @@ resource "aws_iam_role_policy" "deployment_notifier" {
 
 # SNS subscription for deployment notifications
 resource "aws_sns_topic_subscription" "deployment_slack" {
-  count     = var.slack_webhook_url != "" ? 1 : 0
+  count     = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   topic_arn = aws_sns_topic.deployments.arn
   protocol  = "lambda"
   endpoint  = aws_lambda_function.deployment_notifier[0].arn
@@ -393,7 +407,7 @@ resource "aws_sns_topic_subscription" "deployment_slack" {
 
 # Lambda permission for deployment notifications
 resource "aws_lambda_permission" "sns_deployment" {
-  count         = var.slack_webhook_url != "" ? 1 : 0
+  count         = var.slack_webhook_url != null && var.slack_webhook_url != "" ? 1 : 0
   statement_id  = "AllowExecutionFromSNSDeployment"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.deployment_notifier[0].function_name

@@ -263,9 +263,9 @@ resource "aws_wafv2_web_acl" "main" {
   }
 }
 
-# Enhanced CloudWatch Log Group with longer retention for production
+# Enhanced CloudWatch Log Group with simpler naming - FIXED
 resource "aws_cloudwatch_log_group" "waf" {
-  name              = "/aws/wafv2/cineverse-${var.environment}-waf"
+  name              = "/aws/wafv2/cineverse-${var.environment}-waf-logs"  # CHANGED: Simpler name
   retention_in_days = var.is_production ? 90 : var.log_retention_days
   
   provider = aws.us_east_1
@@ -273,16 +273,52 @@ resource "aws_cloudwatch_log_group" "waf" {
   tags = var.tags
 }
 
-# Enhanced WAF Logging Configuration - FIXED
+# CloudWatch Log Resource Policy for WAF - MOVED BEFORE logging config
+data "aws_caller_identity" "current" {
+  provider = aws.us_east_1
+}
+
+resource "aws_cloudwatch_log_resource_policy" "waf_logging" {
+  policy_name = "AWSWAFLoggingPolicy-${var.environment}-${random_string.policy_suffix.result}"
+
+  policy_document = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "delivery.logs.amazonaws.com"
+        },
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/aws/wafv2/*:*"
+      }
+    ]
+  })
+
+  provider = aws.us_east_1
+}
+
+# Random suffix for policy name uniqueness
+resource "random_string" "policy_suffix" {
+  length  = 8
+  special = false
+  upper   = false
+}
+
+# Enhanced WAF Logging Configuration - with correct dependencies
 resource "aws_wafv2_web_acl_logging_configuration" "main" {
   resource_arn            = aws_wafv2_web_acl.main.arn
-  log_destination_configs = ["${aws_cloudwatch_log_group.waf.arn}:*"]  # FIXED: Added ":*" suffix
+  log_destination_configs = ["${aws_cloudwatch_log_group.waf.arn}:*"]
 
   provider = aws.us_east_1
 
   depends_on = [
     aws_wafv2_web_acl.main,
-    aws_cloudwatch_log_group.waf
+    aws_cloudwatch_log_group.waf,
+    aws_cloudwatch_log_resource_policy.waf_logging  # Ensure policy exists first
   ]
 
   redacted_fields {
@@ -310,32 +346,4 @@ resource "aws_wafv2_web_acl_logging_configuration" "main" {
   lifecycle {
     create_before_destroy = true
   }
-}
-
-# CloudWatch Log Resource Policy for WAF
-data "aws_caller_identity" "current" {
-  provider = aws.us_east_1
-}
-
-resource "aws_cloudwatch_log_resource_policy" "waf_logging" {
-  policy_name = "AWSWAFLoggingPolicy-${var.environment}"
-
-  policy_document = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "delivery.logs.amazonaws.com"
-        },
-        Action = [
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ],
-        Resource = "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/aws/wafv2/*:*"
-      }
-    ]
-  })
-
-  provider = aws.us_east_1
 }
