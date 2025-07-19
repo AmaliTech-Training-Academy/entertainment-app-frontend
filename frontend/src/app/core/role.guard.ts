@@ -16,14 +16,18 @@ export const RoleGuard: CanActivateFn = (route, state) => {
   try {
     const user = JSON.parse(decodeURIComponent(userStr));
     const requiredRole = route.data?.['role'];
-    if (requiredRole && Array.isArray(user.roles) && user.roles.includes(requiredRole)) {
+    if (
+      requiredRole === 'ROLE_ADMINISTRATOR' &&
+      Array.isArray(user.roles) &&
+      user.roles.includes('ROLE_ADMINISTRATOR')
+    ) {
       return true;
     } else {
-      window.location.href = '/login';
+      window.location.href = '/'; // Redirect to home if not authorized
       return false;
     }
   } catch (e) {
-    window.location.href = '/login';
+    window.location.href = '/'; // Redirect to home on error
     return false;
   }
 };
