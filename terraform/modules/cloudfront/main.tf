@@ -228,6 +228,12 @@ resource "aws_cloudfront_distribution" "website" {
   }
 
   tags = var.tags
+
+  # Ensure logging bucket is properly configured before creating distribution
+  depends_on = [
+    aws_s3_bucket_ownership_controls.cloudfront_logs,
+    aws_s3_bucket_acl.cloudfront_logs
+  ]
 }
 
 # S3 bucket for CloudFront access logs
@@ -238,6 +244,25 @@ resource "aws_s3_bucket" "cloudfront_logs" {
   tags = merge(var.tags, {
     Purpose = "cloudfront-access-logs"
   })
+}
+
+# ADDED: S3 bucket ownership controls - Required for ACL configuration
+resource "aws_s3_bucket_ownership_controls" "cloudfront_logs" {
+  count  = var.enable_access_logging ? 1 : 0
+  bucket = aws_s3_bucket.cloudfront_logs[0].id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+# ADDED: S3 bucket ACL - Required for CloudFront logging
+resource "aws_s3_bucket_acl" "cloudfront_logs" {
+  count      = var.enable_access_logging ? 1 : 0
+  bucket     = aws_s3_bucket.cloudfront_logs[0].id
+  acl        = "private"
+  
+  depends_on = [aws_s3_bucket_ownership_controls.cloudfront_logs]
 }
 
 resource "aws_s3_bucket_public_access_block" "cloudfront_logs" {
