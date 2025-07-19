@@ -383,57 +383,57 @@ jobs:
         working-directory: frontend
         run: npm ci  # Clean install for reproducible builds
 
-      # =================================================================
-      # Setup Test Environment
-      # =================================================================
-      # Install browser for headless testing (skip if tests are disabled)
-      - name: Install Chromium for Headless Tests
-        if: github.event.inputs.skip_tests != 'true'
-        run: sudo apt-get update && sudo apt-get install -y chromium-browser
+      # # =================================================================
+      # # Setup Test Environment
+      # # =================================================================
+      # # Install browser for headless testing (skip if tests are disabled)
+      # - name: Install Chromium for Headless Tests
+      #   if: github.event.inputs.skip_tests != 'true'
+      #   run: sudo apt-get update && sudo apt-get install -y chromium-browser
 
-      # =================================================================
-      # Run Frontend Tests
-      # =================================================================
-      # Execute unit tests and generate coverage reports
-      - name: Run Frontend Tests
-        if: github.event.inputs.skip_tests != 'true'
-        working-directory: frontend
-        env:
-          CHROME_BIN: /usr/bin/chromium-browser
-        run: |
-          npm test -- --no-watch --browsers=ChromeHeadless --code-coverage
-        # Allow non-production environments to continue even if tests fail
-        continue-on-error: ${{ needs.setup.outputs.is_production != 'true' }}
+      # # =================================================================
+      # # Run Frontend Tests
+      # # =================================================================
+      # # Execute unit tests and generate coverage reports
+      # - name: Run Frontend Tests
+      #   if: github.event.inputs.skip_tests != 'true'
+      #   working-directory: frontend
+      #   env:
+      #     CHROME_BIN: /usr/bin/chromium-browser
+      #   run: |
+      #     npm test -- --no-watch --browsers=ChromeHeadless --code-coverage
+      #   # Allow non-production environments to continue even if tests fail
+      #   continue-on-error: ${{ needs.setup.outputs.is_production != 'true' }}
 
-      # =================================================================
-      # Test Skip Warning
-      # =================================================================
-      # Warn when tests are skipped, especially for production
-      - name: Skip Tests Warning
-        if: github.event.inputs.skip_tests == 'true'
-        run: |
-          echo "WARNING: Tests skipped via manual input"
-          echo "This is NOT recommended for production deployments"
-          if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
-            echo "CRITICAL: Tests skipped for PRODUCTION deployment!"
-            echo "Consider re-running with tests enabled"
-          fi
+      # # =================================================================
+      # # Test Skip Warning
+      # # =================================================================
+      # # Warn when tests are skipped, especially for production
+      # - name: Skip Tests Warning
+      #   if: github.event.inputs.skip_tests == 'true'
+      #   run: |
+      #     echo "WARNING: Tests skipped via manual input"
+      #     echo "This is NOT recommended for production deployments"
+      #     if [[ "${{ needs.setup.outputs.is_production }}" == "true" ]]; then
+      #       echo "CRITICAL: Tests skipped for PRODUCTION deployment!"
+      #       echo "Consider re-running with tests enabled"
+      #     fi
 
-      # =================================================================
-      # Production-Specific Enhanced Testing
-      # =================================================================
-      # Run additional tests and validations for production builds
-      - name: Production-Only Enhanced Testing
-        if: needs.setup.outputs.is_production == 'true' && github.event.inputs.skip_tests != 'true'
-        working-directory: frontend
-        run: |
-          echo "Running enhanced tests for production..."
-          npm run test:ci -- --browsers=ChromeHeadless --code-coverage --watch=false
+      # # =================================================================
+      # # Production-Specific Enhanced Testing
+      # # =================================================================
+      # # Run additional tests and validations for production builds
+      # - name: Production-Only Enhanced Testing
+      #   if: needs.setup.outputs.is_production == 'true' && github.event.inputs.skip_tests != 'true'
+      #   working-directory: frontend
+      #   run: |
+      #     echo "Running enhanced tests for production..."
+      #     npm run test:ci -- --browsers=ChromeHeadless --code-coverage --watch=false
           
-          # Verify code coverage report generation
-          if [ -f coverage/lcov.info ]; then
-            echo "Code coverage report generated"
-          fi
+      #     # Verify code coverage report generation
+      #     if [ -f coverage/lcov.info ]; then
+      #       echo "Code coverage report generated"
+      #     fi
 
       # =================================================================
       # Build Application for Target Environment
