@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Comment } from '../../../shared/components/comments';
+import { Comment, CommentPost } from '../../../shared/components/comments';
 import { ErrorHandlerService } from '../error-handler/error-handler.service';
 
 interface CommentApiResponse {
@@ -18,16 +18,20 @@ interface CommentApiResponse {
   providedIn: 'root',
 })
 export class CommentService {
-  private apiUrl = environment.apiUrl;
+  // private apiUrl = 'https://d101mapcha7bof.cloudfront.net';
+  private readonly apiUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com';
 
   constructor(
     private http: HttpClient,
     private errorHandler: ErrorHandlerService,
   ) {}
 
-  getCommentsByMediaId(mediaId: number): Observable<CommentApiResponse> {
-    return this.http
-      .get<CommentApiResponse>(`${this.apiUrl}/api/v1/comments/media/${mediaId}`)
-      .pipe(catchError((error) => this.errorHandler.handleHttpError(error)));
+  postComment(mediaId: number, comment: CommentPost): Observable<CommentApiResponse> {
+    return this.http.post<CommentApiResponse>(
+      `${this.apiUrl}/api/v1/comments/media/${mediaId}`,
+      comment
+    ).pipe(
+      catchError((error) => this.errorHandler.handleHttpError(error))
+    );
   }
 }

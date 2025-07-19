@@ -1,20 +1,15 @@
 <div class="detail-page-container">
   <div class="detail-header-section">
     <img
-      src="https://www.istockphoto.com/resources/images/PhotoFTLP/NatureLandscapes-519760984.jpg"
+      [src]="thumbnailUrl"
       alt="Show Poster"
       class="detail-header-image"
     />
     <div class="detail-header-text">
-      <h1 class="detail-header-title">Breaking Bad</h1>
+      <h1 class="detail-header-title">{{ title }}</h1>
       <h6 class="detail-header-subtitle">Plot Summary</h6>
       <p class="detail-header-content">
-        Walter White, a high school chemistry teacher who, after being diagnosed with terminal lung
-        cancer, partners with a former student, Jesse Pinkman, to manufacture and sell
-        methamphetamine. Driven by a need to provide for his family after his death, Walter
-        transforms from a mild-mannered teacher into a ruthless drug kingpin known as Heisenberg,
-        navigating the dangerous criminal underworld while battling his illness and internal
-        conflicts.
+        {{ synopsis }}
       </p>
     </div>
   </div>
@@ -32,10 +27,10 @@
       <div class="comments-list">
         <app-comment-card
           *ngFor="let comment of comments"
-          [imageUrl]="comment.avatar"
-          [name]="comment.user"
-          [dateTime]="comment.date"
-          [description]="comment.text"
+          [imageUrl]="'assets/images/profile.jpg'"
+          [name]="comment.username || 'User'"
+          [dateTime]="comment.timestamp || ''"
+          [description]="comment.comment"
         ></app-comment-card>
       </div>
 
@@ -44,8 +39,12 @@
       </ng-container>
       <ng-template #commentInput>
         <div class="comment-input-card">
-          <img [src]="user.avatar" alt="User avatar" class="avatar" />
-          <input [(ngModel)]="commentText" type="text" placeholder="Write a comment..." />
+          <img [src]="user?.avatar || 'assets/images/profile.jpg'" alt="User avatar" class="avatar" />
+          <input
+            [(ngModel)]="commentText"
+            type="text"
+            placeholder="Write a comment..."
+          />
           <div class="input-actions">
             <button mat-icon-button class="cancel-btn" (click)="cancelComment()">
               <mat-icon>cancel</mat-icon>

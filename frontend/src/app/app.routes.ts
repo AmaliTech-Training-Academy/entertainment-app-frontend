@@ -17,9 +17,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/detail-page/detail.page').then((m) => m.DetailPage),
       },
       {
-        path: 'profile',
-        loadComponent: () => import('./pages/profile-page/profile-page.component').then((m) => m.ProfilePageComponent),
-        canActivate: [AuthGuard],
+        path: 'media/detail/:id',
+        loadComponent: () =>
+          import('./pages/detail-page/detail.page').then(
+            (m) => m.DetailPage,
+          ),
       },
       {
         path: 'user/dashboard',
