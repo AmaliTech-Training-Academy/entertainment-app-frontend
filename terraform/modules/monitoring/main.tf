@@ -8,6 +8,105 @@ terraform {
   }
 }
 
+# Local values for dashboard widgets - FIXED
+locals {
+  base_widgets = [
+    {
+      type   = "metric"
+      x      = 0
+      y      = 0
+      width  = 12
+      height = 6
+
+      properties = {
+        metrics = [
+          ["AWS/CloudFront", "Requests", "DistributionId", var.cloudfront_distribution_id],
+          [".", "BytesDownloaded", ".", "."],
+          [".", "BytesUploaded", ".", "."],
+          [".", "4xxErrorRate", ".", "."],
+          [".", "5xxErrorRate", ".", "."]
+        ]
+        view    = "timeSeries"
+        stacked = false
+        region  = var.aws_region
+        title   = "CloudFront Metrics Overview"
+        period  = var.monitoring_period
+        stat    = "Average"
+      }
+    },
+    {
+      type   = "metric"
+      x      = 0
+      y      = 6
+      width  = 6
+      height = 6
+
+      properties = {
+        metrics = [
+          ["AWS/CloudFront", "CacheHitRate", "DistributionId", var.cloudfront_distribution_id]
+        ]
+        view    = "timeSeries"
+        stacked = false
+        region  = var.aws_region
+        title   = "Cache Performance"
+        period  = var.monitoring_period
+        stat    = "Average"
+        yAxis = {
+          left = {
+            min = 0
+            max = 100
+          }
+        }
+      }
+    },
+    {
+      type   = "metric"
+      x      = 6
+      y      = 6
+      width  = 6
+      height = 6
+
+      properties = {
+        metrics = [
+          ["AWS/CloudFront", "OriginLatency", "DistributionId", var.cloudfront_distribution_id]
+        ]
+        view    = "timeSeries"
+        stacked = false
+        region  = var.aws_region
+        title   = "Origin Latency"
+        period  = var.monitoring_period
+        stat    = "Average"
+      }
+    }
+  ]
+
+  rum_widgets = var.enable_rum ? [
+    {
+      type   = "metric"
+      x      = 0
+      y      = 12
+      width  = 12
+      height = 6
+
+      properties = {
+        metrics = [
+          ["AWS/RUM", "JsErrorCount", "application_name", "${var.project_name}-${var.environment}-rum"],
+          [".", "PageLoadTime", ".", "."],
+          [".", "HttpErrorCount", ".", "."]
+        ]
+        view    = "timeSeries"
+        stacked = false
+        region  = "us-east-1"
+        title   = "Real User Monitoring (RUM)"
+        period  = var.monitoring_period
+        stat    = "Sum"
+      }
+    }
+  ] : []
+
+  all_widgets = concat(local.base_widgets, local.rum_widgets)
+}
+
 # CloudWatch RUM Application Monitor (production feature)
 resource "aws_rum_app_monitor" "main" {
   count  = var.enable_rum ? 1 : 0
@@ -29,100 +128,12 @@ resource "aws_rum_app_monitor" "main" {
   provider = aws.us_east_1
 }
 
-# Enhanced CloudWatch Dashboard
+# Enhanced CloudWatch Dashboard - FIXED
 resource "aws_cloudwatch_dashboard" "main" {
   dashboard_name = "${var.project_name}-${var.environment}-frontend"
 
   dashboard_body = jsonencode({
-    widgets = [
-      {
-        type   = "metric"
-        x      = 0
-        y      = 0
-        width  = 12
-        height = 6
-
-        properties = {
-          metrics = [
-            ["AWS/CloudFront", "Requests", "DistributionId", var.cloudfront_distribution_id],
-            [".", "BytesDownloaded", ".", "."],
-            [".", "BytesUploaded", ".", "."],
-            [".", "4xxErrorRate", ".", "."],
-            [".", "5xxErrorRate", ".", "."]
-          ]
-          view    = "timeSeries"
-          stacked = false
-          region  = var.aws_region
-          title   = "CloudFront Metrics Overview"
-          period  = var.monitoring_period
-          stat    = "Average"
-        }
-      },
-      {
-        type   = "metric"
-        x      = 0
-        y      = 6
-        width  = 6
-        height = 6
-
-        properties = {
-          metrics = [
-            ["AWS/CloudFront", "CacheHitRate", "DistributionId", var.cloudfront_distribution_id]
-          ]
-          view    = "timeSeries"
-          stacked = false
-          region  = var.aws_region
-          title   = "Cache Performance"
-          period  = var.monitoring_period
-          stat    = "Average"
-          yAxis = {
-            left = {
-              min = 0
-              max = 100
-            }
-          }
-        }
-      },
-      {
-        type   = "metric"
-        x      = 6
-        y      = 6
-        width  = 6
-        height = 6
-
-        properties = {
-          metrics = [
-            ["AWS/CloudFront", "OriginLatency", "DistributionId", var.cloudfront_distribution_id]
-          ]
-          view    = "timeSeries"
-          stacked = false
-          region  = var.aws_region
-          title   = "Origin Latency"
-          period  = var.monitoring_period
-          stat    = "Average"
-        }
-      }
-    ] + (var.enable_rum ? [{
-      type   = "metric"
-      x      = 0
-      y      = 12
-      width  = 12
-      height = 6
-
-      properties = {
-        metrics = [
-          ["AWS/RUM", "JsErrorCount", "application_name", "${var.project_name}-${var.environment}-rum"],
-          [".", "PageLoadTime", ".", "."],
-          [".", "HttpErrorCount", ".", "."]
-        ]
-        view    = "timeSeries"
-        stacked = false
-        region  = "us-east-1"
-        title   = "Real User Monitoring (RUM)"
-        period  = var.monitoring_period
-        stat    = "Sum"
-      }
-    }] : [])
+    widgets = local.all_widgets
   })
 }
 
@@ -325,8 +336,8 @@ resource "aws_s3_bucket_policy" "cloudtrail" {
   })
 }
 
-# Custom application health check using CloudWatch Synthetics
-resource "aws_cloudwatch_synthetic_canary" "health_check" {
+# Custom application health check using CloudWatch Synthetics - FIXED
+resource "aws_synthetics_canary" "health_check" {
   count                = var.environment == "prod" ? 1 : 0
   name                 = "${var.project_name}-${var.environment}-health-check"
   artifact_s3_location = "s3://${aws_s3_bucket.canary_artifacts[0].bucket}/canary-artifacts"

@@ -193,6 +193,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "cloudfront_logs" {
     id     = "cloudfront_log_retention"
     status = "Enabled"
 
+    filter {
+      prefix = ""
+    }
+
     expiration {
       days = var.environment == "prod" ? 365 : 90
     }
