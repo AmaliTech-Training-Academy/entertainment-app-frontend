@@ -65,10 +65,10 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () => import('./features/admin-dashboard/admin-dashboard.component').then((m) => m.AdminDashboardComponent),
       },
-      // {
-      //   path: 'users',
-      //   loadComponent: () => import('./components/user-management/user-management.component').then((m) => m.UserManagementComponent),
-      // },
+       {
+         path: 'users',
+         loadComponent: () => import('./features/admin-user/admin-user.component').then((m) => m.AdminUserComponent),
+       },
       {
         path: 'content',
         loadComponent: () => import('./features/admin-content/admin-content.component').then((m) => m.AdminContentComponent),
