@@ -17,3 +17,4 @@ export interface TrendingMediaResponse {
   message: string | null;
   timestamp: string;
 }
+

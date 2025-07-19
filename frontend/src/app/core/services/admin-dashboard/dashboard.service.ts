@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 
 import { TrendingMediaResponse } from '../../../models/trending-media.model.js';
 import { AdminMetricsResponse } from '../../../models/admin-metrics.model.js';
+import { MediaListing } from '../../../models/media-listing.model.js';
 
 
 @Injectable({
@@ -23,4 +24,9 @@ export class DashboardService {
   getTrendingMedia(): Observable<TrendingMediaResponse> {
     return this.http.get<TrendingMediaResponse>(`${this.base_Url}/media/trending-now`);
   }
+
+  getMediaListings(): Observable<{ data: { content: MediaListing[] } }> {
+    return this.http.get<{ data: { content: MediaListing[] } }>(`${this.base_Url}/media/listings`);
+  }
 }
+

@@ -1,49 +1,64 @@
 <!-- pages/admin-dashboard/admin-dashboard.component.html -->
 <div class="dashboard">
   <!-- Stat cards -->
-  <div class="stat-card">
-    <h2>Total Users</h2>
-    <p>{{ metrics?.userCount || 0 }}</p>
+  <div class="stat-cards">
+    <div class="stat-card">
+      <h2>Total Users</h2>
+      <p>{{ metrics?.userCount || 0 }}</p>
+    </div>
+    <div class="stat-card">
+      <h2>Total Media</h2>
+      <p>{{ metrics?.mediaCount || 0 }}</p>
+    </div>
   </div>
-  <div class="stat-card">
-    <h2>Total Media</h2>
-    <p>{{ metrics?.mediaCount || 0 }}</p>
-  </div>
-</div>
 
-<!-- Trending Media Section -->
-<div class="trending-section">
-  <h2 class="section-title">🔥 Trending Media</h2>
-  <div class="trending-grid">
-    <div class="media-card" *ngFor="let item of trending">
-      <!-- <img [src]="item.thumbnailUrl" [alt]="item.title" /> -->
-      <div class="overlay">
-        <h3>{{ item.title }}</h3>
-        <p>{{ item.releaseYear }} • {{ item.genres.join(', ') }}</p>
-        <span class="rating">⭐ {{ item.averageRating }}</span>
+  <!-- Trending Media Section -->
+  <div class="trending-section">
+    <h2 class="section-title">🔥 Trending Media</h2>
+    <div class="trending-grid">
+      <div class="media-card" *ngFor="let item of trending">
+        <!-- <img [src]="item.thumbnailUrl" [alt]="item.title" /> -->
+        <div class="overlay">
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.releaseYear }} • {{ item.genres.join(', ') }}</p>
+          <span class="rating">⭐ {{ item.averageRating }}</span>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Top Rated Chart -->
+  <div class="chart-wrapper">
+    <h2 class="section-title">⭐ Top Rated Trending</h2>
+    <ngx-charts-bar-vertical
+      [view]="[700, 400]"
+      [scheme]="colorScheme"
+      [results]="trendingChartData"
+      [gradient]="false"
+      [xAxis]="true"
+      [yAxis]="true"
+      [legend]="false"
+      [showXAxisLabel]="true"
+      [showYAxisLabel]="true"
+      [xAxisLabel]="'Movie'"
+      [yAxisLabel]="'Rating'"
+      [roundDomains]="true"
+    >
+    </ngx-charts-bar-vertical>
+  </div>
+
+  <!-- Top Genres Chart -->
+  <div class="chart-wrapper">
+    <h2 class="section-title">🎭 Top Genres</h2>
+    <ngx-charts-pie-chart
+      [results]="genreChartData"
+      [scheme]="colorScheme"
+      [legend]="true"
+      [labels]="true"
+      [doughnut]="true"
+      [explodeSlices]="false"
+      [animations]="true"
+    >
+    </ngx-charts-pie-chart>
+  </div>
 </div>
-
-<!-- Bar Chart: Top Rated -->
-<div class="chart-wrapper">
-  <h2 class="section-title">⭐ Top Rated Trending</h2>
-
-  <ngx-charts-bar-vertical
-    [view]="[700, 400]"
-    [scheme]="colorScheme"
-    [results]="chartData"
-    [gradient]="false"
-    [xAxis]="true"
-    [yAxis]="true"
-    [legend]="false"
-    [showXAxisLabel]="true"
-    [showYAxisLabel]="true"
-    [xAxisLabel]="'Movie'"
-    [yAxisLabel]="'Rating'"
-    [roundDomains]="true"
-  >
-  </ngx-charts-bar-vertical>
-</div>
-

@@ -2,115 +2,105 @@
 @use "sass:map";
 
 .dashboard {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
   padding: 2rem;
-  background-color: map-get($neutral-colors, 1000);
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  color: rebeccapurple;
 
-  .stat-card {
-    flex: 1 1 300px;
-    padding: 1.5rem;
-    border-radius: 2xl;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-    color: map-get($neutral-colors, 100);
-    text-align: center;
+  .stat-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: space-between;
 
-    h2 {
-      font-size: 1.5rem;
-      color: map-get($primary-colors, 100);
-    }
+    .stat-card {
+      flex: 1 1 200px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 1.5rem;
+      padding: 1.5rem 2rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
 
-    p {
-      font-size: 3rem;
-      font-weight: bold;
-      color: map-get($material-accent, 200);
-      margin: 0.5rem 0 0;
-    }
-  }
-}
-
-// pages/admin-dashboard/admin-dashboard.component.scss
-.trending-section {
-  margin-top: 3rem;
-  padding: 0 2rem;
-
-  .section-title {
-    font-size: 1.8rem;
-    color: map-get($primary-colors, 100);
-    margin-bottom: 1.5rem;
-  }
-
-  .trending-grid {
-    display: grid;
-    gap: 1.5rem;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
-
-  .media-card {
-    position: relative;
-    border-radius: 1rem;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: transform 0.3s ease;
-    cursor: pointer;
-
-    &:hover {
-      transform: scale(1.03);
-    }
-
-    img {
-      width: 100%;
-      height: 260px;
-      object-fit: cover;
-    }
-
-    .overlay {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      padding: 1rem;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-      color: map-get($neutral-colors, 100);
-
-      h3 {
-        font-size: 1rem;
-        font-weight: bold;
-        margin: 0;
+      h2 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: white;
       }
 
       p {
-        font-size: 0.85rem;
-        margin: 0.3rem 0;
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
       }
 
-      .rating {
-        font-size: 0.9rem;
-        color: map-get($yellow-colors, 100);
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
       }
     }
   }
-}
-
-.chart-wrapper {
-  margin-top: 3rem;
-  padding: 0 2rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 
   .section-title {
     font-size: 1.5rem;
-    color: map-get($primary-colors, 100);
-    margin: 1rem 0;
-    padding-left: 1rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 1rem;
+  }
+
+  .trending-section {
+    .trending-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+
+      .media-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 1rem;
+        padding: 1rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        color: white;
+
+        .overlay {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+
+          h3 {
+            font-size: 1rem;
+            font-weight: 600;
+          }
+
+          p {
+            font-size: 0.85rem;
+            color: gray;
+          }
+
+          .rating {
+            margin-top: auto;
+            font-size: 0.9rem;
+            color: yellow;
+            font-weight: bold;
+          }
+        }
+
+        &:hover {
+          transform: scale(1.03);
+          transition: all 0.3s ease;
+        }
+      }
+    }
+  }
+
+  .chart-wrapper {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
   }
 }
 
