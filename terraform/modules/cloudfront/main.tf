@@ -101,14 +101,92 @@ resource "aws_cloudfront_distribution" "website" {
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
 
-  # Cache behavior for images - CHANGED TO ALLOW HTTP
+  # FIXED: Separate cache behaviors for each image type
+  # Cache behavior for JPEG/JPG images
   ordered_cache_behavior {
-    path_pattern               = "*.{jpg,jpeg,png,gif,ico,svg,webp}"
+    path_pattern               = "*.jpg"
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "allow-all"  # CHANGED from "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"
+    cache_policy_id            = aws_cloudfront_cache_policy.images.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  ordered_cache_behavior {
+    path_pattern               = "*.jpeg"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-${var.s3_bucket_id}"
+    compress                   = true
+    viewer_protocol_policy     = "allow-all"
+    cache_policy_id            = aws_cloudfront_cache_policy.images.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Cache behavior for PNG images
+  ordered_cache_behavior {
+    path_pattern               = "*.png"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-${var.s3_bucket_id}"
+    compress                   = true
+    viewer_protocol_policy     = "allow-all"
+    cache_policy_id            = aws_cloudfront_cache_policy.images.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Cache behavior for GIF images
+  ordered_cache_behavior {
+    path_pattern               = "*.gif"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-${var.s3_bucket_id}"
+    compress                   = true
+    viewer_protocol_policy     = "allow-all"
+    cache_policy_id            = aws_cloudfront_cache_policy.images.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Cache behavior for ICO files (favicons)
+  ordered_cache_behavior {
+    path_pattern               = "*.ico"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-${var.s3_bucket_id}"
+    compress                   = true
+    viewer_protocol_policy     = "allow-all"
+    cache_policy_id            = aws_cloudfront_cache_policy.images.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Cache behavior for SVG images
+  ordered_cache_behavior {
+    path_pattern               = "*.svg"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-${var.s3_bucket_id}"
+    compress                   = true
+    viewer_protocol_policy     = "allow-all"
+    cache_policy_id            = aws_cloudfront_cache_policy.images.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Cache behavior for WebP images
+  ordered_cache_behavior {
+    path_pattern               = "*.webp"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-${var.s3_bucket_id}"
+    compress                   = true
+    viewer_protocol_policy     = "allow-all"
     cache_policy_id            = aws_cloudfront_cache_policy.images.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
@@ -184,7 +262,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_logs" 
   }
 }
 
-# Lifecycle for CloudFront logs
+# Lifecycle for CloudFront logs - FIXED
 resource "aws_s3_bucket_lifecycle_configuration" "cloudfront_logs" {
   count  = var.enable_access_logging ? 1 : 0
   bucket = aws_s3_bucket.cloudfront_logs[0].id
