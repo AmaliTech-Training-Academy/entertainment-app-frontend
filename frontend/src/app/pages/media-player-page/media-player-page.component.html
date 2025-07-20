@@ -1,2 +1,40 @@
-<app-media-player [videoUrl]="trailerUrl"></app-media-player>
-<app-comment-section></app-comment-section>
+<div class="media-player-container">
+  <!-- <button class="back-to-details-btn" (click)="goToDetails()">Back to Details</button> -->
+  <vg-player *ngIf="trailerUrl">
+    <video
+      #media
+      [vgMedia]="media"
+      id="singleVideo"
+      controls
+      preload="auto"
+      width="100%"
+      height="auto"
+    >
+      <source [src]="trailerUrl" type="video/mp4" />
+    </video>
+    <vg-controls></vg-controls>
+  </vg-player>
+  <div *ngIf="!trailerUrl" class="video-error">Trailer not available</div>
+
+  <div class="trending-section">
+    <h2 class="trending-title">Trending Now</h2>
+    <div class="trending-movies-grid">
+      <app-trending-movie-card
+        *ngFor="let movie of paginatedTrendingMovies; let i = index"
+        [rank]="(currentPage - 1) * moviesPerPage + i + 1"
+        [image]="movie.thumbnailUrl"
+        [alt]="movie.title"
+        [mediaId]="movie.mediaId"
+      ></app-trending-movie-card>
+    </div>
+    <div class="pagination-controls" *ngIf="totalPages > 1">
+      <button
+        *ngFor="let page of [].constructor(totalPages); let i = index"
+        [class.active]="currentPage === i + 1"
+        (click)="goToPage(i + 1)"
+      >
+        {{ i + 1 }}
+      </button>
+    </div>
+  </div>
+</div>
