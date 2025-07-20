@@ -3,6 +3,10 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
+import { SearchSkeletonComponent } from '../../shared/components/search-skeleton/search-skeleton.component';
+import { TrendingMoviesService } from '../../core/services/home-content/movies.service';
+import { Subject, of } from 'rxjs';
+import { debounceTime, switchMap } from 'rxjs/operators';
 
 interface SearchMovie {
   rank: number;
@@ -14,33 +18,16 @@ interface SearchMovie {
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, AvatarComponent, RouterModule],
+  imports: [CommonModule, ButtonComponent, AvatarComponent, RouterModule, SearchSkeletonComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent {
   searchQuery = '';
   showDropdown = false;
-  searchResults: SearchMovie[] = [
-    {
-      rank: 1,
-      image: 'https://images.unsplash.com/photo-1752350434950-50e8df9c268e?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      alt: 'Beyond Earth',
-      year: 1995,
-    },
-    {
-      rank: 2,
-      image: 'https://images.unsplash.com/photo-1752350434950-50e8df9c268e?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      alt: 'Beyond Earth',
-      year: 1995,
-    },
-    {
-      rank: 3,
-      image: 'https://images.unsplash.com/photo-1752350434950-50e8df9c268e?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      alt: 'Beyond Earth',
-      year: 1995,
-    },
-  ];
+  searchResults: any[] = [];
+  loading = false;
+  private searchSubject = new Subject<string>();
   isAuthenticated = false;
   user: { email: string; name: string; avatar: string; roles?: string[] } | null = null;
   showUserDropdown = false;
@@ -49,10 +36,27 @@ export class NavbarComponent {
   constructor(
     private router: Router,
     private eRef: ElementRef,
+    private moviesService: TrendingMoviesService,
   ) {}
 
   ngOnInit() {
     this.checkAuth();
+    this.searchSubject
+      .pipe(
+        debounceTime(300),
+        switchMap((query) => {
+          if (!query) {
+            this.loading = false;
+            return of({ data: [] });
+          }
+          this.loading = true;
+          return this.moviesService.searchMovies({ title: query });
+        }),
+      )
+      .subscribe((res: any) => {
+        this.searchResults = res?.data || [];
+        this.loading = false;
+      });
   }
 
   checkAuth() {
@@ -93,8 +97,8 @@ export class NavbarComponent {
   onSearchInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.searchQuery = value;
-    // TODO: Implement real search logic here
     this.showDropdown = !!value;
+    this.searchSubject.next(value);
   }
 
   isAdmin(): boolean {
@@ -111,6 +115,11 @@ export class NavbarComponent {
 
   goToUserDashboard() {
     this.router.navigate(['/user-test']);
+  }
+
+  goToDetail(mediaId: number) {
+    this.router.navigate([`/media/detail/${mediaId}`]);
+    this.showDropdown = false;
   }
 
   @HostListener('document:click', ['$event'])

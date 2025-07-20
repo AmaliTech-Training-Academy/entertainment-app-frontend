@@ -52,30 +52,42 @@
         />
       </span>
       <div class="search-dropdown" *ngIf="showDropdown">
-        <ng-container *ngIf="searchResults.length; else noResults">
+        <ng-container *ngIf="loading; else resultsBlock">
           <div class="search-dropdown__results">
-            <ng-container *ngFor="let movie of searchResults; let last = last">
-              <div class="search-dropdown__movie-card">
-                <img [src]="movie.image" [alt]="movie.alt" class="search-dropdown__movie-img" />
-                <div class="search-dropdown__movie-info">
-                  <div class="search-dropdown__movie-title">{{ movie.alt }}</div>
-                  <div class="search-dropdown__movie-year">{{ movie.year }}</div>
-                </div>
-              </div>
-              <div *ngIf="!last" class="search-dropdown__divider"></div>
-            </ng-container>
+            <app-search-skeleton *ngFor="let s of [1, 2, 3]"></app-search-skeleton>
           </div>
         </ng-container>
-        <ng-template #noResults>
-          <div class="search-dropdown__no-results">No results found.</div>
+        <ng-template #resultsBlock>
+          <ng-container *ngIf="searchResults.length; else noResults">
+            <div class="search-dropdown__results">
+              <ng-container *ngFor="let movie of searchResults; let last = last">
+                <div class="search-dropdown__movie-card" (click)="goToDetail(movie.mediaId)">
+                  <img
+                    [src]="movie.imgError ? 'assets/images/search.svg' : movie.thumbnailUrl"
+                    [alt]="movie.title"
+                    class="search-dropdown__movie-img"
+                    (error)="movie.imgError = true"
+                  />
+                  <div class="search-dropdown__movie-info">
+                    <div class="search-dropdown__movie-title">{{ movie.title }}</div>
+                    <div class="search-dropdown__movie-year">
+                      {{ movie.releaseDate | date: 'yyyy' }}
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="!last" class="search-dropdown__divider"></div>
+              </ng-container>
+            </div>
+          </ng-container>
+          <ng-template #noResults>
+            <div class="search-dropdown__no-results">No results found.</div>
+          </ng-template>
         </ng-template>
       </div>
     </div>
     <div class="navbar__actions">
       <ng-container *ngIf="!isAuthenticated; else userMenu">
-        <a class="navbar__sign-in" routerLink="login"
-          >Sign In</a
-        >
+        <a class="navbar__sign-in" routerLink="login">Sign In</a>
         <app-button type="primary" size="medium" routerLink="signup">Sign Up</app-button>
       </ng-container>
       <ng-template #userMenu>

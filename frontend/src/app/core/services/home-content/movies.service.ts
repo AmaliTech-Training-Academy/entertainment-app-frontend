@@ -21,14 +21,42 @@ export interface TrendingMoviesResponse {
   timestamp: string;
 }
 
+export interface SearchMovie {
+  mediaId: number;
+  mediaType: string;
+  title: string;
+  synopsis: string;
+  url: string;
+  releaseDate: string;
+  duration: number;
+  thumbnailUrl: string;
+  trailer: string;
+  language: string;
+  genreNames: string[];
+  actorNames: string[];
+}
+
+export interface SearchMoviesResponse {
+  data: SearchMovie[];
+  status: number;
+  success: boolean;
+  error: string[];
+  message: string;
+  timestamp: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TrendingMoviesService {
-  private readonly apiUrl =
-    'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/media/trending-now';
+  private apiUrl = 'https://d101mapcha7bof.cloudfront.net';
+  // private apiUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api';
 
   private http = inject(HttpClient);
 
   getTrendingMovies(): Observable<TrendingMoviesResponse> {
-    return this.http.get<TrendingMoviesResponse>(this.apiUrl);
+    return this.http.get<TrendingMoviesResponse>(`${this.apiUrl}/v1/media/trending-now`);
+  }
+
+  searchMovies(params: { [key: string]: any }): Observable<SearchMoviesResponse> {
+    return this.http.get<SearchMoviesResponse>(`${this.apiUrl}/v1/media/search`, { params });
   }
 }

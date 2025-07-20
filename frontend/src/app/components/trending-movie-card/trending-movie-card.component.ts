@@ -16,6 +16,8 @@ export class TrendingMovieCardComponent {
   @Input() alt!: string;
   @Input() mediaId!: number;
 
+  imgError = false;
+
   router = inject(Router);
 
   navigateToMovie() {
