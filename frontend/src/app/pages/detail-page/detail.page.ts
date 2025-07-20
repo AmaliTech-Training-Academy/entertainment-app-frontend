@@ -59,6 +59,7 @@ export class DetailPage implements OnInit {
   title = '';
   synopsis = '';
   thumbnailUrl = '';
+  trailerUrl: string | null = null;
 
   private route = inject(ActivatedRoute);
   private commentService = inject(CommentService);
@@ -110,6 +111,8 @@ export class DetailPage implements OnInit {
         this.title = data.title;
         this.synopsis = data.synopsis;
         this.thumbnailUrl = data.thumbnailUrl;
+        this.trailerUrl = data.trailerUrl;
+        console.log('Trailer URL in details page:', this.trailerUrl);
       },
       error: () => {
         this.screenshots = [];
@@ -119,6 +122,7 @@ export class DetailPage implements OnInit {
         this.title = '';
         this.synopsis = '';
         this.thumbnailUrl = '';
+        this.trailerUrl = null;
       },
     });
   }
@@ -170,5 +174,12 @@ export class DetailPage implements OnInit {
 
   asNumber(val: unknown): number {
     return typeof val === 'number' ? val : 0;
+  }
+
+  goToTrailer() {
+    if (this.mediaId && this.trailerUrl) {
+      document.cookie = `trailerUrl=${encodeURIComponent(this.trailerUrl)}; path=/;`;
+      this.router.navigate(['/media', this.mediaId, 'player']);
+    }
   }
 }
