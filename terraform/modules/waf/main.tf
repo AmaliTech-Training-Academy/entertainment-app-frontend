@@ -8,10 +8,16 @@ terraform {
   }
 }
 
+resource "random_string" "waf_suffix" {
+  length  = 6
+  upper   = false
+  special = false
+}
+
 # WAF Web ACL with environment-specific unique name
 resource "aws_wafv2_web_acl" "main" {
   # count = var.enable_waf ? 1 : 0
-  name        = "cineverse-${var.project_name}-${var.environment}-waf"
+  name        = "cineverse-${var.project_name}-${var.environment}-waf-${random_string.waf_suffix.result}"
   description = "WAF for CineVerse ${var.environment} frontend"
   scope       = "CLOUDFRONT"
 
