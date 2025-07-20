@@ -392,35 +392,39 @@ jobs:
             -out="$ENVIRONMENT.tfplan" \
             -detailed-exitcode
           
-          PLAN_EXIT_CODE=$?
-          echo "plan_exitcode=$PLAN_EXIT_CODE" >> $GITHUB_OUTPUT
-          echo "DEBUG: Captured PLAN_EXIT_CODE: $PLAN_EXIT_CODE"
-          
-          if [[ $RESOURCE_COUNT -eq 0 ]]; then
+          # Determine plan_changes based on exit code and plan content
+          PLAN_HAS_CHANGES="false"
+          if [[ $RESOURCE_COUNT -eq 0 ]]; then # Special case for initial deployment with empty state
             echo "State is empty - forcing plan creation for initial deployment"
-            echo "plan_changes=true" >> $GITHUB_OUTPUT
-          elif [[ $PLAN_EXIT_CODE -eq 0 ]]; then
-            echo "No changes needed - infrastructure is up to date"
-            echo "plan_changes=false" >> $GITHUB_OUTPUT
-          elif [[ $PLAN_EXIT_CODE -eq 1 ]]; then
-            echo "Terraform plan failed"
-            echo "plan_changes=error" >> $GITHUB_OUTPUT
-            exit 1
+            PLAN_HAS_CHANGES="true"
           elif [[ $PLAN_EXIT_CODE -eq 2 ]]; then
-            echo "Changes detected - plan created successfully"
-            echo "plan_changes=true" >> $GITHUB_OUTPUT
-          else
+            echo "Changes detected via exit code (PLAN_EXIT_CODE=2)"
+            PLAN_HAS_CHANGES="true"
+          elif [[ $PLAN_EXIT_CODE -eq 0 ]]; then
+            echo "PLAN_EXIT_CODE is 0, checking plan file for actual changes..."
+            # Check for actual "create", "update", or "delete" actions in the JSON plan
+            if terraform show -json "$ENVIRONMENT.tfplan" | grep -q '\"actions\":\[\"create\"' || \
+               terraform show -json "$ENVIRONMENT.tfplan" | grep -q '\"actions\":\[\"update\"' || \
+               terraform show -json "$ENVIRONMENT.tfplan" | grep -q '\"actions\":\[\"delete\"'; then
+              echo "Actual changes (create/update/delete) found in plan file despite PLAN_EXIT_CODE=0."
+              PLAN_HAS_CHANGES="true"
+            else
+              echo "No actual changes (create/update/delete) found in plan file. Infrastructure is truly up to date."
+            fi
+          else # PLAN_EXIT_CODE -eq 1 (error) or other unexpected codes
             echo "Terraform plan failed with exit code $PLAN_EXIT_CODE"
-            echo "plan_changes=error" >> $GITHUB_OUTPUT
-            exit 1 
+            echo "plan_changes=error" >> $GITHUB_OUTPUT # Set output to error
+            exit 1 # Fail the job if plan fails
           fi
-          
+
           # Verify plan file exists
           if [[ -f "$ENVIRONMENT.tfplan" ]]; then
             echo "Plan file created: $ENVIRONMENT.tfplan"
           else
             echo "WARNING: Plan file $ENVIRONMENT.tfplan not created"
           fi
+
+          echo "plan_changes=$PLAN_HAS_CHANGES" >> $GITHUB_OUTPUT # Set the final output
 
           # Verify plan file exists and print its presence
           echo "DEBUG: Checking for plan file in terraform/ directory before upload..."
