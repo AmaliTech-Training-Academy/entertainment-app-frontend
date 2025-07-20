@@ -394,6 +394,7 @@ jobs:
           
           PLAN_EXIT_CODE=$?
           echo "plan_exitcode=$PLAN_EXIT_CODE" >> $GITHUB_OUTPUT
+          echo "DEBUG: Captured PLAN_EXIT_CODE: $PLAN_EXIT_CODE"
           
           if [[ $RESOURCE_COUNT -eq 0 ]]; then
             echo "State is empty - forcing plan creation for initial deployment"
@@ -408,6 +409,10 @@ jobs:
           elif [[ $PLAN_EXIT_CODE -eq 2 ]]; then
             echo "Changes detected - plan created successfully"
             echo "plan_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "Terraform plan failed with exit code $PLAN_EXIT_CODE"
+            echo "plan_changes=error" >> $GITHUB_OUTPUT
+            exit 1 
           fi
           
           # Verify plan file exists
@@ -422,6 +427,8 @@ jobs:
           ls -la "$ENVIRONMENT.tfplan" || echo "WARNING: Plan file $ENVIRONMENT.tfplan not found in terraform/ directory!"
           
           echo "DEBUG: plan_changes output from plan step: ${{ steps.plan.outputs.plan_changes }}" # Debug output
+          
+          echo "DEBUG: Final plan_changes output: $(cat $GITHUB_OUTPUT | grep plan_changes | cut -d'=' -f2)" # Debug output from file
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
