@@ -1,13 +1,12 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 @Component({
   selector: 'app-media-player',
   templateUrl: './media-player.component.html',
   styleUrls: ['./media-player.component.scss'],
 })
-export class MediaPlayerComponent {
-  // videoUrl= 'https://artlist.io/stock-footage/clip/car-parking-nervous-woman/6452580';
-  videoUrl = '/assets/videos/sample-video.mp4';
+export class MediaPlayerComponent implements OnChanges {
+  @Input() videoUrl: string | null = null;
   @ViewChild('mediaElement') mediaElement!: ElementRef<HTMLVideoElement>;
 
   isPlaying = false;
@@ -17,6 +16,13 @@ export class MediaPlayerComponent {
   playbackRate = 1;
   isFullscreen = false;
   videoError = '';
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['videoUrl'] && this.videoUrl && this.mediaElement) {
+      this.mediaElement.nativeElement.src = this.videoUrl;
+      this.mediaElement.nativeElement.load();
+    }
+  }
 
   ngAfterViewInit() {
     const video = this.mediaElement.nativeElement;

@@ -1,27 +1,33 @@
+export interface Screenshot {
+  screenshotId: number;
+  imageUrl: string;
+}
+
 export interface MediaDetails {
   mediaId: number;
-  mediaTypeEnum: string | null;
   title: string;
-  synopsis: string | null;
-  url: string | null;
-  trailer: string | null;
-  releaseDate: string;
-  genres: string[];
-  mimeType: string | null;
-  filename: string | null;
-  castMembers: string[];
-  ratings: number | null;
+  mediaType: string;
+  synopsis: string;
+  mediaUrl: string;
+  thumbnailUrl: string;
+  trailerUrl: string;
+  releaseYear: number;
   duration: number;
-  commentCount: number;
-  thumbnail_url: string | null;
-  language: string | null;
-  screenshots: string[];
-  created_at: string | null;
-  last_update_at: string | null;
-  episodes: string[];
+  language: string;
+  averageRating: number;
+  genres: string[];
+  episodeList: any[];
+  castMembers: any[];
+  reviews: any[];
+  comments: any[];
+  screenshots: Screenshot[];
 }
 
 export interface MediaDetailsResponse {
   data: MediaDetails;
   status: number;
+  success: boolean;
+  error: string[] | null;
+  message: string | null;
+  timestamp: string;
 }
