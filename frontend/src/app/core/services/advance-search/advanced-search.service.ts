@@ -1,105 +1,182 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { delay, Observable, of } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { catchError, filter, map, Observable, of, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 export interface Movie {
+  mediaId: number;
+  mediaType: 'MOVIE' | 'TV_SHOW';
   title: string;
-  year: string;
-  type: string;
-  rating: string;
+  releaseYear: number | null;
+  thumbnailUrl: string;
   genres: string[];
-  imageUrl: string;
-  isBookmarked: boolean;
+  averageRating: number;
 }
 
-interface SearchFilters {
+interface AdvancedSearchResponse {
+  data: {
+    content?: Movie[];
+    pageable?: {
+      pageNumber?: number;
+      pageSize?: number;
+    };
+    totalElements?: number;
+    totalPages?: number;
+    last?: boolean;
+    first?: boolean;
+    empty?: boolean;
+  } | null;
+  status: number;
+  success: boolean;
+}
+
+interface TrendingResponse {
+  data: Movie[] | null;
+  status: number;
+  success: boolean;
+}
+
+export interface MoviesApiResponse {
+  results: Movie[];
+  page: number;
+  total_pages: number;
+  total_results: number;
+}
+
+export interface MovieFilters {
   query?: string;
-  type?: string;
   genre?: string;
-  rating?: string;
   year?: string;
   language?: string;
+  page?: number;
+  itemsPerPage?: number;
+  sort_by?: string;
+  sort_direction?: 'asc' | 'desc';
+  rating?: string;
+  type?: 'All' | 'MOVIE' | 'TV_SHOW';
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AdvancedSearchService {
-  private apiUrl = `${environment.apiUrl}/movies`;
-
+  private readonly TRENDING_URL = `${environment.apiBaseUrl}/trending-now`;
+  private readonly SEARCH_URL = `${environment.apiBaseUrl}/advanced-search`;
   constructor(private http: HttpClient) {}
 
-  // For real API implementation:
-  searchMovies(filters: SearchFilters): Observable<Movie[]> {
-    return this.http.get<Movie[]>(this.apiUrl, { params: filters as any });
-  }
+  searchMovies(filters: MovieFilters): Observable<MoviesApiResponse> {
+    // Determine which endpoint to use
+    const useAdvancedSearch = !!filters.query || this.hasActiveFilters(filters);
+    const url = useAdvancedSearch ? this.SEARCH_URL : this.TRENDING_URL;
 
-  // Mock implementation (temporary - remove when real API is ready)
-  searchMoviesMock(filters: SearchFilters): Observable<Movie[]> {
-    const mockMovies: Movie[] = [
-      {
-        title: 'Beyond Earth',
-        year: '2019',
-        type: 'Movie',
-        rating: '9/10',
-        genres: ['Action', 'Adventure', 'Thriller'],
-        imageUrl: '../../../assets/images/movie.png',
-        isBookmarked: false,
-      },
-    ];
+    // Build query parameters
+    let params = new HttpParams();
 
-    let results = [...mockMovies];
+    // Pagination parameters
+    params = params.set('page', (filters.page || 0).toString());
+    params = params.set('size', (filters.itemsPerPage || 10).toString());
 
+    // Search query
     if (filters.query) {
-      results = results.filter(
-        (movie) =>
-          movie.title.toLowerCase().includes(filters.query!.toLowerCase()) ||
-          movie.year.includes(filters.query!),
-      );
+      params = params.set('query', filters.query);
     }
 
-    if (filters.type && filters.type !== 'All') {
-      results = results.filter((movie) => movie.type === filters.type);
-    }
-
+    // Filters
     if (filters.genre && filters.genre !== 'All') {
-      results = results.filter((movie) => movie.genres.includes(filters.genre!));
+      params = params.set('genre', filters.genre.toUpperCase());
     }
-
-    if (filters.rating && filters.rating !== 'All') {
-      results = results.filter((movie) => movie.rating === filters.rating);
-    }
-
     if (filters.year && filters.year !== 'All') {
-      results = results.filter((movie) => movie.year === filters.year);
+      params = params.set('releaseYear', filters.year);
+    }
+    if (filters.language && filters.language !== 'All') {
+      params = params.set('language', filters.language.toUpperCase());
+    }
+    if (filters.rating && filters.rating !== 'All') {
+      params = params.set('rating', filters.rating);
+    }
+    if (filters.type && filters.type !== 'All' && filters.type !== 'MOVIE') {
+      const transformedType = 'TV_SHOW';
+      params = params.set('mediaType', transformedType);
     }
 
-    return of(results).pipe(delay(300));
+    if (filters.type && filters.type !== 'All' && filters.type === 'MOVIE') {
+      params = params.set('mediaType', filters.type.toUpperCase());
+    }
+
+    // Sorting
+    if (filters.sort_by) {
+      params = params.set('sortBy', this.mapSortBy(filters.sort_by));
+      params = params.set('sortDir', filters.sort_direction || 'asc');
+    }
+
+    console.log('Making request to:', url);
+    console.log('With params:', params.toString());
+
+    return this.http.get<any>(url, { params }).pipe(
+      tap((response) => console.log('Raw API response:', response)),
+      map((response) => this.normalizeResponse(response, filters, useAdvancedSearch)),
+      catchError((error) => {
+        console.error('API Error:', error);
+        return of(this.getEmptyResponse());
+      }),
+    );
   }
 
-  getFilterOptions(): Observable<{
-    types: string[];
-    genres: string[];
-    ratings: string[];
-    years: string[];
-    languages: string[];
-  }> {
-    return this.http.get(`${this.apiUrl}/9`) as Observable<{
-      types: string[];
-      genres: string[];
-      ratings: string[];
-      years: string[];
-      languages: string[];
-    }>;
+  private normalizeResponse(
+    response: any,
+    filters: MovieFilters,
+    isAdvancedSearch: boolean,
+  ): MoviesApiResponse {
+    if (isAdvancedSearch) {
+      // Advanced search response format
+      return {
+        results: response.data?.content || [],
+        page: (response.data?.pageable?.pageNumber ?? 0) + 1,
+        total_pages: response.data?.totalPages ?? 1,
+        total_results: response.data?.totalElements ?? 0,
+      };
+    } else {
+      // Trending response format (client-side pagination)
+      const itemsPerPage = filters.itemsPerPage || 10;
+      const currentPage = filters.page ?? 0;
+      const startIndex = currentPage * itemsPerPage;
 
-    // Mock response:
-    return of({
-      types: ['Movie', 'Series'],
-      genres: ['Action', 'Adventure', 'Thriller', 'Drama', 'Comedy'],
-      ratings: ['9/10', '8/10', '6/10'],
-      years: ['2019', '2023', '2025'],
-      languages: ['English', 'French', 'Spanish'],
-    });
+      return {
+        results: response.data?.slice(startIndex, startIndex + itemsPerPage) || [],
+        page: currentPage + 1,
+        total_pages: Math.ceil((response.data?.length || 0) / itemsPerPage),
+        total_results: response.data?.length || 0,
+      };
+    }
+  }
+
+  private hasActiveFilters(filters: MovieFilters): boolean {
+    return !!(
+      (filters.genre && filters.genre !== 'All') ||
+      (filters.year && filters.year !== 'All') ||
+      (filters.language && filters.language !== 'All') ||
+      (filters.rating && filters.rating !== 'All') ||
+      (filters.type && filters.type !== 'All') ||
+      filters.sort_by
+    );
+  }
+
+  private mapSortBy(sortBy: string): string {
+    const sortMap: Record<string, string> = {
+      Title: 'SORT_BY_TITLE',
+      Year: 'SORT_BY_YEAR',
+      Type: 'SORT_BY_TYPE',
+      Duration: 'SORT_BY_DURATION',
+    };
+    return sortMap[sortBy] || 'SORT_BY_TITLE';
+  }
+
+  private getEmptyResponse(): MoviesApiResponse {
+    return {
+      results: [],
+      page: 1,
+      total_pages: 1,
+      total_results: 0,
+    };
   }
 }

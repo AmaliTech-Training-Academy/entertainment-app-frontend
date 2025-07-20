@@ -1,44 +1,63 @@
 <div class="app-container">
   <main class="main-content">
-    <form class="search-section">
+    <form class="search-section" (submit)="$event.preventDefault()">
       <app-advanced-search (search)="onSearch($event)"></app-advanced-search>
     </form>
 
     <section class="trending-section">
-      <h3 class="section-title">
-        {{ advancedSearchComponent?.hasActiveFilters() ? 'Search Results' : 'Trending Now' }}
-      </h3>
+      <div class="section-header">
+        <h3 class="section-title">
+          {{ isSearchActive() ? 'Search Results' : 'Trending Now' }}
+        </h3>
+      </div>
 
+      <!-- Top Pagination -->
       <app-pagination
-        *ngIf="filteredMovies.length > 0"
+        *ngIf="totalPages > 1"
         [currentPage]="currentPage"
-        [totalItems]="filteredMovies.length"
-        [itemsPerPage]="6"
+        [totalPages]="totalPages"
         (pageChange)="onPageChange($event)"
       ></app-pagination>
 
-      <div *ngIf="filteredMovies.length === 0" class="empty-state">
+      <!-- Empty State -->
+      <div *ngIf="filteredMovies.length === 0 && !isLoading" class="empty-state">
         <h3 class="empty-title">No Results Found</h3>
         <button
           mat-raised-button
           color="primary"
-          *ngIf="search_filter_state"
+          *ngIf="isSearchActive()"
           (click)="resetFilters()"
+          class="reset-button"
         >
           Reset Filters
         </button>
       </div>
 
-      <div *ngIf="filteredMovies.length > 0" class="movies-grid">
-        <app-movie-card *ngFor="let movie of filteredMovies" [movie]="movie"></app-movie-card>
+      <!-- Loading State -->
+      <div class="spinner-container" *ngIf="isLoading">
+        <mat-progress-spinner
+          mode="indeterminate"
+          color="accent"
+          diameter="40"
+        ></mat-progress-spinner>
       </div>
 
+      <!-- Movies Grid -->
+      <div *ngIf="filteredMovies.length > 0" class="movies-grid">
+        <app-movie-card
+          *ngFor="let movie of filteredMovies"
+          [movie]="movie"
+          class="movie-card"
+        ></app-movie-card>
+      </div>
+
+      <!-- Bottom Pagination -->
       <app-pagination
+        *ngIf="filteredMovies.length > 0 && totalPages > 1"
         [currentPage]="currentPage"
-        [totalItems]="filteredMovies.length"
-        [itemsPerPage]="6"
+        [totalPages]="totalPages"
         (pageChange)="onPageChange($event)"
-        *ngIf="filteredMovies.length > 0"
+        class="bottom-pagination"
       ></app-pagination>
     </section>
   </main>

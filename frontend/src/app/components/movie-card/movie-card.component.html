@@ -1,7 +1,7 @@
 <div class="movie-card">
   <div class="card-container">
     <div class="image-container">
-      <img [src]="movie.imageUrl" [alt]="movie.title" class="movie-image" />
+      <img [src]="movie.thumbnailUrl" [alt]="movie.title" class="movie-image" />
     </div>
 
     <div class="content-container">
@@ -14,21 +14,24 @@
       </div>
       <div class="meta-container">
         <div class="meta-item">
-          <span>{{ movie.year }}</span>
+          <span>{{ movie.releaseYear }}</span>
           <mat-icon class="calendar-icon">calendar_month</mat-icon>
         </div>
 
         <span class="separator">•</span>
 
         <div class="meta-item">
-          <span>{{ movie.type }}</span>
-          <mat-icon class="meta-icon">{{ getTypeIcon(movie.type) }}</mat-icon>
+          <span>{{ movie.mediaType === 'MOVIE' ? 'Movie' : 'Series' }}</span>
+          <!-- <mat-icon class="meta-icon">{{ getTypeIcon(movie.mediaType) }}</mat-icon> -->
+          <mat-icon class="meta-icon">{{
+            movie.mediatype === 'MOVIE' ? 'movie' : 'live_tv'
+          }}</mat-icon>
         </div>
 
         <span class="separator">•</span>
 
         <div class="meta-item">
-          <span>{{ movie.rating }}</span>
+          <span>{{ movie.averageRating }}</span>
           <mat-icon class="outlined-star">star</mat-icon>
         </div>
       </div>

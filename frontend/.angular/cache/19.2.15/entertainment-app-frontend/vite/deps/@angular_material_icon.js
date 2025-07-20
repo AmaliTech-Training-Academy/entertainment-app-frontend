@@ -1,19 +1,11 @@
-import {
-  DomSanitizer
-} from "./chunk-2FNFODOA.js";
-import {
-  HttpClient
-} from "./chunk-LKINPQPD.js";
-import {
-  MatCommonModule
-} from "./chunk-4XSXKLH5.js";
-import "./chunk-DFZUIEHR.js";
-import "./chunk-QSTMW43C.js";
-import "./chunk-DXLYELY7.js";
-import "./chunk-4EGC72M3.js";
-import {
-  DOCUMENT
-} from "./chunk-LH4B7CI6.js";
+import { DomSanitizer } from './chunk-YDTBLLHB.js';
+import { HttpClient } from './chunk-SS67WDV2.js';
+import { MatCommonModule } from './chunk-DEPPKGNT.js';
+import './chunk-LMZTW6BW.js';
+import './chunk-EFGIXGQ3.js';
+import './chunk-U5ZBX5YW.js';
+import './chunk-ZEP2XSNY.js';
+import { DOCUMENT } from './chunk-JXH7IHTU.js';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -41,12 +33,10 @@ import {
   ɵɵdefineNgModule,
   ɵɵinject,
   ɵɵprojection,
-  ɵɵprojectionDef
-} from "./chunk-KZUALIOS.js";
-import {
-  forkJoin
-} from "./chunk-7RYJKT7I.js";
-import "./chunk-P3HNZ6IB.js";
+  ɵɵprojectionDef,
+} from './chunk-XZGMYZQR.js';
+import './chunk-T7QKJDR6.js';
+import { forkJoin } from './chunk-3RIMHZ7P.js';
 import {
   Subscription,
   catchError,
@@ -56,19 +46,19 @@ import {
   share,
   take,
   tap,
-  throwError
-} from "./chunk-IS5DM6DS.js";
+  throwError,
+} from './chunk-DVXABYOS.js';
 
 // node_modules/@angular/material/fesm2022/icon-registry-B2IMBfNA.mjs
 var policy;
 function getPolicy() {
   if (policy === void 0) {
     policy = null;
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const ttWindow = window;
       if (ttWindow.trustedTypes !== void 0) {
-        policy = ttWindow.trustedTypes.createPolicy("angular#components", {
-          createHTML: (s) => s
+        policy = ttWindow.trustedTypes.createPolicy('angular#components', {
+          createHTML: (s) => s,
         });
       }
     }
@@ -82,13 +72,19 @@ function getMatIconNameNotFoundError(iconName) {
   return Error(`Unable to find icon with the name "${iconName}"`);
 }
 function getMatIconNoHttpProviderError() {
-  return Error("Could not find HttpClient for use with Angular Material icons. Please add provideHttpClient() to your providers.");
+  return Error(
+    'Could not find HttpClient for use with Angular Material icons. Please add provideHttpClient() to your providers.',
+  );
 }
 function getMatIconFailedToSanitizeUrlError(url) {
-  return Error(`The URL provided to MatIconRegistry was not trusted as a resource URL via Angular's DomSanitizer. Attempted URL was "${url}".`);
+  return Error(
+    `The URL provided to MatIconRegistry was not trusted as a resource URL via Angular's DomSanitizer. Attempted URL was "${url}".`,
+  );
 }
 function getMatIconFailedToSanitizeLiteralError(literal) {
-  return Error(`The literal provided to MatIconRegistry was not trusted as safe HTML by Angular's DomSanitizer. Attempted literal was "${literal}".`);
+  return Error(
+    `The literal provided to MatIconRegistry was not trusted as safe HTML by Angular's DomSanitizer. Attempted literal was "${literal}".`,
+  );
 }
 var SvgIconConfig = class {
   url;
@@ -128,7 +124,7 @@ var MatIconRegistry = class _MatIconRegistry {
    * specified. The default 'material-icons' value assumes that the material icon font has been
    * loaded as described at https://google.github.io/material-design-icons/#icon-font-for-the-web
    */
-  _defaultFontSetClass = ["material-icons", "mat-ligature-font"];
+  _defaultFontSetClass = ['material-icons', 'mat-ligature-font'];
   constructor(_httpClient, _sanitizer, document, _errorHandler) {
     this._httpClient = _httpClient;
     this._sanitizer = _sanitizer;
@@ -141,7 +137,7 @@ var MatIconRegistry = class _MatIconRegistry {
    * @param url
    */
   addSvgIcon(iconName, url, options) {
-    return this.addSvgIconInNamespace("", iconName, url, options);
+    return this.addSvgIconInNamespace('', iconName, url, options);
   }
   /**
    * Registers an icon using an HTML string in the default namespace.
@@ -149,7 +145,7 @@ var MatIconRegistry = class _MatIconRegistry {
    * @param literal SVG source of the icon.
    */
   addSvgIconLiteral(iconName, literal, options) {
-    return this.addSvgIconLiteralInNamespace("", iconName, literal, options);
+    return this.addSvgIconLiteralInNamespace('', iconName, literal, options);
   }
   /**
    * Registers an icon by URL in the specified namespace.
@@ -184,21 +180,25 @@ var MatIconRegistry = class _MatIconRegistry {
       throw getMatIconFailedToSanitizeLiteralError(literal);
     }
     const trustedLiteral = trustedHTMLFromString(cleanLiteral);
-    return this._addSvgIconConfig(namespace, iconName, new SvgIconConfig("", trustedLiteral, options));
+    return this._addSvgIconConfig(
+      namespace,
+      iconName,
+      new SvgIconConfig('', trustedLiteral, options),
+    );
   }
   /**
    * Registers an icon set by URL in the default namespace.
    * @param url
    */
   addSvgIconSet(url, options) {
-    return this.addSvgIconSetInNamespace("", url, options);
+    return this.addSvgIconSetInNamespace('', url, options);
   }
   /**
    * Registers an icon set using an HTML string in the default namespace.
    * @param literal SVG source of the icon set.
    */
   addSvgIconSetLiteral(literal, options) {
-    return this.addSvgIconSetLiteralInNamespace("", literal, options);
+    return this.addSvgIconSetLiteralInNamespace('', literal, options);
   }
   /**
    * Registers an icon set by URL in the specified namespace.
@@ -219,7 +219,7 @@ var MatIconRegistry = class _MatIconRegistry {
       throw getMatIconFailedToSanitizeLiteralError(literal);
     }
     const trustedLiteral = trustedHTMLFromString(cleanLiteral);
-    return this._addSvgIconSetConfig(namespace, new SvgIconConfig("", trustedLiteral, options));
+    return this._addSvgIconSetConfig(namespace, new SvgIconConfig('', trustedLiteral, options));
   }
   /**
    * Defines an alias for CSS class names to be used for icon fonts. Creating an matIcon
@@ -285,7 +285,10 @@ var MatIconRegistry = class _MatIconRegistry {
     if (cachedIcon) {
       return of(cloneSvg(cachedIcon));
     }
-    return this._loadSvgIconFromConfig(new SvgIconConfig(safeUrl, null)).pipe(tap((svg) => this._cachedIconsByUrl.set(url, svg)), map((svg) => cloneSvg(svg)));
+    return this._loadSvgIconFromConfig(new SvgIconConfig(safeUrl, null)).pipe(
+      tap((svg) => this._cachedIconsByUrl.set(url, svg)),
+      map((svg) => cloneSvg(svg)),
+    );
   }
   /**
    * Returns an Observable that produces the icon (as an `<svg>` DOM element) with the given name
@@ -295,7 +298,7 @@ var MatIconRegistry = class _MatIconRegistry {
    * @param name Name of the icon to be retrieved.
    * @param namespace Namespace in which to look for the icon.
    */
-  getNamedSvgIcon(name, namespace = "") {
+  getNamedSvgIcon(name, namespace = '') {
     const key = iconKey(namespace, name);
     let config = this._svgIconConfigs.get(key);
     if (config) {
@@ -341,21 +344,27 @@ var MatIconRegistry = class _MatIconRegistry {
     if (namedIcon) {
       return of(namedIcon);
     }
-    const iconSetFetchRequests = iconSetConfigs.filter((iconSetConfig) => !iconSetConfig.svgText).map((iconSetConfig) => {
-      return this._loadSvgIconSetFromConfig(iconSetConfig).pipe(catchError((err) => {
-        const url = this._sanitizer.sanitize(SecurityContext.RESOURCE_URL, iconSetConfig.url);
-        const errorMessage = `Loading icon set URL: ${url} failed: ${err.message}`;
-        this._errorHandler.handleError(new Error(errorMessage));
-        return of(null);
-      }));
-    });
-    return forkJoin(iconSetFetchRequests).pipe(map(() => {
-      const foundIcon = this._extractIconWithNameFromAnySet(name, iconSetConfigs);
-      if (!foundIcon) {
-        throw getMatIconNameNotFoundError(name);
-      }
-      return foundIcon;
-    }));
+    const iconSetFetchRequests = iconSetConfigs
+      .filter((iconSetConfig) => !iconSetConfig.svgText)
+      .map((iconSetConfig) => {
+        return this._loadSvgIconSetFromConfig(iconSetConfig).pipe(
+          catchError((err) => {
+            const url = this._sanitizer.sanitize(SecurityContext.RESOURCE_URL, iconSetConfig.url);
+            const errorMessage = `Loading icon set URL: ${url} failed: ${err.message}`;
+            this._errorHandler.handleError(new Error(errorMessage));
+            return of(null);
+          }),
+        );
+      });
+    return forkJoin(iconSetFetchRequests).pipe(
+      map(() => {
+        const foundIcon = this._extractIconWithNameFromAnySet(name, iconSetConfigs);
+        if (!foundIcon) {
+          throw getMatIconNameNotFoundError(name);
+        }
+        return foundIcon;
+      }),
+    );
   }
   /**
    * Searches the cached SVG elements for the given icon sets for a nested icon element whose "id"
@@ -380,7 +389,10 @@ var MatIconRegistry = class _MatIconRegistry {
    * from it.
    */
   _loadSvgIconFromConfig(config) {
-    return this._fetchIcon(config).pipe(tap((svgText) => config.svgText = svgText), map(() => this._svgElementFromConfig(config)));
+    return this._fetchIcon(config).pipe(
+      tap((svgText) => (config.svgText = svgText)),
+      map(() => this._svgElementFromConfig(config)),
+    );
   }
   /**
    * Loads the content of the icon set URL specified in the
@@ -390,7 +402,7 @@ var MatIconRegistry = class _MatIconRegistry {
     if (config.svgText) {
       return of(null);
     }
-    return this._fetchIcon(config).pipe(tap((svgText) => config.svgText = svgText));
+    return this._fetchIcon(config).pipe(tap((svgText) => (config.svgText = svgText)));
   }
   /**
    * Searches the cached element of the given SvgIconConfig for a nested icon element whose "id"
@@ -403,14 +415,14 @@ var MatIconRegistry = class _MatIconRegistry {
       return null;
     }
     const iconElement = iconSource.cloneNode(true);
-    iconElement.removeAttribute("id");
-    if (iconElement.nodeName.toLowerCase() === "svg") {
+    iconElement.removeAttribute('id');
+    if (iconElement.nodeName.toLowerCase() === 'svg') {
       return this._setSvgAttributes(iconElement, options);
     }
-    if (iconElement.nodeName.toLowerCase() === "symbol") {
+    if (iconElement.nodeName.toLowerCase() === 'symbol') {
       return this._setSvgAttributes(this._toSvgElement(iconElement), options);
     }
-    const svg = this._svgElementFromString(trustedHTMLFromString("<svg></svg>"));
+    const svg = this._svgElementFromString(trustedHTMLFromString('<svg></svg>'));
     svg.appendChild(iconElement);
     return this._setSvgAttributes(svg, options);
   }
@@ -418,11 +430,11 @@ var MatIconRegistry = class _MatIconRegistry {
    * Creates a DOM element from the given SVG string.
    */
   _svgElementFromString(str) {
-    const div = this._document.createElement("DIV");
+    const div = this._document.createElement('DIV');
     div.innerHTML = str;
-    const svg = div.querySelector("svg");
+    const svg = div.querySelector('svg');
     if (!svg) {
-      throw Error("<svg> tag not found");
+      throw Error('<svg> tag not found');
     }
     return svg;
   }
@@ -430,14 +442,11 @@ var MatIconRegistry = class _MatIconRegistry {
    * Converts an element into an SVG node by cloning all of its children.
    */
   _toSvgElement(element) {
-    const svg = this._svgElementFromString(trustedHTMLFromString("<svg></svg>"));
+    const svg = this._svgElementFromString(trustedHTMLFromString('<svg></svg>'));
     const attributes = element.attributes;
     for (let i = 0; i < attributes.length; i++) {
-      const {
-        name,
-        value
-      } = attributes[i];
-      if (name !== "id") {
+      const { name, value } = attributes[i];
+      if (name !== 'id') {
         svg.setAttribute(name, value);
       }
     }
@@ -452,13 +461,13 @@ var MatIconRegistry = class _MatIconRegistry {
    * Sets the default attributes for an SVG element to be used as an icon.
    */
   _setSvgAttributes(svg, options) {
-    svg.setAttribute("fit", "");
-    svg.setAttribute("height", "100%");
-    svg.setAttribute("width", "100%");
-    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-    svg.setAttribute("focusable", "false");
+    svg.setAttribute('fit', '');
+    svg.setAttribute('height', '100%');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.setAttribute('focusable', 'false');
     if (options && options.viewBox) {
-      svg.setAttribute("viewBox", options.viewBox);
+      svg.setAttribute('viewBox', options.viewBox);
     }
     return svg;
   }
@@ -467,10 +476,7 @@ var MatIconRegistry = class _MatIconRegistry {
    * cached, so future calls with the same URL may not cause another HTTP request.
    */
   _fetchIcon(iconConfig) {
-    const {
-      url: safeUrl,
-      options
-    } = iconConfig;
+    const { url: safeUrl, options } = iconConfig;
     const withCredentials = options?.withCredentials ?? false;
     if (!this._httpClient) {
       throw getMatIconNoHttpProviderError();
@@ -486,12 +492,18 @@ var MatIconRegistry = class _MatIconRegistry {
     if (inProgressFetch) {
       return inProgressFetch;
     }
-    const req = this._httpClient.get(url, {
-      responseType: "text",
-      withCredentials
-    }).pipe(map((svg) => {
-      return trustedHTMLFromString(svg);
-    }), finalize(() => this._inProgressUrlFetches.delete(url)), share());
+    const req = this._httpClient
+      .get(url, {
+        responseType: 'text',
+        withCredentials,
+      })
+      .pipe(
+        map((svg) => {
+          return trustedHTMLFromString(svg);
+        }),
+        finalize(() => this._inProgressUrlFetches.delete(url)),
+        share(),
+      );
     this._inProgressUrlFetches.set(url, req);
     return req;
   }
@@ -533,70 +545,109 @@ var MatIconRegistry = class _MatIconRegistry {
     for (let i = 0; i < this._resolvers.length; i++) {
       const result = this._resolvers[i](name, namespace);
       if (result) {
-        return isSafeUrlWithOptions(result) ? new SvgIconConfig(result.url, null, result.options) : new SvgIconConfig(result, null);
+        return isSafeUrlWithOptions(result)
+          ? new SvgIconConfig(result.url, null, result.options)
+          : new SvgIconConfig(result, null);
       }
     }
     return void 0;
   }
   static ɵfac = function MatIconRegistry_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _MatIconRegistry)(ɵɵinject(HttpClient, 8), ɵɵinject(DomSanitizer), ɵɵinject(DOCUMENT, 8), ɵɵinject(ErrorHandler));
+    return new (__ngFactoryType__ || _MatIconRegistry)(
+      ɵɵinject(HttpClient, 8),
+      ɵɵinject(DomSanitizer),
+      ɵɵinject(DOCUMENT, 8),
+      ɵɵinject(ErrorHandler),
+    );
   };
   static ɵprov = ɵɵdefineInjectable({
     token: _MatIconRegistry,
     factory: _MatIconRegistry.ɵfac,
-    providedIn: "root"
+    providedIn: 'root',
   });
 };
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(MatIconRegistry, [{
-    type: Injectable,
-    args: [{
-      providedIn: "root"
-    }]
-  }], () => [{
-    type: HttpClient,
-    decorators: [{
-      type: Optional
-    }]
-  }, {
-    type: DomSanitizer
-  }, {
-    type: void 0,
-    decorators: [{
-      type: Optional
-    }, {
-      type: Inject,
-      args: [DOCUMENT]
-    }]
-  }, {
-    type: ErrorHandler
-  }], null);
+  (typeof ngDevMode === 'undefined' || ngDevMode) &&
+    setClassMetadata(
+      MatIconRegistry,
+      [
+        {
+          type: Injectable,
+          args: [
+            {
+              providedIn: 'root',
+            },
+          ],
+        },
+      ],
+      () => [
+        {
+          type: HttpClient,
+          decorators: [
+            {
+              type: Optional,
+            },
+          ],
+        },
+        {
+          type: DomSanitizer,
+        },
+        {
+          type: void 0,
+          decorators: [
+            {
+              type: Optional,
+            },
+            {
+              type: Inject,
+              args: [DOCUMENT],
+            },
+          ],
+        },
+        {
+          type: ErrorHandler,
+        },
+      ],
+      null,
+    );
 })();
-function ICON_REGISTRY_PROVIDER_FACTORY(parentRegistry, httpClient, sanitizer, errorHandler, document) {
+function ICON_REGISTRY_PROVIDER_FACTORY(
+  parentRegistry,
+  httpClient,
+  sanitizer,
+  errorHandler,
+  document,
+) {
   return parentRegistry || new MatIconRegistry(httpClient, sanitizer, document, errorHandler);
 }
 var ICON_REGISTRY_PROVIDER = {
   // If there is already an MatIconRegistry available, use that. Otherwise, provide a new one.
   provide: MatIconRegistry,
-  deps: [[new Optional(), new SkipSelf(), MatIconRegistry], [new Optional(), HttpClient], DomSanitizer, ErrorHandler, [new Optional(), DOCUMENT]],
-  useFactory: ICON_REGISTRY_PROVIDER_FACTORY
+  deps: [
+    [new Optional(), new SkipSelf(), MatIconRegistry],
+    [new Optional(), HttpClient],
+    DomSanitizer,
+    ErrorHandler,
+    [new Optional(), DOCUMENT],
+  ],
+  useFactory: ICON_REGISTRY_PROVIDER_FACTORY,
 };
 function cloneSvg(svg) {
   return svg.cloneNode(true);
 }
 function iconKey(namespace, name) {
-  return namespace + ":" + name;
+  return namespace + ':' + name;
 }
 function isSafeUrlWithOptions(value) {
   return !!(value.url && value.options);
 }
 
 // node_modules/@angular/material/fesm2022/icon.mjs
-var _c0 = ["*"];
-var MAT_ICON_DEFAULT_OPTIONS = new InjectionToken("MAT_ICON_DEFAULT_OPTIONS");
-var MAT_ICON_LOCATION = new InjectionToken("mat-icon-location", {
-  providedIn: "root",
-  factory: MAT_ICON_LOCATION_FACTORY
+var _c0 = ['*'];
+var MAT_ICON_DEFAULT_OPTIONS = new InjectionToken('MAT_ICON_DEFAULT_OPTIONS');
+var MAT_ICON_LOCATION = new InjectionToken('mat-icon-location', {
+  providedIn: 'root',
+  factory: MAT_ICON_LOCATION_FACTORY,
 });
 function MAT_ICON_LOCATION_FACTORY() {
   const _document = inject(DOCUMENT);
@@ -604,11 +655,24 @@ function MAT_ICON_LOCATION_FACTORY() {
   return {
     // Note that this needs to be a function, rather than a property, because Angular
     // will only resolve it once, but we want the current path on each call.
-    getPathname: () => _location ? _location.pathname + _location.search : ""
+    getPathname: () => (_location ? _location.pathname + _location.search : ''),
   };
 }
-var funcIriAttributes = ["clip-path", "color-profile", "src", "cursor", "fill", "filter", "marker", "marker-start", "marker-mid", "marker-end", "mask", "stroke"];
-var funcIriAttributeSelector = funcIriAttributes.map((attr) => `[${attr}]`).join(", ");
+var funcIriAttributes = [
+  'clip-path',
+  'color-profile',
+  'src',
+  'cursor',
+  'fill',
+  'filter',
+  'marker',
+  'marker-start',
+  'marker-mid',
+  'marker-end',
+  'mask',
+  'stroke',
+];
+var funcIriAttributeSelector = funcIriAttributes.map((attr) => `[${attr}]`).join(', ');
 var funcIriPattern = /^url\(['"]?#(.*?)['"]?\)$/;
 var MatIcon = class _MatIcon {
   _elementRef = inject(ElementRef);
@@ -685,11 +749,11 @@ var MatIcon = class _MatIcon {
   /** Subscription to the current in-progress SVG icon request. */
   _currentIconFetch = Subscription.EMPTY;
   constructor() {
-    const ariaHidden = inject(new HostAttributeToken("aria-hidden"), {
-      optional: true
+    const ariaHidden = inject(new HostAttributeToken('aria-hidden'), {
+      optional: true,
     });
     const defaults = inject(MAT_ICON_DEFAULT_OPTIONS, {
-      optional: true
+      optional: true,
     });
     if (defaults) {
       if (defaults.color) {
@@ -700,7 +764,7 @@ var MatIcon = class _MatIcon {
       }
     }
     if (!ariaHidden) {
-      this._elementRef.nativeElement.setAttribute("aria-hidden", "true");
+      this._elementRef.nativeElement.setAttribute('aria-hidden', 'true');
     }
   }
   /**
@@ -718,12 +782,12 @@ var MatIcon = class _MatIcon {
    */
   _splitIconName(iconName) {
     if (!iconName) {
-      return ["", ""];
+      return ['', ''];
     }
-    const parts = iconName.split(":");
+    const parts = iconName.split(':');
     switch (parts.length) {
       case 1:
-        return ["", parts[0]];
+        return ['', parts[0]];
       // Use default namespace.
       case 2:
         return parts;
@@ -769,7 +833,7 @@ var MatIcon = class _MatIcon {
     }
     while (childCount--) {
       const child = layoutElement.childNodes[childCount];
-      if (child.nodeType !== 1 || child.nodeName.toLowerCase() === "svg") {
+      if (child.nodeType !== 1 || child.nodeName.toLowerCase() === 'svg') {
         child.remove();
       }
     }
@@ -779,11 +843,18 @@ var MatIcon = class _MatIcon {
       return;
     }
     const elem = this._elementRef.nativeElement;
-    const fontSetClasses = (this.fontSet ? this._iconRegistry.classNameForFontAlias(this.fontSet).split(/ +/) : this._iconRegistry.getDefaultFontSetClass()).filter((className) => className.length > 0);
+    const fontSetClasses = (
+      this.fontSet
+        ? this._iconRegistry.classNameForFontAlias(this.fontSet).split(/ +/)
+        : this._iconRegistry.getDefaultFontSetClass()
+    ).filter((className) => className.length > 0);
     this._previousFontSetClass.forEach((className) => elem.classList.remove(className));
     fontSetClasses.forEach((className) => elem.classList.add(className));
     this._previousFontSetClass = fontSetClasses;
-    if (this.fontIcon !== this._previousFontIconClass && !fontSetClasses.includes("mat-ligature-font")) {
+    if (
+      this.fontIcon !== this._previousFontIconClass &&
+      !fontSetClasses.includes('mat-ligature-font')
+    ) {
       if (this._previousFontIconClass) {
         elem.classList.remove(this._previousFontIconClass);
       }
@@ -799,7 +870,7 @@ var MatIcon = class _MatIcon {
    * have to trim the value and omit space-separated values.
    */
   _cleanupFontValue(value) {
-    return typeof value === "string" ? value.trim().split(" ")[0] : value;
+    return typeof value === 'string' ? value.trim().split(' ')[0] : value;
   }
   /**
    * Prepends the current path to all elements that have an attribute pointing to a `FuncIRI`
@@ -822,7 +893,8 @@ var MatIcon = class _MatIcon {
    */
   _cacheChildrenWithExternalReferences(element) {
     const elementsWithFuncIri = element.querySelectorAll(funcIriAttributeSelector);
-    const elements = this._elementsWithExternalReferences = this._elementsWithExternalReferences || /* @__PURE__ */ new Map();
+    const elements = (this._elementsWithExternalReferences =
+      this._elementsWithExternalReferences || /* @__PURE__ */ new Map());
     for (let i = 0; i < elementsWithFuncIri.length; i++) {
       funcIriAttributes.forEach((attr) => {
         const elementWithReference = elementsWithFuncIri[i];
@@ -836,7 +908,7 @@ var MatIcon = class _MatIcon {
           }
           attributes.push({
             name: attr,
-            value: match[1]
+            value: match[1],
           });
         }
       });
@@ -855,10 +927,16 @@ var MatIcon = class _MatIcon {
       if (iconName) {
         this._svgName = iconName;
       }
-      this._currentIconFetch = this._iconRegistry.getNamedSvgIcon(iconName, namespace).pipe(take(1)).subscribe((svg) => this._setSvgElement(svg), (err) => {
-        const errorMessage = `Error retrieving icon ${namespace}:${iconName}! ${err.message}`;
-        this._errorHandler.handleError(new Error(errorMessage));
-      });
+      this._currentIconFetch = this._iconRegistry
+        .getNamedSvgIcon(iconName, namespace)
+        .pipe(take(1))
+        .subscribe(
+          (svg) => this._setSvgElement(svg),
+          (err) => {
+            const errorMessage = `Error retrieving icon ${namespace}:${iconName}! ${err.message}`;
+            this._errorHandler.handleError(new Error(errorMessage));
+          },
+        );
     }
   }
   static ɵfac = function MatIcon_Factory(__ngFactoryType__) {
@@ -866,24 +944,33 @@ var MatIcon = class _MatIcon {
   };
   static ɵcmp = ɵɵdefineComponent({
     type: _MatIcon,
-    selectors: [["mat-icon"]],
-    hostAttrs: ["role", "img", 1, "mat-icon", "notranslate"],
+    selectors: [['mat-icon']],
+    hostAttrs: ['role', 'img', 1, 'mat-icon', 'notranslate'],
     hostVars: 10,
     hostBindings: function MatIcon_HostBindings(rf, ctx) {
       if (rf & 2) {
-        ɵɵattribute("data-mat-icon-type", ctx._usingFontIcon() ? "font" : "svg")("data-mat-icon-name", ctx._svgName || ctx.fontIcon)("data-mat-icon-namespace", ctx._svgNamespace || ctx.fontSet)("fontIcon", ctx._usingFontIcon() ? ctx.fontIcon : null);
-        ɵɵclassMap(ctx.color ? "mat-" + ctx.color : "");
-        ɵɵclassProp("mat-icon-inline", ctx.inline)("mat-icon-no-color", ctx.color !== "primary" && ctx.color !== "accent" && ctx.color !== "warn");
+        ɵɵattribute('data-mat-icon-type', ctx._usingFontIcon() ? 'font' : 'svg')(
+          'data-mat-icon-name',
+          ctx._svgName || ctx.fontIcon,
+        )('data-mat-icon-namespace', ctx._svgNamespace || ctx.fontSet)(
+          'fontIcon',
+          ctx._usingFontIcon() ? ctx.fontIcon : null,
+        );
+        ɵɵclassMap(ctx.color ? 'mat-' + ctx.color : '');
+        ɵɵclassProp('mat-icon-inline', ctx.inline)(
+          'mat-icon-no-color',
+          ctx.color !== 'primary' && ctx.color !== 'accent' && ctx.color !== 'warn',
+        );
       }
     },
     inputs: {
-      color: "color",
-      inline: [2, "inline", "inline", booleanAttribute],
-      svgIcon: "svgIcon",
-      fontSet: "fontSet",
-      fontIcon: "fontIcon"
+      color: 'color',
+      inline: [2, 'inline', 'inline', booleanAttribute],
+      svgIcon: 'svgIcon',
+      fontSet: 'fontSet',
+      fontIcon: 'fontIcon',
     },
-    exportAs: ["matIcon"],
+    exportAs: ['matIcon'],
     ngContentSelectors: _c0,
     decls: 1,
     vars: 0,
@@ -893,53 +980,80 @@ var MatIcon = class _MatIcon {
         ɵɵprojection(0);
       }
     },
-    styles: ["mat-icon,mat-icon.mat-primary,mat-icon.mat-accent,mat-icon.mat-warn{color:var(--mat-icon-color, inherit)}.mat-icon{-webkit-user-select:none;user-select:none;background-repeat:no-repeat;display:inline-block;fill:currentColor;height:24px;width:24px;overflow:hidden}.mat-icon.mat-icon-inline{font-size:inherit;height:inherit;line-height:inherit;width:inherit}.mat-icon.mat-ligature-font[fontIcon]::before{content:attr(fontIcon)}[dir=rtl] .mat-icon-rtl-mirror{transform:scale(-1, 1)}.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-prefix .mat-icon,.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-suffix .mat-icon{display:block}.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-prefix .mat-icon-button .mat-icon,.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-suffix .mat-icon-button .mat-icon{margin:auto}\n"],
+    styles: [
+      'mat-icon,mat-icon.mat-primary,mat-icon.mat-accent,mat-icon.mat-warn{color:var(--mat-icon-color, inherit)}.mat-icon{-webkit-user-select:none;user-select:none;background-repeat:no-repeat;display:inline-block;fill:currentColor;height:24px;width:24px;overflow:hidden}.mat-icon.mat-icon-inline{font-size:inherit;height:inherit;line-height:inherit;width:inherit}.mat-icon.mat-ligature-font[fontIcon]::before{content:attr(fontIcon)}[dir=rtl] .mat-icon-rtl-mirror{transform:scale(-1, 1)}.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-prefix .mat-icon,.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-suffix .mat-icon{display:block}.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-prefix .mat-icon-button .mat-icon,.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-suffix .mat-icon-button .mat-icon{margin:auto}\n',
+    ],
     encapsulation: 2,
-    changeDetection: 0
+    changeDetection: 0,
   });
 };
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(MatIcon, [{
-    type: Component,
-    args: [{
-      template: "<ng-content></ng-content>",
-      selector: "mat-icon",
-      exportAs: "matIcon",
-      host: {
-        "role": "img",
-        "class": "mat-icon notranslate",
-        "[class]": 'color ? "mat-" + color : ""',
-        "[attr.data-mat-icon-type]": '_usingFontIcon() ? "font" : "svg"',
-        "[attr.data-mat-icon-name]": "_svgName || fontIcon",
-        "[attr.data-mat-icon-namespace]": "_svgNamespace || fontSet",
-        "[attr.fontIcon]": "_usingFontIcon() ? fontIcon : null",
-        "[class.mat-icon-inline]": "inline",
-        "[class.mat-icon-no-color]": 'color !== "primary" && color !== "accent" && color !== "warn"'
+  (typeof ngDevMode === 'undefined' || ngDevMode) &&
+    setClassMetadata(
+      MatIcon,
+      [
+        {
+          type: Component,
+          args: [
+            {
+              template: '<ng-content></ng-content>',
+              selector: 'mat-icon',
+              exportAs: 'matIcon',
+              host: {
+                role: 'img',
+                class: 'mat-icon notranslate',
+                '[class]': 'color ? "mat-" + color : ""',
+                '[attr.data-mat-icon-type]': '_usingFontIcon() ? "font" : "svg"',
+                '[attr.data-mat-icon-name]': '_svgName || fontIcon',
+                '[attr.data-mat-icon-namespace]': '_svgNamespace || fontSet',
+                '[attr.fontIcon]': '_usingFontIcon() ? fontIcon : null',
+                '[class.mat-icon-inline]': 'inline',
+                '[class.mat-icon-no-color]':
+                  'color !== "primary" && color !== "accent" && color !== "warn"',
+              },
+              encapsulation: ViewEncapsulation.None,
+              changeDetection: ChangeDetectionStrategy.OnPush,
+              styles: [
+                'mat-icon,mat-icon.mat-primary,mat-icon.mat-accent,mat-icon.mat-warn{color:var(--mat-icon-color, inherit)}.mat-icon{-webkit-user-select:none;user-select:none;background-repeat:no-repeat;display:inline-block;fill:currentColor;height:24px;width:24px;overflow:hidden}.mat-icon.mat-icon-inline{font-size:inherit;height:inherit;line-height:inherit;width:inherit}.mat-icon.mat-ligature-font[fontIcon]::before{content:attr(fontIcon)}[dir=rtl] .mat-icon-rtl-mirror{transform:scale(-1, 1)}.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-prefix .mat-icon,.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-suffix .mat-icon{display:block}.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-prefix .mat-icon-button .mat-icon,.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-suffix .mat-icon-button .mat-icon{margin:auto}\n',
+              ],
+            },
+          ],
+        },
+      ],
+      () => [],
+      {
+        color: [
+          {
+            type: Input,
+          },
+        ],
+        inline: [
+          {
+            type: Input,
+            args: [
+              {
+                transform: booleanAttribute,
+              },
+            ],
+          },
+        ],
+        svgIcon: [
+          {
+            type: Input,
+          },
+        ],
+        fontSet: [
+          {
+            type: Input,
+          },
+        ],
+        fontIcon: [
+          {
+            type: Input,
+          },
+        ],
       },
-      encapsulation: ViewEncapsulation.None,
-      changeDetection: ChangeDetectionStrategy.OnPush,
-      styles: ["mat-icon,mat-icon.mat-primary,mat-icon.mat-accent,mat-icon.mat-warn{color:var(--mat-icon-color, inherit)}.mat-icon{-webkit-user-select:none;user-select:none;background-repeat:no-repeat;display:inline-block;fill:currentColor;height:24px;width:24px;overflow:hidden}.mat-icon.mat-icon-inline{font-size:inherit;height:inherit;line-height:inherit;width:inherit}.mat-icon.mat-ligature-font[fontIcon]::before{content:attr(fontIcon)}[dir=rtl] .mat-icon-rtl-mirror{transform:scale(-1, 1)}.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-prefix .mat-icon,.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-suffix .mat-icon{display:block}.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-prefix .mat-icon-button .mat-icon,.mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-suffix .mat-icon-button .mat-icon{margin:auto}\n"]
-    }]
-  }], () => [], {
-    color: [{
-      type: Input
-    }],
-    inline: [{
-      type: Input,
-      args: [{
-        transform: booleanAttribute
-      }]
-    }],
-    svgIcon: [{
-      type: Input
-    }],
-    fontSet: [{
-      type: Input
-    }],
-    fontIcon: [{
-      type: Input
-    }]
-  });
+    );
 })();
 var MatIconModule = class _MatIconModule {
   static ɵfac = function MatIconModule_Factory(__ngFactoryType__) {
@@ -948,20 +1062,30 @@ var MatIconModule = class _MatIconModule {
   static ɵmod = ɵɵdefineNgModule({
     type: _MatIconModule,
     imports: [MatCommonModule, MatIcon],
-    exports: [MatIcon, MatCommonModule]
+    exports: [MatIcon, MatCommonModule],
   });
   static ɵinj = ɵɵdefineInjector({
-    imports: [MatCommonModule, MatCommonModule]
+    imports: [MatCommonModule, MatCommonModule],
   });
 };
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(MatIconModule, [{
-    type: NgModule,
-    args: [{
-      imports: [MatCommonModule, MatIcon],
-      exports: [MatIcon, MatCommonModule]
-    }]
-  }], null, null);
+  (typeof ngDevMode === 'undefined' || ngDevMode) &&
+    setClassMetadata(
+      MatIconModule,
+      [
+        {
+          type: NgModule,
+          args: [
+            {
+              imports: [MatCommonModule, MatIcon],
+              exports: [MatIcon, MatCommonModule],
+            },
+          ],
+        },
+      ],
+      null,
+      null,
+    );
 })();
 export {
   ICON_REGISTRY_PROVIDER,
@@ -975,6 +1099,6 @@ export {
   getMatIconFailedToSanitizeLiteralError,
   getMatIconFailedToSanitizeUrlError,
   getMatIconNameNotFoundError,
-  getMatIconNoHttpProviderError
+  getMatIconNoHttpProviderError,
 };
 //# sourceMappingURL=@angular_material_icon.js.map

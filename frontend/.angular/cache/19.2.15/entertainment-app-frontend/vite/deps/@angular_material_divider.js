@@ -1,14 +1,10 @@
-import {
-  coerceBooleanProperty
-} from "./chunk-L66ZKIDN.js";
-import {
-  MatCommonModule
-} from "./chunk-4XSXKLH5.js";
-import "./chunk-DFZUIEHR.js";
-import "./chunk-QSTMW43C.js";
-import "./chunk-DXLYELY7.js";
-import "./chunk-4EGC72M3.js";
-import "./chunk-LH4B7CI6.js";
+import { coerceBooleanProperty } from './chunk-L66ZKIDN.js';
+import { MatCommonModule } from './chunk-DEPPKGNT.js';
+import './chunk-LMZTW6BW.js';
+import './chunk-EFGIXGQ3.js';
+import './chunk-U5ZBX5YW.js';
+import './chunk-ZEP2XSNY.js';
+import './chunk-JXH7IHTU.js';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,11 +16,11 @@ import {
   ɵɵclassProp,
   ɵɵdefineComponent,
   ɵɵdefineInjector,
-  ɵɵdefineNgModule
-} from "./chunk-KZUALIOS.js";
-import "./chunk-7RYJKT7I.js";
-import "./chunk-P3HNZ6IB.js";
-import "./chunk-IS5DM6DS.js";
+  ɵɵdefineNgModule,
+} from './chunk-XZGMYZQR.js';
+import './chunk-T7QKJDR6.js';
+import './chunk-3RIMHZ7P.js';
+import './chunk-DVXABYOS.js';
 
 // node_modules/@angular/material/fesm2022/divider.mjs
 var MatDivider = class _MatDivider {
@@ -49,54 +45,74 @@ var MatDivider = class _MatDivider {
   };
   static ɵcmp = ɵɵdefineComponent({
     type: _MatDivider,
-    selectors: [["mat-divider"]],
-    hostAttrs: ["role", "separator", 1, "mat-divider"],
+    selectors: [['mat-divider']],
+    hostAttrs: ['role', 'separator', 1, 'mat-divider'],
     hostVars: 7,
     hostBindings: function MatDivider_HostBindings(rf, ctx) {
       if (rf & 2) {
-        ɵɵattribute("aria-orientation", ctx.vertical ? "vertical" : "horizontal");
-        ɵɵclassProp("mat-divider-vertical", ctx.vertical)("mat-divider-horizontal", !ctx.vertical)("mat-divider-inset", ctx.inset);
+        ɵɵattribute('aria-orientation', ctx.vertical ? 'vertical' : 'horizontal');
+        ɵɵclassProp('mat-divider-vertical', ctx.vertical)('mat-divider-horizontal', !ctx.vertical)(
+          'mat-divider-inset',
+          ctx.inset,
+        );
       }
     },
     inputs: {
-      vertical: "vertical",
-      inset: "inset"
+      vertical: 'vertical',
+      inset: 'inset',
     },
     decls: 0,
     vars: 0,
-    template: function MatDivider_Template(rf, ctx) {
-    },
-    styles: [".mat-divider{display:block;margin:0;border-top-style:solid;border-top-color:var(--mat-divider-color, var(--mat-sys-outline));border-top-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-vertical{border-top:0;border-right-style:solid;border-right-color:var(--mat-divider-color, var(--mat-sys-outline));border-right-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-inset{margin-left:80px}[dir=rtl] .mat-divider.mat-divider-inset{margin-left:auto;margin-right:80px}\n"],
+    template: function MatDivider_Template(rf, ctx) {},
+    styles: [
+      '.mat-divider{display:block;margin:0;border-top-style:solid;border-top-color:var(--mat-divider-color, var(--mat-sys-outline));border-top-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-vertical{border-top:0;border-right-style:solid;border-right-color:var(--mat-divider-color, var(--mat-sys-outline));border-right-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-inset{margin-left:80px}[dir=rtl] .mat-divider.mat-divider-inset{margin-left:auto;margin-right:80px}\n',
+    ],
     encapsulation: 2,
-    changeDetection: 0
+    changeDetection: 0,
   });
 };
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(MatDivider, [{
-    type: Component,
-    args: [{
-      selector: "mat-divider",
-      host: {
-        "role": "separator",
-        "[attr.aria-orientation]": 'vertical ? "vertical" : "horizontal"',
-        "[class.mat-divider-vertical]": "vertical",
-        "[class.mat-divider-horizontal]": "!vertical",
-        "[class.mat-divider-inset]": "inset",
-        "class": "mat-divider"
+  (typeof ngDevMode === 'undefined' || ngDevMode) &&
+    setClassMetadata(
+      MatDivider,
+      [
+        {
+          type: Component,
+          args: [
+            {
+              selector: 'mat-divider',
+              host: {
+                role: 'separator',
+                '[attr.aria-orientation]': 'vertical ? "vertical" : "horizontal"',
+                '[class.mat-divider-vertical]': 'vertical',
+                '[class.mat-divider-horizontal]': '!vertical',
+                '[class.mat-divider-inset]': 'inset',
+                class: 'mat-divider',
+              },
+              template: '',
+              encapsulation: ViewEncapsulation.None,
+              changeDetection: ChangeDetectionStrategy.OnPush,
+              styles: [
+                '.mat-divider{display:block;margin:0;border-top-style:solid;border-top-color:var(--mat-divider-color, var(--mat-sys-outline));border-top-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-vertical{border-top:0;border-right-style:solid;border-right-color:var(--mat-divider-color, var(--mat-sys-outline));border-right-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-inset{margin-left:80px}[dir=rtl] .mat-divider.mat-divider-inset{margin-left:auto;margin-right:80px}\n',
+              ],
+            },
+          ],
+        },
+      ],
+      null,
+      {
+        vertical: [
+          {
+            type: Input,
+          },
+        ],
+        inset: [
+          {
+            type: Input,
+          },
+        ],
       },
-      template: "",
-      encapsulation: ViewEncapsulation.None,
-      changeDetection: ChangeDetectionStrategy.OnPush,
-      styles: [".mat-divider{display:block;margin:0;border-top-style:solid;border-top-color:var(--mat-divider-color, var(--mat-sys-outline));border-top-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-vertical{border-top:0;border-right-style:solid;border-right-color:var(--mat-divider-color, var(--mat-sys-outline));border-right-width:var(--mat-divider-width, 1px)}.mat-divider.mat-divider-inset{margin-left:80px}[dir=rtl] .mat-divider.mat-divider-inset{margin-left:auto;margin-right:80px}\n"]
-    }]
-  }], null, {
-    vertical: [{
-      type: Input
-    }],
-    inset: [{
-      type: Input
-    }]
-  });
+    );
 })();
 var MatDividerModule = class _MatDividerModule {
   static ɵfac = function MatDividerModule_Factory(__ngFactoryType__) {
@@ -105,23 +121,30 @@ var MatDividerModule = class _MatDividerModule {
   static ɵmod = ɵɵdefineNgModule({
     type: _MatDividerModule,
     imports: [MatCommonModule, MatDivider],
-    exports: [MatDivider, MatCommonModule]
+    exports: [MatDivider, MatCommonModule],
   });
   static ɵinj = ɵɵdefineInjector({
-    imports: [MatCommonModule, MatCommonModule]
+    imports: [MatCommonModule, MatCommonModule],
   });
 };
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(MatDividerModule, [{
-    type: NgModule,
-    args: [{
-      imports: [MatCommonModule, MatDivider],
-      exports: [MatDivider, MatCommonModule]
-    }]
-  }], null, null);
+  (typeof ngDevMode === 'undefined' || ngDevMode) &&
+    setClassMetadata(
+      MatDividerModule,
+      [
+        {
+          type: NgModule,
+          args: [
+            {
+              imports: [MatCommonModule, MatDivider],
+              exports: [MatDivider, MatCommonModule],
+            },
+          ],
+        },
+      ],
+      null,
+      null,
+    );
 })();
-export {
-  MatDivider,
-  MatDividerModule
-};
+export { MatDivider, MatDividerModule };
 //# sourceMappingURL=@angular_material_divider.js.map

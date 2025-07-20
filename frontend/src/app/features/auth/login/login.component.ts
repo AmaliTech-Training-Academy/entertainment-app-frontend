@@ -69,20 +69,6 @@ export class LoginComponent implements OnInit {
           this.loginError = '';
         }
       }
-
-      // Password validation
-      if (passwordControl?.touched || passwordControl?.dirty) {
-        if (passwordControl.hasError('required')) {
-          this.loginError =
-            'Password is required. Password must contain uppercase, lowercase, number, and special character.';
-        } else if (passwordControl.hasError('minlength')) {
-          this.loginError =
-            'Minimum 8 characters required. Password must contain uppercase, lowercase, number, and special character.';
-        } else if (passwordControl.hasError('pattern')) {
-          this.loginError =
-            'Password must contain uppercase, lowercase, number, and special character.';
-        }
-      }
     });
   }
 
@@ -92,7 +78,6 @@ export class LoginComponent implements OnInit {
       const { email, password } = this.loginForm.value;
       this.authService.login(email, password).subscribe({
         next: (response) => {
-          console.log('Login response:', response); // Log the response
           // Extract token and user info from response.data
           const { token, refreshToken, ...user } = response.data || {};
           if (token) {
