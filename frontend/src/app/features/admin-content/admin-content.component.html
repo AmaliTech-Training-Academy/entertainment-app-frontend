@@ -1,119 +1,125 @@
-<section class="content-management">
-  <header class="page-header">
-    <h1>Content Management</h1>
-    <p>Manage content inventory</p>
-  </header>
-
-  <div class="top-bar">
-    <input
-      class="search-input"
-      type="text"
-      placeholder="Search movies"
-      [(ngModel)]="searchTerm"
-      (input)="filterContent()"
-    />
-    <button class="upload-btn" (click)="uploadContent()">+ Upload content</button>
-  </div>
-
-  <!-- Upload Form -->
-  <div *ngIf="showUploadForm" class="upload-form">
-    <h3>Add New Content</h3>
-    <form (ngSubmit)="addContent()">
-      <input type="text" placeholder="Title" [(ngModel)]="newContent.title" name="title" required />
-      <select [(ngModel)]="newContent.genre" name="genre" required>
-        <option value="" disabled>Select genre</option>
-        <option *ngFor="let genre of genres" [value]="genre">{{ genre }}</option>
-      </select>
-      <input
-        type="text"
-        placeholder="Duration"
-        [(ngModel)]="newContent.duration"
-        name="duration"
-        required
-      />
-      <input type="date" [(ngModel)]="newContent.releaseDate" name="releaseDate" required />
-      <select [(ngModel)]="newContent.status" name="status" required>
-        <option value="Draft">Draft</option>
-        <option value="Published">Published</option>
-        <option value="Archived">Archived</option>
-      </select>
-      <button type="submit">Upload</button>
-    </form>
-  </div>
-
-  <!-- Edit Form -->
-  <div *ngIf="showEditForm" class="upload-form">
-    <h3>{{ editingMultiple ? 'Edit Selected Content' : 'Edit Movie' }}</h3>
-    <form (ngSubmit)="submitEdit()">
-      <input type="text" [(ngModel)]="editContent.title" name="editTitle" required />
-      <select [(ngModel)]="editContent.genre" name="editGenre" required>
-        <option *ngFor="let genre of genres" [value]="genre">{{ genre }}</option>
-      </select>
-      <input type="text" [(ngModel)]="editContent.duration" name="editDuration" required />
-      <input type="date" [(ngModel)]="editContent.releaseDate" name="editReleaseDate" required />
-      <select [(ngModel)]="editContent.status" name="editStatus" required>
-        <option value="Draft">Draft</option>
-        <option value="Published">Published</option>
-        <option value="Archived">Archived</option>
-      </select>
-      <button type="submit">Save Changes</button>
-    </form>
-  </div>
-
-  <h3>Bulk Actions</h3>
-  <div class="bulk-actions">
-    <div class="bulk-buttons">
-      <button class="edit-btn" (click)="editSelected()">Edit</button>
-      <button class="delete-btn" (click)="deleteSelected()">Delete</button>
+<div class="media-management">
+  <h2>Media Management</h2>
+  
+  <div class="media-controls">
+    <div class="controls-row">
+      <button class="upload-btn" (click)="openUploadDialog()">Upload New Movie</button>
+      
+      <div class="search-container">
+        <input
+          type="text"
+          placeholder="Search movies..."
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()"
+          class="search-input"
+        />
+      </div>
+      
+      <button class="clear-filters-btn" (click)="clearFilters()" *ngIf="searchQuery">
+        Clear Search
+      </button>
     </div>
-
-    <div class="dropdown">
-      <button class="dropdown-btn" (click)="toggleDropdown()">All Genre</button>
-      <ul *ngIf="dropdownOpen" class="dropdown-menu">
-        <li *ngFor="let genre of genres" (click)="selectGenre(genre)">{{ genre }}</li>
-      </ul>
+    
+    <div class="results-info">
+      <span>Showing {{ media.length }} of {{ totalElements }} results</span>
     </div>
   </div>
 
-  <div class="table-wrapper">
-    <table class="content-table">
+  <div class="table-container">
+    <table class="media-table">
       <thead>
         <tr>
-          <th>
-            <input type="checkbox" [(ngModel)]="selectAll" (change)="toggleAll()" />
-          </th>
+          <th>Thumbnail</th>
           <th>Title</th>
-          <th>Genre</th>
-          <th>Duration</th>
-          <th>Release Date</th>
-          <th>Status</th>
+          <th>Type</th>
+          <th>Year</th>
+          <th>Genres</th>
+          <th>Rating</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of filteredContent">
-          <td>
-            <input type="checkbox" [(ngModel)]="item.selected" (change)="onItemSelectionChange()" />
+        <tr *ngFor="let item of media; trackBy: trackByMediaId" class="media-row">
+          <td class="thumbnail-cell">
+            <img
+              [src]="item.thumbnailUrl"
+              [alt]="item.title"
+              class="media-thumbnail"
+              loading="lazy"
+            />
           </td>
-          <td>{{ item.title }}</td>
-          <td>{{ item.genre }}</td>
-          <td>{{ item.duration }}</td>
-          <td>{{ item.releaseDate }}</td>
-          <td class="status">{{ item.status }}</td>
+          <td class="title-cell">{{ item.title }}</td>
+          <td class="type-cell">{{ item.mediaType }}</td>
+          <td class="year-cell">{{ item.releaseYear }}</td>
+          <td class="genres-cell">{{ item.genres.join(', ') }}</td>
+          <td class="rating-cell">
+            <span class="rating">{{ item.averageRating | number:'1.1-1' }}</span>
+          </td>
+          <td class="actions-cell">
+            <button class="edit-btn" (click)="editMedia(item)">Edit</button>
+            <button class="delete-btn" (click)="deleteMedia(item)">Delete</button>
+          </td>
         </tr>
-        <tr *ngIf="filteredContent.length === 0">
-          <td colspan="6" class="no-results">No movies found.</td>
+        
+        <!-- Empty state -->
+        <tr *ngIf="media.length === 0" class="empty-row">
+          <td colspan="7" class="empty-cell">
+            <div class="empty-state">
+              <p>No media found</p>
+              <p *ngIf="searchQuery" class="empty-subtitle">
+                Try adjusting your search
+              </p>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
-</section>
 
-<app-confirm-modal
-  *ngIf="showConfirmModal"
-  [title]="'Delete Confirmation'"
-  [message]="'Are you sure you want to delete the selected movie(s)?'"
-  [confirmText]="'Delete'"
-  [cancelText]="'Cancel'"
-  (confirm)="confirmDelete()"
-  (cancel)="cancelDelete()"
-></app-confirm-modal>
+  <!-- Enhanced Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button 
+      class="page-btn" 
+      (click)="changePage(0)" 
+      [disabled]="currentPage === 0"
+      title="First Page">
+      &#171;
+    </button>
+    
+    <button 
+      class="page-btn" 
+      (click)="prevPage()" 
+      [disabled]="currentPage === 0"
+      title="Previous Page">
+      &#8249;
+    </button>
+    
+    <button 
+      *ngFor="let page of getPageNumbers()" 
+      class="page-btn"
+      [class.active]="page === currentPage"
+      (click)="changePage(page)">
+      {{ page + 1 }}
+    </button>
+    
+    <button 
+      class="page-btn" 
+      (click)="nextPage()" 
+      [disabled]="currentPage + 1 >= totalPages"
+      title="Next Page">
+      &#8250;
+    </button>
+    
+    <button 
+      class="page-btn" 
+      (click)="changePage(totalPages - 1)" 
+      [disabled]="currentPage + 1 >= totalPages"
+      title="Last Page">
+      &#187;
+    </button>
+    
+    <div class="page-info">
+      <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+    </div>
+  </div>
+</div>
