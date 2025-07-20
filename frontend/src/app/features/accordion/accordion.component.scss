@@ -23,6 +23,7 @@ h2 {
   }
 
   @media (min-width: 1024px) {
+        margin-left: space(7);
   }
 }
 
@@ -101,6 +102,7 @@ h2 {
 
   @media (min-width: 768px) {
     padding: space(2) space(6);
+    margin-left: 0 space(8);
 
     .accordion-item {
       .accordion-header {
@@ -120,7 +122,8 @@ h2 {
   }
 
   @media (min-width: 1024px) {
-    // padding: space(2) space(8);
+    margin: 0 space(7);
+    padding: 0;
 
     .accordion-item {
       .accordion-header {

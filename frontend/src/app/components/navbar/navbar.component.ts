@@ -1,6 +1,6 @@
 import { Component, ElementRef, HostListener } from '@angular/core';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { Router } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 
@@ -14,7 +14,7 @@ interface SearchMovie {
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, AvatarComponent],
+  imports: [CommonModule, ButtonComponent, AvatarComponent, RouterModule],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
@@ -24,20 +24,27 @@ export class NavbarComponent {
   searchResults: SearchMovie[] = [
     {
       rank: 1,
-      image: 'assets/images/cineverse_logo.svg',
+      image: 'https://images.unsplash.com/photo-1752350434950-50e8df9c268e?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       alt: 'Beyond Earth',
       year: 1995,
     },
     {
       rank: 2,
-      image: 'assets/images/cineverse_logo.svg',
+      image: 'https://images.unsplash.com/photo-1752350434950-50e8df9c268e?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      alt: 'Beyond Earth',
+      year: 1995,
+    },
+    {
+      rank: 3,
+      image: 'https://images.unsplash.com/photo-1752350434950-50e8df9c268e?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       alt: 'Beyond Earth',
       year: 1995,
     },
   ];
   isAuthenticated = false;
-  user: { email: string; name: string; avatar: string } | null = null;
+  user: { email: string; name: string; avatar: string; roles?: string[] } | null = null;
   showUserDropdown = false;
+  public cookies: any = {};
 
   constructor(
     private router: Router,
@@ -50,13 +57,13 @@ export class NavbarComponent {
 
   checkAuth() {
     // Parse cookies to get auth_token and auth_user
-    const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
+    this.cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
       const [key, value] = cookie.trim().split('=');
       acc[key] = value;
       return acc;
     }, {});
-    const token = cookies['auth_token'];
-    const user = cookies['auth_user'];
+    const token = this.cookies['auth_token'];
+    const user = this.cookies['auth_user'];
     this.isAuthenticated = !!token && !!user;
     this.user = user ? JSON.parse(decodeURIComponent(user)) : null;
   }
@@ -90,18 +97,18 @@ export class NavbarComponent {
     this.showDropdown = !!value;
   }
 
-  goToAdvancedSearch() {
-    this.showDropdown = false;
-    this.router.navigate(['/advanced-search']);
+  isAdmin(): boolean {
+    return this.user?.roles?.includes('ROLE_ADMINISTRATOR') || false;
   }
 
-  goToLogin() {
-    this.router.navigate(['/login']);
+  goToDashboard() {
+    if (this.isAdmin()) {
+      this.router.navigate(['/admin/dashboard']);
+    } else {
+      this.router.navigate(['/user/dashboard']);
+    }
   }
 
-  goToSignUp() {
-    this.router.navigate(['/signup']);
-  }
   goToUserDashboard() {
     this.router.navigate(['/user-test']);
   }

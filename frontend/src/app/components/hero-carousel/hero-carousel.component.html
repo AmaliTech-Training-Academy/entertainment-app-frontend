@@ -12,7 +12,7 @@
             <span class="hero-genres">• {{ currentHero.genres.join(' ') }}</span>
           </div>
           <div class="hero-actions">
-            <app-button type="primary" size="large" ariaLabel="Play Now">
+            <app-button type="primary" size="large" ariaLabel="Play Now" (click)="playNow()">
               <div style="display: flex; align-items: center; justify-content: center; gap: 12px">
                 <svg
                   width="24"
@@ -29,7 +29,7 @@
                 Play Now
               </div>
             </app-button>
-            <app-button type="link" size="large" ariaLabel="Info">
+            <app-button type="link" size="large" ariaLabel="Info" (click)="showInfo()">
               <div style="display: flex; align-items: center; justify-content: center; gap: 12px">
                 <svg
                   width="24"

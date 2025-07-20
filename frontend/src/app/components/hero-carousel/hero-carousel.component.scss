@@ -44,7 +44,20 @@
 
 .hero-content {
   color: map.get($neutral-colors, 100);
-  // flex: 1 1 0;
+  margin-left: 0;
+  max-width: 90vw;
+
+  @media (max-width: 1024px) {
+    margin-left: map.get($spacing, 7);
+  }
+
+  @media (max-width: 768px) {
+    margin-left: map.get($spacing, 4);
+  }
+
+  @media (max-width: 428px) {
+    margin-left: 1rem;
+  }
 }
 
 .hero-title {
@@ -163,19 +176,6 @@
 .hero-carousel-indicators span.active {
   background: map.get($neutral-colors, 100);
   transform: scale(1.2);
-}
-
-@media (max-width: 900px) {
-  .hero-content {
-    margin-left: map.get($spacing, 4);
-    max-width: 90vw;
-  }
-  .hero-title {
-    font-size: map.get(map.get($headings, h3), font-size);
-  }
-  .hero-carousel {
-    height: 350px;
-  }
 }
 
 .hero-carousel {
@@ -314,12 +314,7 @@
   transform: scale(1.1);
 }
 
-@media (max-width: 900px) {
-  .hero-content {
-    padding: 20px;
-    // margin-left: 20px;
-    // max-width: 90vw;
-  }
+@media (max-width: 768px) {
   .hero-title {
     font-size: 2rem;
   }
@@ -327,13 +322,3 @@
     height: 350px;
   }
 }
-@media (max-width: 768) {
-  .hero-content {
-    width: 100%;
-  }
-}
-// @media (min-width:768){
-//   .hero-content{
-//     padding: 10px;
-//   }
-// }

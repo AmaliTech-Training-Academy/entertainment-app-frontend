@@ -386,3 +386,13 @@
     scroll-snap-align: start;
   }
 }
+@media (max-width: 900px) {
+  .trending-section__arrow {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .trending-section__arrow {
+    display: none;
+  }
+}
