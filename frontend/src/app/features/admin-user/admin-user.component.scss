@@ -1,261 +1,299 @@
-@use 'sass:map';
-@use '../../../styles/variables' as *;
-
-// Helpers
-@function color($palette, $shade) {
-  @return map.get($palette, $shade);
-}
-
 .user-management {
-  background-color: #10141e;
-  color: #e0e0e0;
-  min-height: 100vh;
-  font-family: 'Segoe UI', sans-serif;
-}
+  background-color: #10141E;
+  color: #e8eaed;
+  padding: 2rem;
+  border-radius: 12px;
 
-.page-header {
-  margin-bottom: 2rem;
-
-  h1 {
+  h2 {
     font-size: 2rem;
-    margin-bottom: 0.25rem;
-    color: #ffffff;
+    margin-bottom: 1.5rem;
+    color: #e8eaed;
   }
 
-  p {
-    font-size: 1rem;
-    color: #aaaaaa;
-  }
-}
+  .filters-and-actions {
+    background-color: #1a1e2a;
+    border: 1px solid #2c2c2c;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
 
-.top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-  gap: 50px;
+    .search-section,
+    .filter-section,
+    .bulk-actions {
+      flex: 1 1 250px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
 
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
+      label {
+        font-size: 0.85rem;
+        color: #9aa0a6;
+      }
 
-  .search-input {
-    padding: 1rem 1rem;
-    background-color: color($primary-colors, 800);
-    border: none;
-    border-radius: 6px;
-    color: #f0f0f0;
-    width: 60%;
+      input,
+      select {
+        background-color: #222531;
+        color: #e8eaed;
+        border: 1px solid #444;
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
 
-    @media (max-width: 768px) {
-      width: 100%;
-    }
-  }
-
-  .dropdown {
-    position: relative;
-
-    .dropdown-btn {
-      background-color: transparent;
-      color: #ffffff;
-      border: 1px solid color($primary-colors, 800);
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
+        &:focus {
+          border-color: #8ab4f8;
+          outline: none;
+          box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.2);
+        }
+      }
     }
 
-    .dropdown-menu {
-      position: absolute;
-      top: 110%;
-      left: 0;
-      background-color: transparent;
-      border: 1px solid color($primary-colors, 800);
-      border-radius: 6px;
-      list-style: none;
-      margin: 0;
-      padding: 0.5rem 0;
-      width: 150px;
-      z-index: 10;
+    .bulk-actions {
+      flex: 1 1 100%;
 
-      li {
-        padding: 0.5rem 1rem;
-        color: #f0f0f0;
-        cursor: pointer;
+      .role-change-section,
+      .ban-section,
+      .delete-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        button {
+          padding: 0.5rem 1rem;
+          font-size: 0.85rem;
+          font-weight: 500;
+          border-radius: 6px;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+        }
+      }
+
+      .change-role-btn {
+        background-color: #8ab4f8;
+        color: #10141E;
+
+        &:hover:not(:disabled) {
+          background-color: #aecbfa;
+        }
+
+        &:disabled {
+          background-color: #3c4043;
+          color: #9aa0a6;
+          cursor: not-allowed;
+        }
+      }
+
+      .ban-btn {
+        background-color: #f28b82;
+        color: #10141E;
 
         &:hover {
-          background-color: #3a3a3a;
+          background-color: #ea4335;
+        }
+      }
+
+      .unban-btn {
+        background-color: #81c784;
+        color: #10141E;
+
+        &:hover {
+          background-color: #66bb6a;
+        }
+      }
+
+      .bulk-delete-btn {
+        background-color: #ff8a65;
+        color: #10141E;
+
+        &:hover {
+          background-color: #ff7043;
+        }
+      }
+
+      .clear-selection-btn {
+        background: transparent;
+        border: 1px solid #8ab4f8;
+        color: #8ab4f8;
+
+        &:hover {
+          background-color: rgba(138, 180, 248, 0.1);
         }
       }
     }
   }
-}
 
-.bulk-actions {
-  margin-bottom: 1.5rem;
-
-  .action-btn {
-    background-color: color($primary-colors, 800);
-    color: #f0f0f0;
-    padding: 0.5rem 1.2rem;
-    border: none;
-    border-radius: 6px;
-    margin-right: 0.75rem;
-    cursor: pointer;
-    transition: background 0.2s;
-
-    &:hover {
-      background-color: #3d3d3d;
-    }
-
-    &.ban {
-      background-color: #5c1e1e;
-
-      &:hover {
-        background-color: #7e2c2c;
-      }
-    }
-  }
-}
-
-.user-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: color($primary-colors, 800);
-  border: 1px solid #333;
-  border-radius: 8px;
-  overflow: hidden;
-
-  th,
-  td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    cursor: pointer;
+  .table-info {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #9aa0a6;
   }
 
-  thead {
-    background-color: color($primary-colors, 1000);
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1c1f2a;
+    border-radius: 12px;
+    overflow: hidden;
 
-    th {
-      color: #bbbbbb;
-      font-weight: 600;
-    }
-  }
-
-  tbody {
-    tr {
-      border-top: 1px solid #2d2d2d;
-
-      &:hover {
-        background-color: #252525;
-      }
-    }
-
+    th,
     td {
-      color: #e0e0e0;
+      text-align: left;
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+
+    thead {
+      background-color: #232634;
+
+      th {
+        color: #9aa0a6;
+      }
+    }
+
+    tbody {
+      tr {
+        border-top: 1px solid #333;
+
+        &.inactive-user {
+          background-color: rgba(255, 255, 255, 0.03);
+          color: #f28b82;
+        }
+
+        &.selected-row {
+          background-color: rgba(138, 180, 248, 0.08);
+        }
+
+        td {
+          vertical-align: middle;
+        }
+
+        .role-badge {
+          display: inline-block;
+          padding: 0.25rem 0.75rem;
+          border-radius: 999px;
+          font-size: 0.75rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          background-color: rgba(255, 255, 255, 0.1);
+
+          &.role-admin {
+            background-color: rgba(244, 67, 54, 0.15);
+            color: #f28b82;
+          }
+
+          &.role-user {
+            background-color: rgba(76, 175, 80, 0.15);
+            color: #81c784;
+          }
+
+          &.role-moderator {
+            background-color: rgba(255, 193, 7, 0.15);
+            color: #ffd54f;
+          }
+
+          &.role-banned {
+            background-color: rgba(158, 158, 158, 0.15);
+            color: #9e9e9e;
+          }
+        }
+      }
     }
   }
 
-  .status-active {
-    color: #00c853;
-    font-weight: 500;
+  .selected-info {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: rgba(138, 180, 248, 0.1);
+    border-left: 4px solid #8ab4f8;
+    border-radius: 6px;
+    font-size: 0.9rem;
   }
 
-  .status-inactive {
-    color: #f44336;
-    font-weight: 500;
+  .no-results {
+    margin-top: 2rem;
+    text-align: center;
+    color: #9aa0a6;
+
+    .clear-filters-btn {
+      margin-top: 0.5rem;
+      background: transparent;
+      color: #8ab4f8;
+      border: 1px solid #8ab4f8;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+
+      &:hover {
+        background-color: rgba(138, 180, 248, 0.1);
+      }
+    }
   }
-}
 
-/* admin-user.component.scss */
+  // Responsive
+  @media (max-width: 768px) {
+    padding: 1rem;
 
-:host {
-  display: block;
-  background-color: #10141e;
-  color: #c9d1d9;
-  min-height: 100vh;
-  padding: 2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+    .filters-and-actions {
+      flex-direction: column;
+    }
 
-/* Glassmorphism modal */
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 16px;
-  padding: 2rem;
-  width: 400px;
-  z-index: 1000;
-  transition: all 0.3s ease-in-out;
-}
+    table {
+      display: block;
+      width: 100%;
 
-.modal h2 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-  color: #ffffff;
-  text-align: center;
-}
+      thead {
+        display: none;
+      }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
+      tbody {
+        display: block;
+        width: 100%;
 
-input,
-select {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease-in-out;
-}
+        tr {
+          display: block;
+          margin-bottom: 1rem;
+          background-color: #1c1f2a;
+          border: 1px solid #333;
+          border-radius: 8px;
+          padding: 1rem;
 
-input:focus,
-select:focus {
-  outline: none;
-  border-color: #58a6ff;
-  background: rgba(255, 255, 255, 0.15);
-}
+          &.inactive-user {
+            background-color: rgba(255, 255, 255, 0.03);
+          }
 
-button {
-  background-color: #238636;
-  color: #fff;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
-}
+          &.selected-row {
+            background-color: rgba(138, 180, 248, 0.08);
+          }
 
-button:hover {
-  background-color: #2ea043;
-}
+          td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border: none;
 
-/* Close button */
-.modal button.close {
-  background-color: transparent;
-  color: #999;
-  border: none;
-  font-size: 1.25rem;
-  align-self: flex-end;
-  margin-bottom: -1rem;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
+            &::before {
+              content: attr(data-label);
+              font-weight: 600;
+              color: #9aa0a6;
+              flex: 0 0 50%;
+              max-width: 50%;
+              text-align: left;
+            }
 
-.modal button.close:hover {
-  color: #fff;
+            .role-badge {
+              margin-left: auto;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  *:focus {
+    outline: 2px solid #8ab4f8;
+    outline-offset: 2px;
+  }
 }

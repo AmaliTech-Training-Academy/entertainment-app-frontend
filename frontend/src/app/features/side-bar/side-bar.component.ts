@@ -17,15 +17,14 @@ export class SidebarComponent {
   topItems = [
     { label: 'Dashboard', route: '/admin/dashboard', icon: 'dashboard' },
     { label: 'Users', route: '/admin/users', icon: 'users' },
-    { label: 'Content', route: '/admin/content', icon: 'film' },
+    { label: 'Media', route: '/admin/content', icon: 'film' },
     { label: 'Logout', route: '/', icon: 'logout' },
   ];
 
   onItemClick(item: any) {
     if (item.label === 'Logout') {
-      this.logoutClicked.emit(); // Show modal
-    } else {
-      this.router.navigate([item.route]);
+      this.logoutClicked.emit(); 
     }
+   
   }
 }

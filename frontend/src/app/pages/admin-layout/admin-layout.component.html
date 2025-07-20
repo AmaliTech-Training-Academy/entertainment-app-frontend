@@ -4,10 +4,24 @@
     <div class="logo">
       <img src="assets/images/cineverse_logo.svg" alt="Cineverse Logo" />
     </div>
-    <img class="avatar" src="assets/images/profile.jpg" alt="Avatar" />
+
+    <div class="profile-container" (clickOutside)="closeProfileDropdown()">
+      <div class="profile-avatar" (click)="toggleProfileDropdown()">
+        {{ getUserInitials() }}
+      </div>
+      
+      <div class="profile-dropdown" [class.show]="showProfileDropdown">
+        <div class="profile-email">{{ userEmail }}</div>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item logout-btn" (click)="onLogoutClick()">
+          <i class="logout-icon">🚪</i>
+          Logout
+        </button>
+      </div>
+    </div>
   </header>
 
-  <!-- Layout Container -->
+  <!-- Sidebar + Main Content -->
   <div class="admin-body">
     <app-sidebar (logoutClicked)="onLogoutClick()"></app-sidebar>
 
@@ -17,6 +31,7 @@
   </div>
 </div>
 
+<!-- Confirm Logout Modal -->
 <app-confirm-modal
   *ngIf="showLogoutModal"
   [title]="'Confirm Logout'"

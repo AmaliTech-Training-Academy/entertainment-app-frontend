@@ -1,232 +1,654 @@
-@use '../../../styles/variables' as *;
-@use '../../../styles/spacing' as *;
-@use 'sass:map';
+// Variables
+$background-dark: #10141E;
+$surface-dark: #1A1D29;
+$accent-color: #bb86fc;
+$text-color: #ffffff;
+$muted-text: #b3b3b3;
+$divider: rgba(255, 255, 255, 0.1);
+$transition-speed: 0.3s;
 
-@function color($palette, $shade) {
-  @return map.get($palette, $shade);
+// Additional semantic colors
+$success-color: #4caf50;
+$warning-color: #ff9800;
+$error-color: #f44336;
+$info-color: #2196f3;
+
+// Media type colors
+$movie-color: #ff6b6b;
+$series-color: #4ecdc4;
+$documentary-color: #45b7d1;
+
+// Rating colors
+$rating-high: #4caf50;
+$rating-medium: #ff9800;
+$rating-low: #f44336;
+
+// Breakpoints
+$mobile: 768px;
+$tablet: 1024px;
+
+// Material Design elevation shadows
+@mixin elevation-1 {
+  box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
+              0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+              0px 1px 3px 0px rgba(0, 0, 0, 0.12);
 }
 
-@function space($size) {
-  @return map.get($spacing, $size);
+@mixin elevation-2 {
+  box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
+              0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+              0px 1px 5px 0px rgba(0, 0, 0, 0.12);
 }
 
-.content-management {
-  background-color: color($primary-colors, 1000);
-  color: color($neutral-colors, 100);
-  padding: space(4);
+@mixin elevation-3 {
+  box-shadow: 0px 3px 3px -2px rgba(0, 0, 0, 0.2),
+              0px 3px 4px 0px rgba(0, 0, 0, 0.14),
+              0px 1px 8px 0px rgba(0, 0, 0, 0.12);
+}
 
-  .page-header {
-    margin-bottom: space(lg);
+// Button mixins
+@mixin button-base {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all $transition-speed cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  text-decoration: none;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
 
-    h1 {
-      font-size: 2rem;
-      font-weight: 700;
+  &:focus-visible {
+    outline: 2px solid $accent-color;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // Ripple effect
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transform: scale(0);
+    pointer-events: none;
+  }
+
+  &:active:not(:disabled)::after {
+    animation: ripple 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+// Main container
+.media-management {
+  background: $background-dark;
+  color: $text-color;
+  padding: 24px;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+
+  @media (max-width: $mobile) {
+    padding: 16px;
+  }
+
+  h2 {
+    font-size: 28px;
+    font-weight: 400;
+    margin: 0 0 32px 0;
+    color: $text-color;
+    line-height: 1.2;
+
+    @media (max-width: $mobile) {
+      font-size: 24px;
+      margin-bottom: 24px;
     }
+  }
+}
 
-    p {
-      font-size: 0.875rem;
-      color: color($neutral-colors, 500);
-      margin-top: 12px;
-      margin-bottom: 1rem;
+// Media controls section
+.media-controls {
+  background: $surface-dark;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  @include elevation-1;
+
+  @media (max-width: $mobile) {
+    padding: 16px;
+  }
+
+  .controls-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+
+    @media (max-width: $mobile) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
     }
   }
 
-  .top-bar {
-    flex-direction: row;
+  .results-info {
+    display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid $divider;
+    color: $muted-text;
+    font-size: 14px;
 
-    @media (min-width: 768px) {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: space(3);
-    }
-
-    .search-input {
-      background: color($primary-colors, 700);
-      border: none;
-      border-radius: 0.5rem;
-      padding: 1rem 1rem;
-      width: 100%;
-      color: color($neutral-colors, 100);
-      margin-bottom: 1rem;
-    }
-
-    .upload-btn {
-      background-color: color($secondary-colors, 200);
-      color: white;
-      border: none;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-      font-weight: 500;
-      cursor: pointer;
-      width: 100%;
-      margin-bottom: 2rem;
-
-      &:hover {
-        background-color: color($secondary-colors, 300);
-      }
-    }
-
-    @media (min-width: 768px) {
-      .upload-btn {
-        width: 150px;
-      }
-
-      .search-input {
-        width: 60%;
-      }
+    @media (max-width: $mobile) {
+      justify-content: center;
+      text-align: center;
     }
   }
+}
 
-  h3 {
-    margin-bottom: space(3);
+// Upload button
+.upload-btn {
+  @include button-base;
+  background: $accent-color;
+  color: $background-dark;
+  font-weight: 600;
+  padding: 12px 24px;
+
+  &:hover:not(:disabled) {
+    background: lighten($accent-color, 10%);
+    @include elevation-2;
+    transform: translateY(-1px);
   }
 
-  .bulk-actions {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: space(3);
-
-    .bulk-buttons {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .edit-btn,
-    .delete-btn {
-      background-color: color($primary-colors, 700);
-      border: none;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 0.375rem;
-      cursor: pointer;
-    }
-
-    .dropdown {
-      position: relative;
-
-      .dropdown-btn {
-        background-color: transparent;
-        border: 1px solid color($neutral-colors, 100);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 0.375rem;
-        // border: none;
-        cursor: pointer;
-        width: 100%;
-      }
-
-      .dropdown-menu {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        background-color: color($neutral-colors, 900);
-        list-style: none;
-        padding: 0.5rem 0;
-        margin-top: 0.5rem;
-        border-radius: 0.375rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        z-index: 100;
-        width: 100%;
-
-        li {
-          padding: 0.5rem 1rem;
-          cursor: pointer;
-
-          &:hover {
-            background-color: color($neutral-colors, 800);
-          }
-        }
-      }
-    }
-
-    @media (min-width: 768px) {
-      flex-direction: row;
-      align-items: center;
-
-      .dropdown .dropdown-btn {
-        width: auto;
-      }
-    }
-  }
-
-  .table-wrapper {
-    overflow-x: hidden;
-    border: 1px solid color($neutral-colors, 100);
-    border-radius: 0.5rem;
-  }
-
-  .content-table {
+  @media (max-width: $mobile) {
     width: 100%;
-    border-collapse: collapse;
-    min-width: 600px;
-    border-radius: 0.625rem;
-    th,
-    td {
-      text-align: left;
-      padding: space(3);
-      white-space: nowrap;
+    justify-content: center;
+  }
+}
+
+// Search container
+.search-container {
+  flex: 1;
+  max-width: 400px;
+
+  @media (max-width: $mobile) {
+    max-width: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: $background-dark;
+    border: 2px solid $divider;
+    border-radius: 8px;
+    color: $text-color;
+    font-size: 14px;
+    transition: all $transition-speed ease;
+
+    &::placeholder {
+      color: $muted-text;
     }
+
+    &:focus {
+      outline: none;
+      border-color: $accent-color;
+      @include elevation-1;
+    }
+  }
+}
+
+// Clear filters button
+.clear-filters-btn {
+  @include button-base;
+  background: transparent;
+  color: $muted-text;
+  border: 1px solid $divider;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: $text-color;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+// Table container
+.table-container {
+  background: $surface-dark;
+  border-radius: 12px;
+  overflow: hidden;
+  @include elevation-1;
+  margin-bottom: 24px;
+
+  // Horizontal scroll for mobile
+  @media (max-width: $tablet) {
+    overflow-x: auto;
+  }
+}
+
+// Media table
+.media-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 800px; // Ensures table doesn't get too cramped
+
+  thead {
+    background: rgba($accent-color, 0.1);
 
     th {
-      background-color: transparent;
-      color: color($neutral-colors, 100);
-      font-weight: 400;
-      border-bottom: 1px solid color($primary-colors, 100);
-    }
+      padding: 16px;
+      text-align: left;
+      font-weight: 500;
+      color: $text-color;
+      font-size: 14px;
+      border-bottom: 1px solid $divider;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      background: rgba($accent-color, 0.1);
+      z-index: 10;
 
-    td {
-      background-color: color($primary-colors, 800);
-      color: color($primary-colors, 100);
-      border-bottom: 1px solid color($primary-colors, 100);
+      &:first-child {
+        width: 80px; // Thumbnail column
+      }
+
+      &:last-child {
+        width: 140px; // Actions column
+      }
+
+      @media (max-width: $mobile) {
+        padding: 12px 8px;
+        font-size: 12px;
+      }
+    }
+  }
+
+  tbody {
+    .media-row {
+      transition: all $transition-speed ease;
+      border-bottom: 1px solid $divider;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.04);
+        transform: translateY(-1px);
+        @include elevation-1;
+      }
 
       &:last-child {
         border-bottom: none;
       }
+
+      td {
+        padding: 16px;
+        color: $text-color;
+        font-size: 14px;
+        vertical-align: middle;
+        border-bottom: 1px solid $divider;
+
+        @media (max-width: $mobile) {
+          padding: 12px 8px;
+          font-size: 12px;
+        }
+      }
     }
 
-    .status {
-      color: color($primary-colors, 100);
-    }
+    .empty-row {
+      td.empty-cell {
+        padding: 48px 24px;
+        text-align: center;
 
-    tr {
-      border-radius: 0.625rem;
-      overflow: hidden;
+        .empty-state {
+          p {
+            color: $muted-text;
+            font-size: 16px;
+            margin: 0 0 8px 0;
+
+            &.empty-subtitle {
+              font-size: 14px;
+              margin: 0;
+            }
+          }
+        }
+      }
     }
   }
 }
 
-.no-results {
-  text-align: center;
-  font-style: italic;
-  padding: 1rem;
-  color: gray;
+// Table cell specific styles
+.thumbnail-cell {
+  .media-thumbnail {
+    width: 60px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+    @include elevation-1;
+    transition: transform $transition-speed ease;
+
+    &:hover {
+      transform: scale(1.05);
+      @include elevation-2;
+    }
+
+    @media (max-width: $mobile) {
+      width: 40px;
+      height: 60px;
+    }
+  }
 }
 
-.upload-form {
-  background: #f9f9f9;
-  padding: 1rem;
-  margin: 1rem 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+.title-cell {
+  font-weight: 500;
+  max-width: 200px;
+  
+  @media (max-width: $tablet) {
+    max-width: 150px;
+  }
+}
 
-  input,
-  select {
-    display: block;
-    margin: 0.5rem 0;
-    padding: 0.4rem;
+.type-cell {
+  .media-type {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &.movie {
+      background: rgba($movie-color, 0.2);
+      color: $movie-color;
+    }
+
+    &.series {
+      background: rgba($series-color, 0.2);
+      color: $series-color;
+    }
+
+    &.documentary {
+      background: rgba($documentary-color, 0.2);
+      color: $documentary-color;
+    }
+  }
+}
+
+.year-cell {
+  color: $muted-text;
+  font-weight: 400;
+}
+
+.genres-cell {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: $muted-text;
+  font-size: 13px;
+
+  @media (max-width: $tablet) {
+    max-width: 100px;
+  }
+}
+
+.rating-cell {
+  .rating {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    
+    // Color based on rating value
+    &[data-rating^="9"], &[data-rating^="8"] {
+      background: rgba($rating-high, 0.2);
+      color: $rating-high;
+    }
+    
+    &[data-rating^="7"], &[data-rating^="6"] {
+      background: rgba($rating-medium, 0.2);
+      color: $rating-medium;
+    }
+    
+    &[data-rating^="5"], &[data-rating^="4"], &[data-rating^="3"], &[data-rating^="2"], &[data-rating^="1"], &[data-rating^="0"] {
+      background: rgba($rating-low, 0.2);
+      color: $rating-low;
+    }
+  }
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  @media (max-width: $mobile) {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+// Action buttons
+.edit-btn {
+  @include button-base;
+  background: $info-color;
+  color: white;
+  font-size: 12px;
+  padding: 6px 12px;
+  min-height: 32px;
+
+  &:hover:not(:disabled) {
+    background: darken($info-color, 10%);
+    @include elevation-1;
+  }
+
+  @media (max-width: $mobile) {
     width: 100%;
+    justify-content: center;
+  }
+}
+
+.delete-btn {
+  @include button-base;
+  background: $error-color;
+  color: white;
+  font-size: 12px;
+  padding: 6px 12px;
+  min-height: 32px;
+
+  &:hover:not(:disabled) {
+    background: darken($error-color, 10%);
+    @include elevation-1;
   }
 
-  button {
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    background-color: #0066cc;
-    color: white;
-    border: none;
-    border-radius: 4px;
+  @media (max-width: $mobile) {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+// Pagination
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 24px;
+  background: $surface-dark;
+  border-radius: 12px;
+  @include elevation-1;
+
+  @media (max-width: $mobile) {
+    padding: 16px;
+    gap: 4px;
+  }
+
+  .page-btn {
+    @include button-base;
+    background: transparent;
+    color: $muted-text;
+    border: 1px solid $divider;
+    min-width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    font-weight: 500;
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      color: $text-color;
+      border-color: rgba(255, 255, 255, 0.2);
+      @include elevation-1;
+    }
+
+    &.active {
+      background: $accent-color;
+      color: $background-dark;
+      border-color: $accent-color;
+      font-weight: 600;
+      @include elevation-2;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      background: transparent;
+      color: $muted-text;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: $mobile) {
+      min-width: 36px;
+      height: 36px;
+      font-size: 12px;
+    }
+  }
+
+  .page-info {
+    margin-left: 16px;
+    color: $muted-text;
+    font-size: 14px;
+    white-space: nowrap;
+
+    @media (max-width: $mobile) {
+      margin-left: 8px;
+      font-size: 12px;
+      width: 100%;
+      text-align: center;
+      margin-top: 8px;
+    }
+  }
+}
+
+// Loading state (optional enhancement)
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba($background-dark, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid $divider;
+    border-top: 3px solid $accent-color;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .media-management {
+    border: 1px solid $text-color;
+  }
+
+  .media-controls,
+  .table-container,
+  .pagination {
+    border: 1px solid $divider;
+  }
+
+  .media-thumbnail {
+    border: 1px solid $divider;
+  }
+
+  .rating {
+    border: 1px solid currentColor;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .media-row:hover {
+    transform: none;
+  }
+
+  .media-thumbnail:hover {
+    transform: none;
+  }
+
+  .upload-btn:hover {
+    transform: none;
+  }
+}
+
+// Print styles
+@media print {
+  .media-management {
+    background: white;
+    color: black;
+    
+    .media-controls,
+    .pagination {
+      display: none;
+    }
+    
+    .media-table {
+      box-shadow: none;
+      
+      .actions-cell {
+        display: none;
+      }
+    }
   }
 }
