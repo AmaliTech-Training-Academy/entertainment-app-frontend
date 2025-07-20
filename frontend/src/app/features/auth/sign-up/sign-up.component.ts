@@ -98,7 +98,7 @@ export class SignUpComponent {
           }
 
           this.snackBar.open('Account created successfully!', 'Close', {
-            duration: 3000,
+            duration: 10000,
             verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });

@@ -1,180 +1,171 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { AdminService } from '../../core/services/admin/admin.service';
+import { MediaItem } from '../../models/media.model';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-admin-content',
+  imports: [CommonModule, FormsModule],
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmModalComponent],
   templateUrl: './admin-content.component.html',
   styleUrls: ['./admin-content.component.scss'],
 })
-export class AdminContentComponent {
-  content = [
-    {
-      title: 'Golden Eye',
-      genre: 'Action',
-      duration: '2h',
-      releaseDate: '2023-01-01',
-      status: 'Published',
-      selected: false,
-    },
-    {
-      title: 'Extraction',
-      genre: 'Drama',
-      duration: '1h 45m',
-      releaseDate: '2022-11-10',
-      status: 'Draft',
-      selected: false,
-    },
-    {
-      title: 'The Conjuring',
-      genre: 'Comedy',
-      duration: '2h 10m',
-      releaseDate: '2023-05-15',
-      status: 'Published',
-      selected: false,
-    },
-    {
-      title: 'The Nun',
-      genre: 'Horror',
-      duration: '1h 30m',
-      releaseDate: '2021-10-31',
-      status: 'Archived',
-      selected: false,
-    },
-  ];
-
-  genres = ['Action', 'Drama', 'Comedy', 'Horror'];
-  selectedGenre: string | null = null;
-  dropdownOpen = false;
-
-  searchTerm: string = '';
-  filteredContent: any[] = [];
-
-  selectAll = false;
+export class AdminContentComponent implements OnInit, OnDestroy {
+  media: MediaItem[] = [];
+  currentPage = 0;
+  pageSize = 10;
+  totalPages = 0;
+  totalElements = 0;
+  searchQuery: string = '';
+  isSearching = false;
+  isLoading = false;
   showUploadForm = false;
-  showEditForm = false;
-  showConfirmModal = false;
-  editingMultiple = false;
+  selectedMediaItem: MediaItem | null = null;
 
-  newContent = {
-    title: '',
-    genre: '',
-    duration: '',
-    releaseDate: '',
-    status: 'Draft',
-  };
+  
 
-  editContent = {
-    title: '',
-    genre: '',
-    duration: '',
-    releaseDate: '',
-    status: '',
-  };
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
-  ngOnInit() {
-    this.filteredContent = [...this.content];
+  constructor(private adminService: AdminService) {}
+
+  ngOnInit(): void {
+    this.loadMedia();
   }
 
-  filterContent() {
-    const term = this.searchTerm.trim().toLowerCase();
-    this.filteredContent = this.content.filter(
-      (item) =>
-        item.title.toLowerCase().includes(term) &&
-        (!this.selectedGenre || item.genre === this.selectedGenre),
-    );
-    this.syncSelection();
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  selectGenre(genre: string) {
-    this.selectedGenre = genre;
-    this.dropdownOpen = false;
-    this.filterContent();
-  }
+  loadMedia(): void {
+    this.isLoading = true;
 
-  toggleDropdown() {
-    this.dropdownOpen = !this.dropdownOpen;
-  }
+    // Determine if we're in search mode
+    const trimmedQuery = this.searchQuery.trim();
+    this.isSearching = !!trimmedQuery;
 
-  toggleAll() {
-    this.filteredContent.forEach((item) => (item.selected = this.selectAll));
-  }
+    // Choose the appropriate service call
+    const serviceCall = this.isSearching
+      ? this.adminService.searchMedia(trimmedQuery, this.currentPage, this.pageSize)
+      : this.adminService.getPaginatedMedia(this.currentPage, this.pageSize);
 
-  updateSelection() {
-    this.selectAll = this.filteredContent.every((item) => item.selected);
-  }
+    serviceCall.subscribe({
+      next: (res) => {
+        this.isLoading = false;
 
-  syncSelection() {
-    this.selectAll = this.filteredContent.every((item) => item.selected);
-  }
+        // Handle nested data structure (res.data.content)
+        if (res.data && res.data.content) {
+          this.media = res.data.content;
+          this.totalPages = res.data.totalPages || 0;
+          this.totalElements = res.data.totalElements || res.data.total || 0;
+        }
+        // Handle direct response structure (res.content)
+        else if (res.content) {
+          this.media = res.content;
+          this.totalPages = res.totalPages || 0;
+          this.totalElements = res.totalElements || res.total || res.size || 0;
+        }
+        // Handle direct array response
+        else if (Array.isArray(res)) {
+          this.media = res;
+          this.totalPages = 1;
+          this.totalElements = res.length;
+        }
+        // Handle response where media is directly in res
+        else {
+          this.media = res.media || res.items || [];
+          this.totalPages = res.totalPages || res.pages || 1;
+          this.totalElements = res.totalElements || res.total || res.count || this.media.length;
+        }
 
-  uploadContent() {
-    this.showUploadForm = !this.showUploadForm;
-  }
+        console.log(
+          `Loaded ${this.media.length} items (${this.isSearching ? 'search' : 'browse'} mode)`,
+          {
+            totalPages: this.totalPages,
+            totalElements: this.totalElements,
+            response: res,
+          },
+        );
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Failed to load media:', err);
+        // Reset data on error
+        this.media = [];
+        this.totalPages = 0;
+        this.totalElements = 0;
 
-  addContent() {
-    const { title, genre, duration, releaseDate, status } = this.newContent;
-    if (!title || !genre || !duration || !releaseDate || !status) {
-      alert('Please fill out all fields.');
-      return;
-    }
-
-    this.content.unshift({ ...this.newContent, selected: false });
-    this.filterContent();
-    this.showUploadForm = false;
-
-    this.newContent = {
-      title: '',
-      genre: '',
-      duration: '',
-      releaseDate: '',
-      status: 'Draft',
-    };
-  }
-
-  editSelected() {
-    const selectedItems = this.filteredContent.filter((item) => item.selected);
-    if (selectedItems.length === 0) {
-      alert('Please select at least one item to edit.');
-      return;
-    }
-
-    this.editingMultiple = selectedItems.length > 1;
-    this.editContent = { ...selectedItems[0] };
-    this.showEditForm = true;
-  }
-
-  submitEdit() {
-    const selectedItems = this.filteredContent.filter((item) => item.selected);
-    selectedItems.forEach((item) => {
-      item.title = this.editContent.title;
-      item.genre = this.editContent.genre;
-      item.duration = this.editContent.duration;
-      item.releaseDate = this.editContent.releaseDate;
-      item.status = this.editContent.status;
+        // Show user-friendly error message
+        if (err.status === 404 && this.isSearching) {
+          console.log('No search results found');
+        } else {
+          console.error('Error loading media:', err.message || 'Unknown error');
+        }
+      },
     });
-
-    this.showEditForm = false;
   }
 
-  deleteSelected() {
-    this.showConfirmModal = true;
+
+  changePage(page: number): void {
+    if (page >= 0 && page < this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.loadMedia();
+    }
   }
 
-  confirmDelete() {
-    this.content = this.content.filter((item) => !item.selected);
-    this.filterContent();
-    this.showConfirmModal = false;
+  nextPage(): void {
+    if (this.currentPage + 1 < this.totalPages) {
+      this.changePage(this.currentPage + 1);
+    }
   }
 
-  cancelDelete() {
-    this.showConfirmModal = false;
+  prevPage(): void {
+    if (this.currentPage > 0) {
+      this.changePage(this.currentPage - 1);
+    }
   }
 
-  onItemSelectionChange() {
-    this.syncSelection();
+  clearFilters(): void {
+    this.searchQuery = '';
+    this.currentPage = 0;
+    this.isSearching = false;
+    this.loadMedia();
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPagesToShow = 5;
+    const startPage = Math.max(0, this.currentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(this.totalPages - 1, startPage + maxPagesToShow - 1);
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  trackByMediaId(index: number, item: MediaItem): any {
+    // Use id if available, otherwise fall back to title+year combination
+    if ((item as any).id) {
+      return (item as any).id;
+    }
+    if ((item as any).mediaId) {
+      return (item as any).mediaId;
+    }
+    return item.title && item.releaseYear ? `${item.title}-${item.releaseYear}` : index;
+  }
+
+
+
+  refreshData(): void {
+    this.loadMedia();
+  }
+
+  // Method to check if we have results
+  hasResults(): boolean {
+    return this.media.length > 0;
   }
 }

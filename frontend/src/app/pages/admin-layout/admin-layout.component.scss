@@ -1,82 +1,130 @@
-@use '../../../styles/variables' as *;
-@use '../../../styles/spacing' as *;
-@use 'sass:map';
+// Variables
+$bg-dark: #10141E;
+$surface: #1A1D29;
+$accent: #BB86FC;
+$text-light: #EDEDED;
+$transition: all 0.3s ease;
 
-// Helpers
-@function color($palette, $shade) {
-  @return map.get($palette, $shade);
-}
-
-@function space($size) {
-  @return map.get($spacing, $size);
+// Reset
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .admin-layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden;
-}
+  background-color: $bg-dark;
+  color: $text-light;
 
-.admin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: color($primary-colors, 900);
-  color: white;
-  border-bottom: 1px solid color($primary-colors, 800);
-
-  .logo img {
-    height: 32px;
-  }
-
-  .avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-}
-
-.admin-body {
-  display: flex;
-  flex: 1;
-  height: calc(100vh - 64px); // 64px header
-}
-
-.admin-main {
-  background-color: #10141e;
-  flex: 1;
-  overflow-y: auto;
-
-  &::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-  }
-
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  overscroll-behavior: contain;
-}
-
-/* ======== Responsive: Sidebar at Bottom on Mobile ======== */
-@media (max-width: 768px) {
-  .admin-body {
-    flex-direction: column-reverse;
-  }
-
-  app-sidebar {
-    width: 100%;
-    height: 60px;
-    background-color: color($primary-colors, 900);
+  .admin-header {
+    background-color: $surface;
+    padding: 1rem;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
-    border-top: 1px solid color($primary-colors, 800);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .logo img {
+      height: 32px;
+    }
+
+    .profile-container {
+      position: relative;
+
+      .profile-avatar {
+        background-color: $accent;
+        color: #000;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 48px;
+        background-color: $surface;
+        border-radius: 8px;
+        padding: 0.75rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        min-width: 160px;
+        display: none;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        &.show {
+          display: flex;
+        }
+
+        .profile-email {
+          font-size: 0.875rem;
+          color: $text-light;
+        }
+
+        .dropdown-divider {
+          height: 1px;
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown-item {
+          background: none;
+          border: none;
+          color: $text-light;
+          text-align: left;
+          font-size: 0.9rem;
+          cursor: pointer;
+          padding: 0.25rem 0;
+
+          .logout-icon {
+            margin-right: 0.5rem;
+          }
+        }
+      }
+    }
   }
 
-  .admin-main {
-    height: calc(100vh - 64px - 60px); // header + bottom nav
+  .admin-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+
+    app-sidebar {
+
+      min-width: 200px;
+      max-width: 260px;
+      background-color: $surface;
+      flex-shrink: 0;
+    }
+
+    .admin-main {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      background-color: $bg-dark;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .admin-body {
+      flex-direction: column;
+
+      app-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .admin-main {
+        padding: 1rem 0.5rem;
+      }
+    }
   }
 }

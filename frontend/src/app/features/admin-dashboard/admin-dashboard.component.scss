@@ -1,174 +1,161 @@
-@use '../../../styles/variables' as *;
-@use '../../../styles/spacing' as *;
-@use 'sass:map';
+@use "../../../styles/variables" as *;
 
-// Helper functions
-@function color($palette, $shade) {
-  @return map.get($palette, $shade);
-}
-
-@function space($size) {
-  @return map.get($spacing, $size);
-}
-
-// Animations
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes slideUp {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// Dashboard styles
 .dashboard {
-  padding: space(4);
-  background-color: color($primary-colors, 1000);
-  color: color($neutral-colors, 100);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem;
+  background-color: #10141E;
+  color: #ffffff;
+  font-family: 'Roboto', sans-serif;
+  min-height: 100vh;
+  transition: all 0.3s ease-in-out;
 
-  h1 {
-    font-size: 3rem;
-    margin-bottom: space(1);
-    font-weight: 700;
-  }
-
-  .subtitle {
-    font-size: 0.95rem;
-    color: color($primary-colors, 100);
-    margin-bottom: space(5);
-  }
-
-  .metrics {
+  .stat-cards {
     display: flex;
-    gap: space(4);
-    flex-wrap: wrap;
-    margin-bottom: space(6);
+    flex-direction: column;
+    gap: 1rem;
 
-    .card {
-      flex: 1 1 200px;
-      background-color: color($primary-colors, 800);
-      border-radius: 12px;
-      padding: space(5);
-      display: flex;
-      flex-direction: column;
-      animation: fadeIn 0.6s ease forwards;
-      transition: background-color 0.3s ease;
+    .stat-card {
+      background-color: #1c1f2a;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      transition: transform 0.3s ease;
 
-      h3 {
-        font-size: 1rem;
-        margin-bottom: space(1);
-        color: color($neutral-colors, 200);
+      h2 {
+        font-size: 1.2rem;
+        color: #bb86fc;
+        margin-bottom: 0.5rem;
       }
 
-      .value {
-        font-size: 1.5rem;
+      p {
+        font-size: 2rem;
         font-weight: bold;
-        color: color($neutral-colors, 100);
+        color: #ffffff;
       }
 
-      .green {
-        color: color($green-colors, 200);
-        font-size: 0.9rem;
-        margin-top: space(1);
-      }
-
-      .red {
-        color: color($red-colors, 100);
-        font-size: 0.9rem;
-        margin-top: space(1);
+      &:hover {
+        transform: translateY(-4px);
       }
     }
   }
 
-  .table-section {
-    margin-bottom: space(6);
-    animation: slideUp 0.6s ease forwards;
-
-    h2 {
-      margin-bottom: space(2);
-      font-size: 1.2rem;
-      color: color($neutral-colors, 100);
+  .trending-section {
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 1rem;
     }
 
-    table {
+    .trending-table {
+      overflow-x: auto;
+      background-color: #1c1f2a;
+      border-radius: 0.75rem;
+      padding: 1rem;
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th, td {
+          padding: 0.75rem 1rem;
+          text-align: left;
+          white-space: nowrap;
+        }
+
+        th {
+          background-color: #252836;
+          color: #bb86fc;
+          font-weight: 500;
+        }
+
+        td {
+          border-top: 1px solid #2f3242;
+        }
+
+        .title-cell {
+          font-weight: 500;
+        }
+
+        .genre-tag {
+          display: inline-block;
+          background-color: #3700b3;
+          color: #fff;
+          font-size: 0.75rem;
+          padding: 0.3rem 0.6rem;
+          border-radius: 9999px;
+          margin-right: 0.4rem;
+          margin-bottom: 0.3rem;
+        }
+
+        .rating-cell {
+          .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: #03dac6;
+            color: #000;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            gap: 0.3rem;
+          }
+        }
+      }
+    }
+  }
+
+  .chart-wrapper {
+    background-color: #1c1f2a;
+    border-radius: 1rem;
+    padding: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 1rem;
+    }
+
+    ngx-charts-bar-vertical,
+    ngx-charts-pie-chart {
+      display: block;
       width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      background-color: transparent;
-      border: 1px solid color($primary-colors, 100);
-      border-radius: 12px;
-      overflow: hidden;
-
-      th,
-      td {
-        text-align: left;
-        padding: space(4);
-        border-bottom: 1px solid color($primary-colors, 100);
-      }
-
-      th {
-        background-color: #2d3955;
-        color: color($neutral-colors, 200);
-        font-weight: 600;
-      }
-
-      td {
-        color: color($neutral-colors, 300);
-        font-size: 0.95rem;
-      }
-
-      tr:last-child td {
-        border-bottom: none;
-      }
-
-      tr:first-child th:first-child {
-        border-top-left-radius: 12px;
-      }
-
-      tr:first-child th:last-child {
-        border-top-right-radius: 12px;
-      }
-
-      tr:last-child td:first-child {
-        border-bottom-left-radius: 12px;
-      }
-
-      tr:last-child td:last-child {
-        border-bottom-right-radius: 12px;
-      }
+      height: auto;
     }
   }
 
-  // Responsive
-  @media (min-width: 768px) {
-    padding: space(5);
+  .stat-card, .chart-wrapper, .trending-table {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+}
 
-    .metrics .card {
-      padding: space(5) space(6);
+// Responsive styles
+@media (min-width: 768px) {
+  .dashboard {
+    .stat-cards {
+      flex-direction: row;
     }
   }
+}
 
-  @media (min-width: 1024px) {
-    h1 {
-      font-size: 2rem;
+@media (min-width: 1024px) {
+  .dashboard {
+    padding: 2rem 4rem;
+
+    .stat-cards {
+      gap: 2rem;
     }
 
-    .metrics .card {
-      padding: space(6) space(8);
+    .chart-wrapper {
+      padding: 2rem;
+    }
+
+    .trending-table {
+      padding: 1.5rem;
     }
   }
 }

@@ -43,14 +43,14 @@ export const routes: Routes = [
             (m) => m.RecommendationComponent,
           ),
       },
-      {
-        path: 'media/:id/player',
-        loadComponent: () =>
-          import('./pages/media-player-page/media-player-page.component').then(
-            (m) => m.MediaPlayerPageComponent,
-          ),
-        canActivate: [AuthGuard],
-      },
+      // {
+      //   path: 'media/:id/player',
+      //   loadComponent: () =>
+      //     import('./pages/media-player-page/media-player-page.component').then(
+      //       (m) => m.MediaPlayerPageComponent,
+      //     ),
+      //   canActivate: [AuthGuard],
+      // },
     ],
   },
   {
@@ -95,11 +95,10 @@ export const routes: Routes = [
             (m) => m.AdminDashboardComponent,
           ),
       },
-      {
-        path: 'users',
-        loadComponent: () =>
-          import('./features/admin-user/admin-user.component').then((m) => m.AdminUserComponent),
-      },
+       {
+         path: 'users',
+         loadComponent: () => import('./features/admin-user/admin-user.component').then((m) => m.AdminUserComponent),
+       },
       {
         path: 'content',
         loadComponent: () =>
