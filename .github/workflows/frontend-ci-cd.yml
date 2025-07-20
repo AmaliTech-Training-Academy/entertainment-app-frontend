@@ -430,6 +430,14 @@ jobs:
           
           echo "DEBUG: Final plan_changes output: $(cat $GITHUB_OUTPUT | grep plan_changes | cut -d'=' -f2)" # Debug output from file
 
+          echo "DEBUG: Contents of generated terraform.tfvars:"
+          cat environments/$ENVIRONMENT/terraform.tfvars
+          echo "DEBUG: Contents of generated backend.hcl:"
+          cat environments/$ENVIRONMENT/backend.hcl
+          
+          echo "DEBUG: Terraform show -json of the plan file:"
+          terraform show -json "$ENVIRONMENT.tfplan"
+
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
         if: steps.plan.outputs.plan_changes == 'true'
