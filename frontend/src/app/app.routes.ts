@@ -23,12 +23,6 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
       },
       {
-        path: 'user/dashboard',
-        loadComponent: () =>
-          import('./pages/user-dashboard.page.component').then((m) => m.UserDashboardPageComponent),
-        canActivate: [AuthGuard],
-      },
-      {
         path: 'search/advanced',
         loadComponent: () =>
           import('./pages/advanced-search.page/advanced-search.page.component').then(
@@ -56,6 +50,24 @@ export const routes: Routes = [
             (m) => m.MediaPlayerPageComponent,
           ),
         canActivate: [AuthGuard],
+      },
+    ],
+  },
+  {
+    path: 'user',
+    loadComponent: () =>
+      import('./pages/user-layout/user-layout.component').then((m) => m.UserLayoutComponent),
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./pages/user-dashboard.page.component').then((m) => m.UserDashboardPageComponent),
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
       },
     ],
   },

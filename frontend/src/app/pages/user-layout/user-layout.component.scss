@@ -1,0 +1,82 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/spacing' as *;
+@use 'sass:map';
+
+// Helpers
+@function color($palette, $shade) {
+  @return map.get($palette, $shade);
+}
+
+@function space($size) {
+  @return map.get($spacing, $size);
+}
+
+.user-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: color($primary-colors, 900);
+  color: white;
+  border-bottom: 1px solid color($primary-colors, 800);
+
+  .logo img {
+    height: 32px;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+
+.user-body {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 64px); // 64px header
+}
+
+.user-main {
+  background-color: #10141e;
+  flex: 1;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior: contain;
+}
+
+/* ======== Responsive: Sidebar at Bottom on Mobile ======== */
+@media (max-width: 768px) {
+  .user-body {
+    flex-direction: column-reverse;
+  }
+
+  app-sidebar {
+    width: 100%;
+    height: 60px;
+    background-color: color($primary-colors, 900);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid color($primary-colors, 800);
+  }
+
+  .user-main {
+    height: calc(100vh - 64px - 60px); // header + bottom nav
+  }
+}

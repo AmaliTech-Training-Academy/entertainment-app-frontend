@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 // import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,8 +14,7 @@ import { MediaDetailsService } from '../../core/services/media-details/media-det
 import { MediaDetails, Screenshot } from '../../shared/components/media-details';
 
 function getUserId(): number | null {
-  // Parse cookies
-  const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
+  const cookies = document.cookie.split(';').reduce((acc: Record<string, string>, cookie) => {
     const [key, value] = cookie.trim().split('=');
     acc[key] = value;
     return acc;
@@ -24,9 +23,9 @@ function getUserId(): number | null {
   if (userStr) {
     try {
       const user = JSON.parse(decodeURIComponent(userStr));
-      return user.id; 
-    } catch (e) {
-      console.log('Error parsing user cookie:', e, userStr);
+      return user.id;
+    } catch {
+      return null;
     }
   }
   return null;
@@ -43,7 +42,7 @@ function getUserId(): number | null {
     TopCastCardComponent,
     RatingCardComponent,
     MatIconModule,
-    RouterModule
+    RouterModule,
   ],
   templateUrl: './detail.page.html',
   styleUrls: ['./detail.page.scss'],
@@ -51,30 +50,26 @@ function getUserId(): number | null {
 export class DetailPage implements OnInit {
   screenshots: Screenshot[] = [];
   comments: Comment[] = [];
-  topCast: any[] = [];
-  reviews: any[] = [];
+  topCast: Record<string, unknown>[] = [];
+  reviews: Record<string, unknown>[] = [];
   isLoggedIn = false;
-  user: any = null;
+  user: Record<string, unknown> | null = null;
   commentText = '';
   mediaId: number | null = null;
-  title: string = '';
-  synopsis: string = '';
-  thumbnailUrl: string = '';
+  title = '';
+  synopsis = '';
+  thumbnailUrl = '';
 
-  constructor(
-    // private http: HttpClient,
-    private route: ActivatedRoute,
-    private commentService: CommentService,
-    private mediaDetailsService: MediaDetailsService,
-    private router:Router
-  ) {}
+  private route = inject(ActivatedRoute);
+  private commentService = inject(CommentService);
+  private mediaDetailsService = inject(MediaDetailsService);
+  private router = inject(Router);
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params) => {
       this.mediaId = Number(params.get('id'));
       if (this.mediaId) {
         this.fetchMediaDetails();
-        // this.fetchComments(); // If you want to keep comments in sync with the comment service
       }
     });
     this.setUser();
@@ -82,7 +77,7 @@ export class DetailPage implements OnInit {
 
   setUser() {
     // Parse cookies
-    const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
+    const cookies = document.cookie.split(';').reduce((acc: Record<string, string>, cookie) => {
       const [key, value] = cookie.trim().split('=');
       acc[key] = value;
       return acc;
@@ -92,10 +87,11 @@ export class DetailPage implements OnInit {
     if (token && userStr) {
       try {
         this.user = JSON.parse(decodeURIComponent(userStr));
-        console.log('auth_user cookie:', userStr);
         this.isLoggedIn = true;
         return;
-      } catch {}
+      } catch {
+        return;
+      }
     }
     this.user = null;
     this.isLoggedIn = false;
@@ -106,7 +102,6 @@ export class DetailPage implements OnInit {
     console.log('Fetching media details for mediaId:', this.mediaId);
     this.mediaDetailsService.getMediaDetailsById(this.mediaId).subscribe({
       next: (res) => {
-        console.log('GET media details response:', res);
         const data: MediaDetails = res.data;
         this.screenshots = data.screenshots || [];
         this.topCast = data.castMembers || [];
@@ -115,10 +110,8 @@ export class DetailPage implements OnInit {
         this.title = data.title;
         this.synopsis = data.synopsis;
         this.thumbnailUrl = data.thumbnailUrl;
-        console.log('Comments from backend:', data.comments);
       },
-      error: (err) => {
-        console.log('GET media details error:', err);
+      error: () => {
         this.screenshots = [];
         this.topCast = [];
         this.reviews = [];
@@ -126,24 +119,9 @@ export class DetailPage implements OnInit {
         this.title = '';
         this.synopsis = '';
         this.thumbnailUrl = '';
-      }
+      },
     });
   }
-
-  // fetchComments() {
-  //   if (!this.mediaId) return;
-  //   console.log('Fetching comments for mediaId:', this.mediaId);
-  //   this.commentService.getCommentsByMediaId(this.mediaId).subscribe({
-  //     next: (res) => {
-  //       console.log('GET comments response:', res);
-  //       this.comments = res.data || [];
-  //     },
-  //     error: (err) => {
-  //       console.log('GET comments error:', err);
-  //       this.comments = [];
-  //     }
-  //   });
-  // }
 
   login() {
     this.router.navigate(['/login']);
@@ -178,11 +156,19 @@ export class DetailPage implements OnInit {
       },
       error: (err) => {
         console.log('POST comment error:', err);
-      }
+      },
     });
   }
 
   cancelComment() {
     this.commentText = '';
+  }
+
+  asString(val: unknown): string {
+    return typeof val === 'string' ? val : '';
+  }
+
+  asNumber(val: unknown): number {
+    return typeof val === 'number' ? val : 0;
   }
 }

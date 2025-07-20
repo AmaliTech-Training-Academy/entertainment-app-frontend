@@ -9,7 +9,16 @@
     <div class="dropdown">
       <button class="dropdown-btn" (click)="toggleDropdown()">All Roles</button>
       <ul *ngIf="dropdownOpen" class="dropdown-menu">
-        <li *ngFor="let role of roles" (click)="selectRole(role)">{{ role }}</li>
+        <li
+          *ngFor="let role of roles"
+          (click)="selectRole(role)"
+          (keydown.enter)="selectRole(role)"
+          (keydown.space)="selectRole(role)"
+          tabindex="0"
+          role="button"
+        >
+          {{ role }}
+        </li>
       </ul>
     </div>
   </div>

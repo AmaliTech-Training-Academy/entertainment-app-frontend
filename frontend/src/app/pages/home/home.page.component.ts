@@ -1,9 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { HeroCarouselComponent } from '../../components/hero-carousel/hero-carousel.component';
-import { TrendingMovieCardComponent } from '../../components/trending-movie-card/trending-movie-card.component';
 import { CommonModule } from '@angular/common';
 import { SubscriptionFormComponent } from '../../components/subscription-form/subscription-form.component';
 import { AccordionComponent } from '../../features/accordion/accordion.component';
+import {
+  TrendingMoviesService,
+  TrendingMovie,
+} from '../../core/services/home-content/movies.service';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { TrendingCarouselComponent } from '../../components/trending-carousel/trending-carousel.component';
 
 @Component({
   selector: 'app-home-page',
@@ -11,64 +16,32 @@ import { AccordionComponent } from '../../features/accordion/accordion.component
   imports: [
     CommonModule,
     HeroCarouselComponent,
-    TrendingMovieCardComponent,
+  
     SubscriptionFormComponent,
     AccordionComponent,
+    TrendingCarouselComponent,
   ],
   templateUrl: './home.page.component.html',
   styleUrl: './home.page.component.scss',
 })
 export class HomePage implements OnInit {
-  trendingMovies = [
-    {
-      rank: 1,
-      image: 'assets/images/final-destination.png',
-      alt: 'Final Destination Bloodlines poster',
-    },
-    {
-      rank: 2,
-      image: 'assets/images/maa.png',
-      alt: 'Maa poster',
-    },
-    {
-      rank: 3,
-      image: 'assets/images/heads-of-state.png',
-      alt: 'Heads of State poster',
-    },
-    {
-      rank: 4,
-      image: 'assets/images/maa.png',
-      alt: 'Heads of State poster',
-    },
-    {
-      rank: 5,
-      image: 'assets/images/heads-of-state.png',
-      alt: 'Heads of State poster',
-    },
-    {
-      rank: 6,
-      image: 'assets/images/maa.png',
-      alt: 'Heads of State poster',
-    },
-    {
-      rank: 7,
-      image: 'assets/images/heads-of-state.png',
-      alt: 'Ballerina poster',
-    },
-  ];
+  getTrendingMovies = inject(TrendingMoviesService);
+
+  public trendingMoviesSubject = new BehaviorSubject<TrendingMovie[]>([]);
+  trendingMovies$: Observable<TrendingMovie[]> = this.trendingMoviesSubject.asObservable();
 
   currentTrendingStartIndex = 0;
   trendingSlideDirection: 'slide-left' | 'slide-right' | '' = '';
 
   get visibleTrendingMovies() {
-    return this.trendingMovies.slice(
+    return this.trendingMoviesSubject.value.slice(
       this.currentTrendingStartIndex,
       this.currentTrendingStartIndex + 4,
     );
   }
 
   nextTrending() {
-    if (this.currentTrendingStartIndex < this.trendingMovies.length - 4) {
+    if (this.currentTrendingStartIndex < this.trendingMoviesSubject.value.length - 4) {
       this.trendingSlideDirection = 'slide-left';
       setTimeout(() => {
         this.currentTrendingStartIndex++;
@@ -89,19 +62,39 @@ export class HomePage implements OnInit {
 
   ngOnInit() {
     // Parse cookies to get auth_user
-    const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
+    const cookies = document.cookie.split(';').reduce((acc: Record<string, string>, cookie) => {
       const [key, value] = cookie.trim().split('=');
       acc[key] = value;
       return acc;
     }, {});
     if (cookies['auth_user']) {
       try {
-        const user = JSON.parse(decodeURIComponent(cookies['auth_user']));
+        JSON.parse(decodeURIComponent(cookies['auth_user']));
       } catch (e) {
         console.log('Failed to parse user from cookie:', e);
       }
     } else {
       console.log('No logged in user found in cookies.');
     }
+
+    // Fetch trending movies from the service and update the subject
+    this.getTrendingMovies.getTrendingMovies().subscribe({
+      next: (response) => {
+        console.log('this is a res', response);
+        if (response && Array.isArray(response.data)) {
+          // TEMP: Override thumbnailUrl for all movies
+          // const overrideUrl =
+          //   'https://images.unsplash.com/photo-1752350434950-50e8df9c268e?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+          const moviesWithImage = response.data.map((movie) => ({
+            ...movie,
+            // thumbnailUrl: overrideUrl,
+          }));
+          this.trendingMoviesSubject.next(moviesWithImage);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to fetch trending movies:', err);
+      },
+    });
   }
 }

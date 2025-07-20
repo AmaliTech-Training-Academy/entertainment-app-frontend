@@ -1,21 +1,11 @@
 <div class="detail-page-container">
   <div class="detail-header-section">
-    <img
-      [src]="thumbnailUrl"
-      alt="Show Poster"
-      class="detail-header-image"
-    />
+    <img [src]="thumbnailUrl" alt="Show Poster" class="detail-header-image" />
     <div class="detail-header-text">
       <h1 class="detail-header-title">{{ title }}</h1>
       <h6 class="detail-header-subtitle">Plot Summary</h6>
-      <p class="detail-header-content">
-        {{ synopsis }}
-      </p>
-      <a 
-        [routerLink]="['/media', mediaId, 'player']" 
-        class="watch-trailer-link"
-        *ngIf="mediaId"
-      >
+      <p class="detail-header-content">{{ synopsis }}</p>
+      <a [routerLink]="['/media', mediaId, 'player']" class="watch-trailer-link" *ngIf="mediaId">
         Watch Trailer
       </a>
     </div>
@@ -24,8 +14,8 @@
   <div class="movie-screenshot-section">
     <h2 class="screenshots-section-title">Movies Screenshot</h2>
     <div class="screenshots-list">
-      <app-screen-shot 
-        *ngFor="let screenshot of screenshots" 
+      <app-screen-shot
+        *ngFor="let screenshot of screenshots"
         [imageUrl]="screenshot.imageUrl"
       ></app-screen-shot>
     </div>
@@ -49,12 +39,12 @@
       </ng-container>
       <ng-template #commentInput>
         <div class="comment-input-card">
-          <img [src]="user?.avatar || 'assets/images/profile.jpg'" alt="User avatar" class="avatar" />
-          <input
-            [(ngModel)]="commentText"
-            type="text"
-            placeholder="Write a comment..."
+          <img
+            [src]="user?.['avatar'] || 'assets/images/profile.jpg'"
+            alt="User avatar"
+            class="avatar"
           />
+          <input [(ngModel)]="commentText" type="text" placeholder="Write a comment..." />
           <div class="input-actions">
             <button mat-icon-button class="cancel-btn" (click)="cancelComment()">
               <mat-icon>cancel</mat-icon>
@@ -85,8 +75,8 @@
         <div class="top-cast-list">
           <app-top-cast-card
             *ngFor="let cast of topCast"
-            [imageUrl]="cast.avatar"
-            [name]="cast.name"
+            [imageUrl]="asString(cast['avatar'])"
+            [name]="asString(cast['name'])"
           ></app-top-cast-card>
         </div>
       </div>
@@ -94,9 +84,9 @@
         <h4>Movie Reviews</h4>
         <app-rating-card
           *ngFor="let review of reviews"
-          [reviewer]="review.reviewer"
-          [rating]="review.rating"
-          [content]="review.text"
+          [reviewer]="asString(review['reviewer'])"
+          [rating]="asNumber(review['rating'])"
+          [content]="asString(review['text'])"
         ></app-rating-card>
       </div>
     </div>

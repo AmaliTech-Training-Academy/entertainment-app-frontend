@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import {
   FormBuilder,
@@ -13,9 +13,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
-import { of } from 'rxjs';
-import { delay } from 'rxjs/operators';
-import { AuthService } from '../../../core/services/sign-up/auth.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
+
+interface RegisterResponse {
+  token?: string;
+  message?: string;
+}
 
 @Component({
   selector: 'app-sign-up',
@@ -39,12 +42,12 @@ export class SignUpComponent {
   loading = false;
   apiError: string | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router,
-    private snackBar: MatSnackBar,
-  ) {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
+
+  constructor() {
     this.registerForm = this.fb.group(
       {
         firstName: ['', [Validators.required]],
@@ -86,11 +89,12 @@ export class SignUpComponent {
         // Add other fields if required by backend
       };
       this.authService.register(formValue).subscribe({
-        next: (res) => {
+        next: (res: unknown) => {
+          const response = res as RegisterResponse;
           this.loading = false;
           // Store token in cookies if returned
-          if (res.token) {
-            document.cookie = `token=${res.token}; path=/;`;
+          if (response.token) {
+            document.cookie = `token=${response.token}; path=/; SameSite=None; Secure`;
           }
 
           this.snackBar.open('Account created successfully!', 'Close', {

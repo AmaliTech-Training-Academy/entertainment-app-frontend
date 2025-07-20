@@ -8,7 +8,7 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
-import { AuthService } from './services/login/auth.service';
+import { AuthService } from './services/auth/auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -47,16 +47,17 @@ export class AuthInterceptor implements HttpInterceptor {
               switchMap((response: any) => {
                 const { token: newToken, refreshToken: newRefreshToken } = response.data || {};
                 if (newToken) {
-                  document.cookie = `auth_token=${newToken}; path=/;`;
+                  document.cookie = `auth_token=${newToken}; path=/; SameSite=None; Secure`;
                 }
                 if (newRefreshToken) {
-                  document.cookie = `refresh_token=${newRefreshToken}; path=/;`;
+                  document.cookie = `refresh_token=${newRefreshToken}; path=/; SameSite=None; Secure`;
                 }
                 // Retry the original request with the new token
                 const retryReq = req.clone({
                   setHeaders: {
                     Authorization: `Bearer ${newToken}`,
                   },
+                  withCredentials: true,
                 });
                 return next.handle(retryReq);
               }),

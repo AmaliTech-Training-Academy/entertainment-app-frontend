@@ -8,7 +8,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../core/services/login/auth.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +21,7 @@ import { AuthService } from '../../../core/services/login/auth.service';
     RouterModule,
     MatFormField,
     CommonModule,
-      MatSnackBarModule
+    MatSnackBarModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -40,7 +40,7 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private authService: AuthService,
-     private snackBar: MatSnackBar,
+    private snackBar: MatSnackBar,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -96,10 +96,10 @@ export class LoginComponent implements OnInit {
           // Extract token and user info from response.data
           const { token, refreshToken, ...user } = response.data || {};
           if (token) {
-            document.cookie = `auth_token=${token}; path=/;`;
+            document.cookie = `auth_token=${token}; path=/; SameSite=None; Secure`;
           }
           if (refreshToken) {
-            document.cookie = `refresh_token=${refreshToken}; path=/;`;
+            document.cookie = `refresh_token=${refreshToken}; path=/; SameSite=None; Secure`;
           }
           if (Object.keys(user).length > 0) {
             document.cookie = `auth_user=${encodeURIComponent(JSON.stringify(user))}; path=/;`;

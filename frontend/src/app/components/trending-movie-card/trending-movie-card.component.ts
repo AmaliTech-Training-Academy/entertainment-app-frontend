@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -14,10 +14,11 @@ export class TrendingMovieCardComponent {
   @Input() rank!: number;
   @Input() image!: string;
   @Input() alt!: string;
+  @Input() mediaId!: number;
 
-  constructor(private router: Router) {}
+  router = inject(Router);
 
   navigateToMovie() {
-    this.router.navigate(['media/detail/9']);
+    this.router.navigate([`media/detail/${this.mediaId}`]);
   }
 }
