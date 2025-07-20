@@ -14,7 +14,7 @@ import { MediaListing } from '../../../models/media-listing.model.js';
 export class DashboardService {
   // private base_Url =
   //   'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1';
-  private base_Url = 'https://d101mapcha7bof.cloudfront.net';
+  private base_Url = 'https://d101mapcha7bof.cloudfront.net/api/v1';
 
   constructor(private http: HttpClient) {}
 
