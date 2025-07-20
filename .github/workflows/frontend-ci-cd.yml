@@ -514,7 +514,7 @@ jobs:
         continue-on-error: false
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
-          path: terraform/
+          path: .
 
       - name: Debug Infrastructure State
         working-directory: terraform
@@ -570,7 +570,13 @@ jobs:
           echo ""
           echo "6. Checking current outputs (if any):"
           terraform output -json 2>/dev/null || echo "No outputs available (expected for first deployment)"
-
+      
+      - name: Debug Downloaded Artifact Structure
+        run: |
+          echo "--- After Download Artifact ---"
+          ls -R
+          echo "-------------------------------"
+          
       - name: Determine Deployment Strategy
         id: strategy
         working-directory: terraform
@@ -652,7 +658,7 @@ jobs:
               terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
               ;;
             "update")
-              if [[ "${{ needs.plan.outputs.plan_changes }}" == "true" && -f "$ENVIRONMENT.tfplan" ]]; then
+              if [[ "${{ needs.plan.outputs.plan_changes }}" == "true" && -f "../terraform/$ENVIRONMENT.tfplan" ]]; then
                 echo " Applying planned changes"
                 terraform apply -auto-approve "$ENVIRONMENT.tfplan"
               elif [[ "${{ needs.plan.outputs.plan_changes }}" == "false" ]]; then
