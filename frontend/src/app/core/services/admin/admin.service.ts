@@ -4,7 +4,6 @@ import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { PaginatedResponse, AdminUser, UserRoleUpdateResponse } from '../../../models/admin-users';
-import { PaginatedMediaResponse } from '../../../models/media.model';
 
 @Injectable({
   providedIn: 'root',
@@ -41,12 +40,7 @@ export class AdminService {
       .pipe(catchError(this.handleError));
   }
 
-  /**
-   * Fetch paginated media listings with optional keyword filtering
-   * Use this for general browsing without search
-   */
   getPaginatedMedia(page: number, size: number, keyword?: string | null): Observable<any> {
-    // Changed to 'any' to avoid TypeScript issues
     let params = new HttpParams().set('page', page.toString()).set('size', size.toString());
 
     if (keyword && keyword.trim()) {
@@ -61,12 +55,7 @@ export class AdminService {
     );
   }
 
-  /**
-   * Search media by title using the dedicated search endpoint
-   * This is the primary method for searching movies by title
-   */
   searchMedia(query: string, page: number = 0, size: number = 10): Observable<any> {
-    // Changed to 'any' to avoid TypeScript issues
     const trimmedQuery = query.trim();
 
     if (!trimmedQuery) {
@@ -89,13 +78,7 @@ export class AdminService {
       }),
     );
   }
-
-  /**
-   * Alternative search method - searches specifically by title
-   * Use this if the main search endpoint doesn't work as expected
-   */
   searchByTitle(title: string, page: number = 0, size: number = 10): Observable<any> {
-    // Changed to 'any' to avoid TypeScript issues
     let params = new HttpParams()
       .set('title', title.trim())
       .set('page', page.toString())
@@ -109,10 +92,6 @@ export class AdminService {
     );
   }
 
-  /**
-   * Advanced search with multiple criteria
-   * Use this for more complex search scenarios
-   */
   advancedSearchMedia(searchCriteria: {
     title?: string;
     year?: number;
@@ -121,16 +100,13 @@ export class AdminService {
     page?: number;
     size?: number;
   }): Observable<any> {
-    // Changed to 'any' to avoid TypeScript issues
     let params = new HttpParams();
 
-    // Set default pagination if not provided
     const page = searchCriteria.page ?? 0;
     const size = searchCriteria.size ?? 10;
 
     params = params.set('page', page.toString()).set('size', size.toString());
 
-    // Add search criteria
     Object.keys(searchCriteria).forEach((key) => {
       if (key !== 'page' && key !== 'size') {
         const value = searchCriteria[key as keyof typeof searchCriteria];
@@ -148,29 +124,12 @@ export class AdminService {
     );
   }
 
-  /**
-   * Fallback method: Use listings endpoint with keyword parameter for search
-   * This can be used if dedicated search endpoints are not working
-   */
   searchUsingListings(query: string, page: number = 0, size: number = 10): Observable<any> {
-    // Changed to 'any' to avoid TypeScript issues
     return this.getPaginatedMedia(page, size, query);
   }
 
-  /**
-   * Get admin metrics/dashboard data
-   */
   getAdminMetrics(): Observable<any> {
     return this.http.get<any>(`${this.BASE_URL}/admin/metrics`).pipe(catchError(this.handleError));
-  }
-
-  /**
-   * Get recent activities for admin dashboard
-   */
-  getRecentActivities(): Observable<any> {
-    return this.http
-      .get<any>(`${this.BASE_URL}/admin/recent-activities`)
-      .pipe(catchError(this.handleError));
   }
 
   /**
@@ -193,60 +152,14 @@ export class AdminService {
     );
   }
 
-  /**
-   * Update media by ID
-   */
-  updateMedia(mediaId: number, mediaData: any): Observable<any> {
-    return this.http
-      .put<any>(`${this.BASE_URL}/media/${mediaId}`, mediaData)
-      .pipe(catchError(this.handleError));
-  }
-
-  /**
-   * Get single media item by ID
-   */
-  getMediaById(mediaId: number): Observable<any> {
-    return this.http
-      .get<any>(`${this.BASE_URL}/media/${mediaId}`)
-      .pipe(catchError(this.handleError));
-  }
-
-  /**
-   * Test the search endpoint to verify it's working
-   */
-  testSearchEndpoint(query: string = 'test'): Observable<any> {
-    console.log('Testing search endpoint with query:', query);
-    return this.searchMedia(query, 0, 1).pipe(
-      map((response) => ({
-        success: true,
-        data: response,
-        message: 'Search endpoint is working',
-      })),
-      catchError((error) => {
-        console.error('Search endpoint test failed:', error);
-        return throwError(() => ({
-          success: false,
-          error: error,
-          message: 'Search endpoint is not working',
-        }));
-      }),
-    );
-  }
-
-  /**
-   * Error handling method
-   */
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'An unknown error occurred';
 
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = `Client Error: ${error.error.message}`;
     } else {
-      // Server-side error
       errorMessage = `Server Error Code: ${error.status}\nMessage: ${error.message}`;
 
-      // Log additional details for debugging
       console.error('HTTP Error Details:', {
         status: error.status,
         statusText: error.statusText,

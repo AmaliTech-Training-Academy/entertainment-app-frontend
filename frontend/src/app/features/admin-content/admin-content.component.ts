@@ -32,26 +32,12 @@ export class AdminContentComponent implements OnInit, OnDestroy {
   constructor(private adminService: AdminService) {}
 
   ngOnInit(): void {
-    this.setupSearchDebounce();
     this.loadMedia();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  private setupSearchDebounce(): void {
-    this.searchSubject
-      .pipe(
-        debounceTime(300), // Wait 300ms after user stops typing
-        distinctUntilChanged(), // Only trigger if search query actually changed
-        takeUntil(this.destroy$),
-      )
-      .subscribe((query) => {
-        this.currentPage = 0; // Reset to first page when searching
-        this.loadMedia();
-      });
   }
 
   loadMedia(): void {
@@ -122,37 +108,6 @@ export class AdminContentComponent implements OnInit, OnDestroy {
     });
   }
 
-  onSearchChange(): void {
-    // Reset pagination when search changes
-    this.currentPage = 0;
-
-    // Trigger the debounced search
-    this.searchSubject.next(this.searchQuery);
-  }
-
-  // Enhanced search method that handles empty queries better
-  performSearch(): void {
-    const trimmedQuery = this.searchQuery.trim();
-
-    if (trimmedQuery.length === 0) {
-      // If search is cleared, load all media
-      this.clearFilters();
-      return;
-    }
-
-    if (trimmedQuery.length < 2) {
-      // Don't search for very short queries
-      return;
-    }
-
-    this.currentPage = 0;
-    this.loadMedia();
-  }
-
-  openUploadDialog(): void {
-    console.log('Upload dialog triggered');
-    // TODO: Implement upload functionality
-  }
 
   changePage(page: number): void {
     if (page >= 0 && page < this.totalPages && page !== this.currentPage) {
@@ -203,38 +158,7 @@ export class AdminContentComponent implements OnInit, OnDestroy {
     return item.title && item.releaseYear ? `${item.title}-${item.releaseYear}` : index;
   }
 
-  editMedia(item: MediaItem): void {
-    console.log('Edit media:', item);
-    // TODO: Open edit modal or navigate to edit page
-  }
 
-  deleteMedia(item: MediaItem): void {
-    const confirmMessage = `Are you sure you want to delete "${item.title}"? This action cannot be undone.`;
-
-    if (confirm(confirmMessage)) {
-      const mediaId = (item as any).id || (item as any).mediaId;
-
-      if (mediaId) {
-        this.adminService.deleteMedia(mediaId).subscribe({
-          next: (response) => {
-            console.log('Media deleted successfully:', response);
-            // Refresh the current page or go to previous page if current page becomes empty
-            if (this.media.length === 1 && this.currentPage > 0) {
-              this.currentPage--;
-            }
-            this.loadMedia();
-          },
-          error: (err) => {
-            console.error('Failed to delete media:', err);
-            alert('Failed to delete media. Please try again.');
-          },
-        });
-      } else {
-        console.error('Media ID not found for deletion');
-        alert('Unable to delete media: ID not found');
-      }
-    }
-  }
 
   refreshData(): void {
     this.loadMedia();
@@ -243,18 +167,5 @@ export class AdminContentComponent implements OnInit, OnDestroy {
   // Method to check if we have results
   hasResults(): boolean {
     return this.media.length > 0;
-  }
-
-  // Method to get appropriate empty state message
-  getEmptyStateMessage(): string {
-    if (this.isLoading) {
-      return 'Loading...';
-    }
-
-    if (this.isSearching) {
-      return `No movies found for "${this.searchQuery}". Try adjusting your search.`;
-    }
-
-    return 'No movies available.';
   }
 }

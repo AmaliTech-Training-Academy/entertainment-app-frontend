@@ -3,14 +3,13 @@
   
   <div class="media-controls">
     <div class="controls-row">
-      <button class="upload-btn" (click)="openUploadDialog()">Upload New Movie</button>
+      <button class="upload-btn">Upload New Movie</button>
       
       <div class="search-container">
         <input
           type="text"
           placeholder="Search movies..."
           [(ngModel)]="searchQuery"
-          (input)="onSearchChange()"
           class="search-input"
         />
       </div>
@@ -56,8 +55,8 @@
             <span class="rating">{{ item.averageRating | number:'1.1-1' }}</span>
           </td>
           <td class="actions-cell">
-            <button class="edit-btn" (click)="editMedia(item)">Edit</button>
-            <button class="delete-btn" (click)="deleteMedia(item)">Delete</button>
+            <button class="edit-btn">Edit</button>
+            <button class="delete-btn">Delete</button>
           </td>
         </tr>
         

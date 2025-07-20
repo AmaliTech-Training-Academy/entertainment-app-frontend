@@ -105,7 +105,7 @@
             [checked]="selectedUsers.includes(user.id)"
             (change)="toggleUserSelection(user.id, $event)"
             [id]="'user-' + user.id">
-          <label [for]="'user-' + user.id" class="sr-only">Select {{ user.username }}</label>
+          <label [for]="'user-' + user.id" class="sr-only"></label>
         </td>
         <td>{{ user.firstName }} {{ user.lastName }}</td>
         <td>{{ user.username }}</td>
