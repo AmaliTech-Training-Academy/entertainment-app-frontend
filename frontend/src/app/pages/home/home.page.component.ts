@@ -88,7 +88,6 @@ export class HomePage implements OnInit {
   }
 
   ngOnInit() {
-    console.log('Cookies on home page:', document.cookie);
     // Parse cookies to get auth_user
     const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
       const [key, value] = cookie.trim().split('=');
@@ -98,7 +97,6 @@ export class HomePage implements OnInit {
     if (cookies['auth_user']) {
       try {
         const user = JSON.parse(decodeURIComponent(cookies['auth_user']));
-        console.log('Logged in user from cookie:', user);
       } catch (e) {
         console.log('Failed to parse user from cookie:', e);
       }

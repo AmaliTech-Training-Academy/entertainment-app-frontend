@@ -97,7 +97,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
   }
 
   showInfo() {
-    this.router.navigate(['/movies/9']);
+    this.router.navigate(['media/detail/9']);
   }
 
   ngOnInit() {

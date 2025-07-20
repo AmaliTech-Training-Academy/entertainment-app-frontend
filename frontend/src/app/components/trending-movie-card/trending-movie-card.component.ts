@@ -18,6 +18,6 @@ export class TrendingMovieCardComponent {
   constructor(private router: Router) {}
 
   navigateToMovie() {
-    this.router.navigate(['/movies/9']);
+    this.router.navigate(['media/detail/9']);
   }
 }
