@@ -1,16 +1,25 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { delay, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 
 export interface Movie {
+  mediaId: number;
+  mediaType: string;
   title: string;
-  year: string;
-  type: string;
-  rating: string;
-  genres: string[];
-  imageUrl: string;
-  isBookmarked: boolean;
+  synopsis?: string;
+  url?: string;
+  releaseDate?: string;
+  releaseYear?: number;
+  duration?: number;
+  thumbnailUrl: string;
+  trailer?: string;
+  language?: string;
+  genreNames?: string[];
+  genres?: string[];
+  actorNames?: string[];
+  averageRating?: number;
 }
 
 interface SearchFilters {
@@ -26,58 +35,49 @@ interface SearchFilters {
   providedIn: 'root',
 })
 export class AdvancedSearchService {
-  private apiUrl = `${environment.apiUrl}/movies`;
+  private apiUrl = 'https://d101mapcha7bof.cloudfront.net';
+  // private readonly apiUrl =
+  //   'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com';
+  private listingsUrl = `${this.apiUrl}/api/v1/media/listings`;
+  private advancedSearchUrl = `${this.apiUrl}/api/v1/media/advanced-search`;
+  private searchUrl = `${this.apiUrl}/api/v1/media/search`;
 
   constructor(private http: HttpClient) {}
 
-  // For real API implementation:
-  searchMovies(filters: SearchFilters): Observable<Movie[]> {
-    return this.http.get<Movie[]>(this.apiUrl, { params: filters as any });
+  getAllMovies(): Observable<Movie[]> {
+    return this.http
+      .get<any>(this.listingsUrl)
+      .pipe(map((response) => response.data.content as Movie[]));
   }
 
-  // Mock implementation (temporary - remove when real API is ready)
-  searchMoviesMock(filters: SearchFilters): Observable<Movie[]> {
-    const mockMovies: Movie[] = [
-      {
-        title: 'Beyond Earth',
-        year: '2019',
-        type: 'Movie',
-        rating: '9/10',
-        genres: ['Action', 'Adventure', 'Thriller'],
-        imageUrl: '../../../assets/images/movie.png',
-        isBookmarked: false,
-      },
-    ];
-
-    let results = [...mockMovies];
-
-    if (filters.query) {
-      results = results.filter(
-        (movie) =>
-          movie.title.toLowerCase().includes(filters.query!.toLowerCase()) ||
-          movie.year.includes(filters.query!),
-      );
-    }
-
-    if (filters.type && filters.type !== 'All') {
-      results = results.filter((movie) => movie.type === filters.type);
-    }
-
-    if (filters.genre && filters.genre !== 'All') {
-      results = results.filter((movie) => movie.genres.includes(filters.genre!));
-    }
-
-    if (filters.rating && filters.rating !== 'All') {
-      results = results.filter((movie) => movie.rating === filters.rating);
-    }
-
-    if (filters.year && filters.year !== 'All') {
-      results = results.filter((movie) => movie.year === filters.year);
-    }
-
-    return of(results).pipe(delay(300));
+  searchMoviesAdvanced(params: {
+    genres?: string[];
+    language?: string;
+    rating?: number;
+    releaseYear?: number;
+    mediaType?: string;
+    page?: number;
+    size?: number;
+    sortBy?: string;
+    sortDir?: string;
+  }): Observable<any> {
+    // Map frontend values to backend enums
+    const queryParams: any = {};
+    if (params.genres) queryParams.genres = params.genres;
+    if (params.language) queryParams.language = params.language;
+    if (params.rating) queryParams.rating = params.rating;
+    if (params.releaseYear) queryParams.releaseYear = params.releaseYear;
+    if (params.mediaType) queryParams.mediaType = params.mediaType;
+    if (params.page !== undefined) queryParams.page = params.page;
+    if (params.size !== undefined) queryParams.size = params.size;
+    if (params.sortBy) queryParams.sortBy = params.sortBy;
+    if (params.sortDir) queryParams.sortDir = params.sortDir;
+    return this.http.get<any>(this.advancedSearchUrl, { params: queryParams });
   }
 
+  searchByTitle(title: string): Observable<any> {
+    return this.http.get<any>(this.searchUrl, { params: { title } });
+  }
   getFilterOptions(): Observable<{
     types: string[];
     genres: string[];
@@ -85,20 +85,11 @@ export class AdvancedSearchService {
     years: string[];
     languages: string[];
   }> {
-    return this.http.get(`${this.apiUrl}/9`) as Observable<{
-      types: string[];
-      genres: string[];
-      ratings: string[];
-      years: string[];
-      languages: string[];
-    }>;
-
-    // Mock response:
     return of({
-      types: ['Movie', 'Series'],
-      genres: ['Action', 'Adventure', 'Thriller', 'Drama', 'Comedy'],
-      ratings: ['9/10', '8/10', '6/10'],
-      years: ['2019', '2023', '2025'],
+      types: ['MOVIE', 'TV_SHOW'],
+      genres: ['ACTION', 'COMEDY', 'DRAMA', 'ADVENTURE', 'THRILLER'],
+      ratings: ['9.0', '8.5', '8.0', '7.5', '7.0', '6.5', '6.0', '5.5'],
+      years: ['2024', '2023', '2022', '2021', '2020'],
       languages: ['English', 'French', 'Spanish'],
     });
   }

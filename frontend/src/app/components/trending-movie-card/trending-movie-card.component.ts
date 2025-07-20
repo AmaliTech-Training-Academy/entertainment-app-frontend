@@ -15,6 +15,7 @@ export class TrendingMovieCardComponent {
   @Input() image!: string;
   @Input() alt!: string;
   @Input() mediaId!: number;
+  @Input() movie: any;
 
   imgError = false;
 
