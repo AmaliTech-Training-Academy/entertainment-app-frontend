@@ -21,10 +21,9 @@ export class AdminService {
   }
 
   /**
-   * Change a user's role - CORRECTED VERSION with multiple payload attempts
+   * Change a user's role
    */
   changeUserRole(userId: number, newRole: string): Observable<UserRoleUpdateResponse> {
-    // Try the payload structure from API documentation first
     const payload = {
       userId: userId,
       newRole: newRole,
@@ -44,6 +43,18 @@ export class AdminService {
    * Toggle ban status of a user
    */
   toggleBanUser(userId: number): Observable<UserRoleUpdateResponse> {
-    return this.http.put<UserRoleUpdateResponse>(`${this.BASE_URL}/admin/${userId}/ban`, null);
+    // The interceptor will automatically add authentication headers
+    return this.http.put<UserRoleUpdateResponse>(
+      `${this.BASE_URL}/admin/users/${userId}/ban`,
+      {}, // Send empty object as body
+    );
+  }
+
+  /**
+   * Delete a user
+   */
+  deleteUser(userId: number): Observable<any> {
+    console.log('Making API call to delete user:', userId);
+    return this.http.delete<any>(`${this.BASE_URL}/admin/users/${userId}`);
   }
 }

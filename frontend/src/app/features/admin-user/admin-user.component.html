@@ -2,30 +2,75 @@
   <h2>User Management</h2>
 
   <div class="filters-and-actions">
+    <!-- Search Section -->
+    <div class="search-section">
+      <label for="search-input">Search Users:</label>
+      <input 
+        type="text" 
+        id="search-input" 
+        placeholder="Search by name, username, or email..."
+        [(ngModel)]="searchTerm" 
+        (input)="applyFilters()"
+        class="search-input">
+    </div>
+
     <div class="filter-section">
       <label for="role-select">Filter by Role:</label>
-      <select id="role-select" [(ngModel)]="selectedRole" (change)="filterByRole()">
+      <select id="role-select" [(ngModel)]="selectedRole" (change)="applyFilters()">
         <option value="ALL">All</option>
         <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
       </select>
     </div>
 
     <div class="bulk-actions" *ngIf="selectedUsers.length > 0">
-      <label for="new-role-select">Change selected users to:</label>
-      <select id="new-role-select" [(ngModel)]="newRole">
-        <option value="" disabled>Select Role</option>
-        <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
-      </select>
-      <button 
-        (click)="changeSelectedUsersRole()" 
-        [disabled]="!newRole || selectedUsers.length === 0"
-        class="change-role-btn">
-        Change Role ({{ selectedUsers.length }} selected)
-      </button>
+      <!-- Role Change Section -->
+      <div class="role-change-section">
+        <label for="new-role-select">Change selected users to:</label>
+        <select id="new-role-select" [(ngModel)]="newRole">
+          <option value="" disabled>Select Role</option>
+          <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+        </select>
+        <button 
+          (click)="changeSelectedUsersRole()" 
+          [disabled]="!newRole || selectedUsers.length === 0"
+          class="change-role-btn">
+          Change Role ({{ selectedUsers.length }} selected)
+        </button>
+      </div>
+
+      <!-- Ban/Unban Section -->
+      <div class="ban-section">
+        <button 
+          (click)="confirmToggleSelectedUsersBan()" 
+          [disabled]="selectedUsers.length === 0 || areAllSelectedUsersBanned()"
+          [ngClass]="{ 
+            'ban-btn': shouldShowBanAction(), 
+            'unban-btn': !shouldShowBanAction(),
+            'disabled-btn': areAllSelectedUsersBanned()
+          }"
+          class="bulk-ban-btn">
+          {{ getBanButtonText() }}
+        </button>
+      </div>
+
+      <!-- Delete Section -->
+      <div class="delete-section">
+        <button 
+          (click)="confirmDeleteSelectedUsers()" 
+          [disabled]="selectedUsers.length === 0"
+          class="bulk-delete-btn delete-btn">
+          Delete Selected ({{ selectedUsers.length }})
+        </button>
+      </div>
+
       <button (click)="clearSelection()" class="clear-selection-btn">
         Clear Selection
       </button>
     </div>
+  </div>
+
+  <div class="table-info" *ngIf="searchTerm || selectedRole !== 'ALL'">
+    <p>Showing {{ filteredUsers.length }} of {{ users.length }} users</p>
   </div>
 
   <table>
@@ -46,18 +91,19 @@
         <th>Role</th>
         <th>Created At</th>
         <th>Last Updated</th>
-        <th>Action</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let user of filteredUsers" 
-          [ngClass]="{ 'banned-user': user.roles.includes('ROLE_BANNED'), 'selected-row': selectedUsers.includes(user.id) }">
+          [ngClass]="{ 
+            'inactive-user': !isUserActive(user), 
+            'selected-row': selectedUsers.includes(user.id) 
+          }">
         <td>
           <input 
             type="checkbox" 
             [checked]="selectedUsers.includes(user.id)"
             (change)="toggleUserSelection(user.id, $event)"
-            [disabled]="user.roles.includes('ROLE_BANNED')"
             [id]="'user-' + user.id">
           <label [for]="'user-' + user.id" class="sr-only">Select {{ user.username }}</label>
         </td>
@@ -65,19 +111,12 @@
         <td>{{ user.username }}</td>
         <td>{{ user.email }}</td>
         <td>
-          <span class="role-badge" [ngClass]="getRoleClass(user.roles[0])">
-            {{ user.roles[0] }}
+          <span class="role-badge" [ngClass]="getRoleClass(getUserDisplayRole(user))">
+            {{ getUserDisplayRole(user) }}
           </span>
         </td>
         <td>{{ user.createdAt | date: 'medium' }}</td>
         <td>{{ user.lastUpdatedAt | date: 'medium' }}</td>
-        <td>
-          <button 
-            (click)="toggleUserBan(user.id)" 
-            [ngClass]="{ 'ban-btn': !user.roles.includes('ROLE_BANNED'), 'unban-btn': user.roles.includes('ROLE_BANNED') }">
-            {{ user.roles.includes('ROLE_BANNED') ? 'Unban' : 'Ban' }}
-          </button>
-        </td>
       </tr>
     </tbody>
   </table>
@@ -85,4 +124,21 @@
   <div class="selected-info" *ngIf="selectedUsers.length > 0">
     <p>{{ selectedUsers.length }} user(s) selected</p>
   </div>
+
+  <!-- No results message -->
+  <div class="no-results" *ngIf="filteredUsers.length === 0 && users.length > 0">
+    <p>No users found matching your search criteria.</p>
+    <button (click)="clearFilters()" class="clear-filters-btn">Clear Filters</button>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <app-confirm-modal
+    *ngIf="showConfirmModal"
+    [title]="modalTitle"
+    [message]="modalMessage"
+    [confirmText]="modalConfirmText"
+    [cancelText]="modalCancelText"
+    (confirm)="onConfirmAction()"
+    (cancel)="onCancelAction()">
+  </app-confirm-modal>
 </div>
