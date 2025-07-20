@@ -1,1 +1,6 @@
-<img [src]="imageUrl" alt="Screenshot" class="screenshot-image" />
+<img
+  [src]="imgError ? 'assets/images/search.svg' : imageUrl"
+  alt="Screenshot"
+  class="screenshot-image"
+  (error)="imgError = true"
+/>

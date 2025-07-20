@@ -59,6 +59,7 @@ export class DetailPage implements OnInit {
   title = '';
   synopsis = '';
   thumbnailUrl = '';
+  imgError = false;
 
   private route = inject(ActivatedRoute);
   private commentService = inject(CommentService);
@@ -102,14 +103,25 @@ export class DetailPage implements OnInit {
     console.log('Fetching media details for mediaId:', this.mediaId);
     this.mediaDetailsService.getMediaDetailsById(this.mediaId).subscribe({
       next: (res) => {
-        const data: MediaDetails = res.data;
-        this.screenshots = data.screenshots || [];
-        this.topCast = data.castMembers || [];
-        this.reviews = data.reviews || [];
-        this.comments = data.comments || [];
-        this.title = data.title;
-        this.synopsis = data.synopsis;
-        this.thumbnailUrl = data.thumbnailUrl;
+        console.log(res);
+        const data: MediaDetails | null = res.data;
+        if (data) {
+          this.screenshots = data.screenshots || [];
+          this.topCast = data.castMembers || [];
+          this.reviews = data.reviews || [];
+          this.comments = data.comments || [];
+          this.title = data.title;
+          this.synopsis = data.synopsis;
+          this.thumbnailUrl = data.thumbnailUrl;
+        } else {
+          this.screenshots = [];
+          this.topCast = [];
+          this.reviews = [];
+          this.comments = [];
+          this.title = '';
+          this.synopsis = '';
+          this.thumbnailUrl = '';
+        }
       },
       error: () => {
         this.screenshots = [];
@@ -170,5 +182,16 @@ export class DetailPage implements OnInit {
 
   asNumber(val: unknown): number {
     return typeof val === 'number' ? val : 0;
+  }
+
+  formatName(name: string): string {
+    return name.replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
   }
 }
