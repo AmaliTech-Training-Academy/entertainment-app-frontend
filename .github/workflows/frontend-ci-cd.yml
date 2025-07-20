@@ -395,27 +395,8 @@ jobs:
           PLAN_EXIT_CODE=$?
           echo "plan_exitcode=$PLAN_EXIT_CODE" >> $GITHUB_OUTPUT
           echo "DEBUG: Captured PLAN_EXIT_CODE: $PLAN_EXIT_CODE"
-          
-          # if [[ $RESOURCE_COUNT -eq 0 ]]; then
-          #   echo "State is empty - forcing plan creation for initial deployment"
-          #   echo "plan_changes=true" >> $GITHUB_OUTPUT
-          # elif [[ $PLAN_EXIT_CODE -eq 0 ]]; then
-          #   echo "No changes needed - infrastructure is up to date"
-          #   echo "plan_changes=false" >> $GITHUB_OUTPUT
-          # elif [[ $PLAN_EXIT_CODE -eq 1 ]]; then
-          #   echo "Terraform plan failed"
-          #   echo "plan_changes=error" >> $GITHUB_OUTPUT
-          #   exit 1
-          # elif [[ $PLAN_EXIT_CODE -eq 2 ]]; then
-          #   echo "Changes detected - plan created successfully"
-          #   echo "plan_changes=true" >> $GITHUB_OUTPUT
-          # else
-          #   echo "Terraform plan failed with exit code $PLAN_EXIT_CODE"
-          #   echo "plan_changes=error" >> $GITHUB_OUTPUT
-          #   exit 1 
-          # fi
 
-           # Determine plan_changes based on exit code and plan content
+          # Determine plan_changes based on exit code and plan content
           PLAN_HAS_CHANGES="false"
           if [[ $RESOURCE_COUNT -eq 0 ]]; then # Special case for initial deployment with empty state
             echo "State is empty - forcing plan creation for initial deployment"
@@ -456,14 +437,6 @@ jobs:
           echo "DEBUG: plan_changes output from plan step: ${{ steps.plan.outputs.plan_changes }}" # Debug output
           
           echo "DEBUG: Final plan_changes output: $(cat $GITHUB_OUTPUT | grep plan_changes | cut -d'=' -f2)" # Debug output from file
-
-          echo "DEBUG: Contents of generated terraform.tfvars:"
-          cat environments/$ENVIRONMENT/terraform.tfvars
-          echo "DEBUG: Contents of generated backend.hcl:"
-          cat environments/$ENVIRONMENT/backend.hcl
-          
-          echo "DEBUG: Terraform show -json of the plan file:"
-          terraform show -json "$ENVIRONMENT.tfplan"
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
