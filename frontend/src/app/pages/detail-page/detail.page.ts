@@ -7,24 +7,27 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
 import { TopCastCardComponent } from '../../shared/top-cast-card/top-cast-card.component';
 import { RatingCardComponent } from '../../shared/components/rating-card/rating-card.component';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommentService } from '../../core/services/comment/comment.service';
 import { Comment, CommentPost } from '../../shared/components/comments';
 import { MediaDetailsService } from '../../core/services/media-details/media-details.service';
-import { MediaDetails } from '../../shared/components/media-details';
+import { MediaDetails, Screenshot } from '../../shared/components/media-details';
 
 function getUserId(): number | null {
-  // Try localStorage
-  const user = localStorage.getItem('auth_user');
-  if (user) {
+  // Parse cookies
+  const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
+    const [key, value] = cookie.trim().split('=');
+    acc[key] = value;
+    return acc;
+  }, {});
+  const userStr = cookies['auth_user'];
+  if (userStr) {
     try {
-      return JSON.parse(user).id;
-    } catch {}
-  }
-  // Try cookies
-  const match = document.cookie.match(/(?:^|; )userId=([^;]*)/);
-  if (match) {
-    return Number(decodeURIComponent(match[1]));
+      const user = JSON.parse(decodeURIComponent(userStr));
+      return user.id; 
+    } catch (e) {
+      console.log('Error parsing user cookie:', e, userStr);
+    }
   }
   return null;
 }
@@ -40,12 +43,13 @@ function getUserId(): number | null {
     TopCastCardComponent,
     RatingCardComponent,
     MatIconModule,
+    RouterModule
   ],
   templateUrl: './detail.page.html',
   styleUrls: ['./detail.page.scss'],
 })
 export class DetailPage implements OnInit {
-  screenshots: string[] = [];
+  screenshots: Screenshot[] = [];
   comments: Comment[] = [];
   topCast: any[] = [];
   reviews: any[] = [];
@@ -111,6 +115,7 @@ export class DetailPage implements OnInit {
         this.title = data.title;
         this.synopsis = data.synopsis;
         this.thumbnailUrl = data.thumbnailUrl;
+        console.log('Comments from backend:', data.comments);
       },
       error: (err) => {
         console.log('GET media details error:', err);

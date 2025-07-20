@@ -1,3 +1,8 @@
+export interface Screenshot {
+  screenshotId: number;
+  imageUrl: string;
+}
+
 export interface MediaDetails {
   mediaId: number;
   title: string;
@@ -15,7 +20,7 @@ export interface MediaDetails {
   castMembers: any[];
   reviews: any[];
   comments: any[];
-  screenshots: string[];
+  screenshots: Screenshot[];
 }
 
 export interface MediaDetailsResponse {

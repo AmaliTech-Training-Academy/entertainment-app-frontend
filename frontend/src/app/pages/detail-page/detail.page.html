@@ -11,13 +11,23 @@
       <p class="detail-header-content">
         {{ synopsis }}
       </p>
+      <a 
+        [routerLink]="['/media', mediaId, 'player']" 
+        class="watch-trailer-link"
+        *ngIf="mediaId"
+      >
+        Watch Trailer
+      </a>
     </div>
   </div>
 
   <div class="movie-screenshot-section">
     <h2 class="screenshots-section-title">Movies Screenshot</h2>
     <div class="screenshots-list">
-      <app-screen-shot *ngFor="let img of screenshots" [imageUrl]="img"></app-screen-shot>
+      <app-screen-shot 
+        *ngFor="let screenshot of screenshots" 
+        [imageUrl]="screenshot.imageUrl"
+      ></app-screen-shot>
     </div>
   </div>
 
@@ -28,9 +38,9 @@
         <app-comment-card
           *ngFor="let comment of comments"
           [imageUrl]="'assets/images/profile.jpg'"
-          [name]="comment.username || 'User'"
-          [dateTime]="comment.timestamp || ''"
-          [description]="comment.comment"
+          [name]="comment.userName || 'User'"
+          [dateTime]="comment.createdAt || ''"
+          [description]="comment.content"
         ></app-comment-card>
       </div>
 

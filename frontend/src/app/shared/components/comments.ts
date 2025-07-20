@@ -1,10 +1,9 @@
 export interface Comment {
-  userId: number;
-  mediaId: number;
-  commentId?: number;
-  comment: string;
-  username?: string;
-  timestamp?: string; 
+  commentId: number;
+  userName: string;
+  content: string;
+  createdAt: string;
+  lastUpdatedAt: string;
 }
 
 export interface CommentPost {
