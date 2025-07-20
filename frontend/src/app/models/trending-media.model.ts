@@ -18,3 +18,25 @@ export interface TrendingMediaResponse {
   timestamp: string;
 }
 
+export interface CreateMediaRequest {
+  mediaTypeEnum: 'MOVIE' | 'TV_SHOW';
+  title: string;
+  synopsis: string;
+  url: string;
+  releaseDate: string; // ISO string
+  releaseYear: number;
+  duration: number;
+  thumbnailUrl: string;
+  trailer: string;
+  language: 'ENGLISH' | 'FRENCH' | 'SPANISH' | string;
+  genres: string[];
+  castMembers: {
+    actorId: number;
+    mediaRoles: string[];
+  }[];
+}
+
+export interface Actor {
+  actorId: number;
+  name: string;
+}

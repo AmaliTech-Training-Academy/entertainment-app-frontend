@@ -18,10 +18,13 @@ export class AdminContentComponent implements OnInit, OnDestroy {
   pageSize = 10;
   totalPages = 0;
   totalElements = 0;
-
   searchQuery: string = '';
   isSearching = false;
   isLoading = false;
+  showUploadForm = false;
+  selectedMediaItem: MediaItem | null = null;
+
+  
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -253,29 +256,5 @@ export class AdminContentComponent implements OnInit, OnDestroy {
     }
 
     return 'No movies available.';
-  }
-
-  // Method to highlight search terms in results
-  highlightSearchTerm(text: string): string {
-    if (!this.isSearching || !this.searchQuery.trim() || !text) {
-      return text;
-    }
-
-    const query = this.searchQuery.trim();
-    const regex = new RegExp(`(${query})`, 'gi');
-    return text.replace(regex, '<mark>$1</mark>');
-  }
-
-  // Method to test search functionality
-  testSearch(): void {
-    console.log('Testing search functionality...');
-    this.adminService.testSearchEndpoint().subscribe({
-      next: (result) => {
-        console.log('Search test result:', result);
-      },
-      error: (error) => {
-        console.error('Search test failed:', error);
-      },
-    });
   }
 }

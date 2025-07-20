@@ -5,7 +5,6 @@
       <img src="assets/images/cineverse_logo.svg" alt="Cineverse Logo" />
     </div>
 
-    <!-- Profile Dropdown -->
     <div class="profile-container" (clickOutside)="closeProfileDropdown()">
       <div class="profile-avatar" (click)="toggleProfileDropdown()">
         {{ getUserInitials() }}
@@ -22,7 +21,7 @@
     </div>
   </header>
 
-  <!-- Layout Container -->
+  <!-- Sidebar + Main Content -->
   <div class="admin-body">
     <app-sidebar (logoutClicked)="onLogoutClick()"></app-sidebar>
 
@@ -32,6 +31,7 @@
   </div>
 </div>
 
+<!-- Confirm Logout Modal -->
 <app-confirm-modal
   *ngIf="showLogoutModal"
   [title]="'Confirm Logout'"
