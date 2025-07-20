@@ -1,7 +1,7 @@
 import { CanActivateFn } from '@angular/router';
 
 export const RoleGuard: CanActivateFn = (route, state) => {
-  // Parse cookies to check for auth_token and auth_user
+
   const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
     const [key, value] = cookie.trim().split('=');
     acc[key] = value;
@@ -23,11 +23,11 @@ export const RoleGuard: CanActivateFn = (route, state) => {
     ) {
       return true;
     } else {
-      window.location.href = '/'; // Redirect to home if not authorized
+      window.location.href = '/';
       return false;
     }
   } catch (e) {
-    window.location.href = '/'; // Redirect to home on error
+    window.location.href = '/';
     return false;
   }
 };

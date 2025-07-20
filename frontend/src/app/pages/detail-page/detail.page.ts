@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, inject } from '@angular/core';
+// import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScreenShotComponent } from '../../shared/components/screen-shot/screen-shot.component';
@@ -7,6 +7,29 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
 import { TopCastCardComponent } from '../../shared/top-cast-card/top-cast-card.component';
 import { RatingCardComponent } from '../../shared/components/rating-card/rating-card.component';
 import { MatIconModule } from '@angular/material/icon';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CommentService } from '../../core/services/comment/comment.service';
+import { Comment, CommentPost } from '../../shared/components/comments';
+import { MediaDetailsService } from '../../core/services/media-details/media-details.service';
+import { MediaDetails, Screenshot } from '../../shared/components/media-details';
+
+function getUserId(): number | null {
+  const cookies = document.cookie.split(';').reduce((acc: Record<string, string>, cookie) => {
+    const [key, value] = cookie.trim().split('=');
+    acc[key] = value;
+    return acc;
+  }, {});
+  const userStr = cookies['auth_user'];
+  if (userStr) {
+    try {
+      const user = JSON.parse(decodeURIComponent(userStr));
+      return user.id;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
 
 @Component({
   selector: 'app-detail-page',
@@ -19,59 +42,144 @@ import { MatIconModule } from '@angular/material/icon';
     TopCastCardComponent,
     RatingCardComponent,
     MatIconModule,
+    RouterModule,
   ],
   templateUrl: './detail.page.html',
   styleUrls: ['./detail.page.scss'],
 })
 export class DetailPage implements OnInit {
-  screenshots: string[] = [];
-  comments: any[] = [];
-  topCast: any[] = [];
-  reviews: any[] = [];
+  screenshots: Screenshot[] = [];
+  comments: Comment[] = [];
+  topCast: Record<string, unknown>[] = [];
+  reviews: Record<string, unknown>[] = [];
   isLoggedIn = false;
-  user = {
-    id: 1,
-    name: 'John Doe',
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-  };
+  user: Record<string, unknown> | null = null;
   commentText = '';
+  mediaId: number | null = null;
+  title = '';
+  synopsis = '';
+  thumbnailUrl = '';
+  trailerUrl: string | null = null;
 
-  constructor(private http: HttpClient) {
-    console.log('HttpClient injected:', !!http);
-  }
+  private route = inject(ActivatedRoute);
+  private commentService = inject(CommentService);
+  private mediaDetailsService = inject(MediaDetailsService);
+  private router = inject(Router);
 
   ngOnInit() {
-    this.http.get<{ screenshots: string[] }>('screenshots.json').subscribe((data) => {
-      this.screenshots = data.screenshots;
+    this.route.paramMap.subscribe((params) => {
+      this.mediaId = Number(params.get('id'));
+      if (this.mediaId) {
+        this.fetchMediaDetails();
+      }
     });
-    this.http.get<{ comments: any[] }>('comments.json').subscribe((data) => {
-      this.comments = data.comments;
-    });
-    this.http.get<{ topCast: any[] }>('top-cast.json').subscribe((data) => {
-      this.topCast = data.topCast;
-    });
-    this.http.get<{ reviews: any[] }>('reviews.json').subscribe((data) => {
-      this.reviews = data.reviews;
+    this.setUser();
+  }
+
+  setUser() {
+    // Parse cookies
+    const cookies = document.cookie.split(';').reduce((acc: Record<string, string>, cookie) => {
+      const [key, value] = cookie.trim().split('=');
+      acc[key] = value;
+      return acc;
+    }, {});
+    const token = cookies['auth_token'];
+    const userStr = cookies['auth_user'];
+    if (token && userStr) {
+      try {
+        this.user = JSON.parse(decodeURIComponent(userStr));
+        this.isLoggedIn = true;
+        return;
+      } catch {
+        return;
+      }
+    }
+    this.user = null;
+    this.isLoggedIn = false;
+  }
+
+  fetchMediaDetails() {
+    if (!this.mediaId) return;
+    console.log('Fetching media details for mediaId:', this.mediaId);
+    this.mediaDetailsService.getMediaDetailsById(this.mediaId).subscribe({
+      next: (res) => {
+        const data: MediaDetails = res.data;
+        this.screenshots = data.screenshots || [];
+        this.topCast = data.castMembers || [];
+        this.reviews = data.reviews || [];
+        this.comments = data.comments || [];
+        this.title = data.title;
+        this.synopsis = data.synopsis;
+        this.thumbnailUrl = data.thumbnailUrl;
+        this.trailerUrl = data.trailerUrl;
+        console.log('Trailer URL in details page:', this.trailerUrl);
+      },
+      error: () => {
+        this.screenshots = [];
+        this.topCast = [];
+        this.reviews = [];
+        this.comments = [];
+        this.title = '';
+        this.synopsis = '';
+        this.thumbnailUrl = '';
+        this.trailerUrl = null;
+      },
     });
   }
 
   login() {
-    this.isLoggedIn = true;
+    this.router.navigate(['/login']);
   }
 
   submitComment() {
-    if (this.commentText.trim()) {
-      this.comments.push({
-        avatar: this.user.avatar,
-        user: this.user.name,
-        date: new Date().toLocaleString(),
-        text: this.commentText,
-      });
-      this.commentText = '';
+    console.log('submitComment called');
+    if (!this.commentText.trim()) {
+      console.log('No comment text');
+      return;
     }
+    if (!this.mediaId) {
+      console.log('No mediaId');
+      return;
+    }
+    const userId = getUserId();
+    if (!userId) {
+      console.log('No userId');
+      return;
+    }
+    const payload: CommentPost = {
+      userId: userId,
+      mediaId: this.mediaId,
+      comment: this.commentText.trim(),
+    };
+    console.log('Posting comment payload:', payload);
+    this.commentService.postComment(this.mediaId, payload).subscribe({
+      next: (res) => {
+        console.log('POST comment response:', res);
+        this.commentText = '';
+        this.fetchMediaDetails();
+      },
+      error: (err) => {
+        console.log('POST comment error:', err);
+      },
+    });
   }
 
   cancelComment() {
     this.commentText = '';
+  }
+
+  asString(val: unknown): string {
+    return typeof val === 'string' ? val : '';
+  }
+
+  asNumber(val: unknown): number {
+    return typeof val === 'number' ? val : 0;
+  }
+
+  goToTrailer() {
+    if (this.mediaId && this.trailerUrl) {
+      document.cookie = `trailerUrl=${encodeURIComponent(this.trailerUrl)}; path=/;`;
+      this.router.navigate(['/media', this.mediaId, 'player']);
+    }
   }
 }

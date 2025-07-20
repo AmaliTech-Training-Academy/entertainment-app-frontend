@@ -8,9 +8,13 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
+<<<<<<< HEAD
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from './services/login/auth.service';
+=======
+import { AuthService } from './services/auth/auth.service';
+>>>>>>> 33f79c0bfac0112e5b3cb6e739ec286b0a40e06a
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -89,6 +93,7 @@ export class AuthInterceptor implements HttpInterceptor {
                 const { token: newToken, refreshToken: newRefreshToken } = response.data || {};
 
                 if (newToken) {
+<<<<<<< HEAD
                   // Set new tokens in cookies
                   document.cookie = `auth_token=${newToken}; path=/; secure; samesite=strict;`;
                   if (newRefreshToken) {
@@ -118,6 +123,21 @@ export class AuthInterceptor implements HttpInterceptor {
                 // Refresh token is invalid or expired
                 this.handleAuthFailure('Session expired. Please login again.');
                 return throwError(() => refreshError);
+=======
+                  document.cookie = `auth_token=${newToken}; path=/; SameSite=None; Secure`;
+                }
+                if (newRefreshToken) {
+                  document.cookie = `refresh_token=${newRefreshToken}; path=/; SameSite=None; Secure`;
+                }
+                // Retry the original request with the new token
+                const retryReq = req.clone({
+                  setHeaders: {
+                    Authorization: `Bearer ${newToken}`,
+                  },
+                  withCredentials: true,
+                });
+                return next.handle(retryReq);
+>>>>>>> 33f79c0bfac0112e5b3cb6e739ec286b0a40e06a
               }),
             );
           } else {

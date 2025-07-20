@@ -1,8 +1,14 @@
-<mat-card class="trending-movie-card">
+<mat-card class="trending-movie-card" (click)="navigateToMovie()">
   <mat-card-header>
     <div mat-card-avatar class="trending-movie-card__rank-badge">
       {{ rank }}
     </div>
   </mat-card-header>
-  <img mat-card-image class="trending-movie-card__image" [src]="image" [alt]="alt" />
+  <img
+    mat-card-image
+    class="trending-movie-card__image"
+    [src]="imgError ? 'assets/images/search.svg' : image"
+    [alt]="alt"
+    (error)="imgError = true"
+  />
 </mat-card>

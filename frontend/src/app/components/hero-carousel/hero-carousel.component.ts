@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 
 @Component({
@@ -65,6 +66,8 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
   animate = true;
   private intervalId: any;
 
+  constructor(private router: Router) {}
+
   get currentHero() {
     return this.heroItems[this.currentIndex];
   }
@@ -87,6 +90,14 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
   goToSlide(index: number) {
     this.currentIndex = index;
     this.triggerAnimation();
+  }
+
+  playNow() {
+    this.router.navigate(['/media/9/player']);
+  }
+
+  showInfo() {
+    this.router.navigate(['media/detail/9']);
   }
 
   ngOnInit() {
