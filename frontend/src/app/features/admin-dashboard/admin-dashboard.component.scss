@@ -1,106 +1,633 @@
-@use "../../../styles/variables" as *;
-@use "sass:map";
+// Movie Admin Dashboard Styles - Dark Theme
+// Inspired by Google Material Design
+
+// Variables
+$primary-bg: #121212;
+$surface-bg: #1e1e1e;
+$surface-variant: #2d2d2d;
+$primary-color: #bb86fc;
+$secondary-color: #03dac6;
+$error-color: #cf6679;
+$on-surface: #ffffff;
+$on-surface-variant: #b3b3b3;
+$outline: #404040;
+$shadow: rgba(0, 0, 0, 0.5);
+
+// Typography
+$font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 
 .dashboard {
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-  color: rebeccapurple;
+  background-color: $primary-bg;
+  color: $on-surface;
+  font-family: $font-family;
+  padding: 24px;
+  min-height: 100vh;
 
+  // Stat Cards Section
   .stat-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
 
     .stat-card {
-      flex: 1 1 200px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 1.5rem;
-      padding: 1.5rem 2rem;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.3s ease;
+      background-color: $surface-bg;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px $shadow;
+      border: 1px solid $outline;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: bounceIn 0.6s ease-out forwards;
+
+      &:nth-child(2) { animation-delay: 0.1s; }
+      &:nth-child(3) { animation-delay: 0.2s; }
+
+      &:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 8px 25px rgba($primary-color, 0.2);
+        border-color: $primary-color;
+      }
 
       h2 {
-        font-size: 1.2rem;
-        margin-bottom: 0.5rem;
-        color: white;
+        font-size: 14px;
+        font-weight: 500;
+        color: $on-surface-variant;
+        margin: 0 0 8px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: color 0.3s ease;
       }
 
       p {
-        font-size: 2rem;
-        font-weight: bold;
-        color: white;
+        font-size: 32px;
+        font-weight: 400;
+        color: $on-surface;
+        margin: 0;
+        font-variant-numeric: tabular-nums;
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
       }
+
+      &:hover p {
+        color: $primary-color;
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  // Section Titles
+  .section-title {
+    font-size: 24px;
+    font-weight: 400;
+    color: $on-surface;
+    margin: 0 0 24px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  // Trending Media Section
+  .trending-section {
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: slideInUp 0.8s ease-out 0.4s forwards;
+
+    .trending-table {
+      background-color: $surface-bg;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px $shadow;
+      border: 1px solid $outline;
+      transition: all 0.3s ease;
 
       &:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 16px rgba($shadow, 0.8);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+
+        thead {
+          background-color: $surface-variant;
+
+          th {
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 500;
+            font-size: 14px;
+            color: $on-surface-variant;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid $outline;
+            opacity: 0;
+            animation: fadeInText 0.5s ease-out 0.6s forwards;
+
+            &:first-child {
+              padding-left: 24px;
+            }
+
+            &:last-child {
+              padding-right: 24px;
+            }
+
+            &:nth-child(1) { animation-delay: 0.6s; }
+            &:nth-child(2) { animation-delay: 0.7s; }
+            &:nth-child(3) { animation-delay: 0.8s; }
+            &:nth-child(4) { animation-delay: 0.9s; }
+          }
+        }
+
+        tbody {
+          tr {
+            border-bottom: 1px solid $outline;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideInLeft 0.5s ease-out forwards;
+
+            &:nth-child(1) { animation-delay: 1.0s; }
+            &:nth-child(2) { animation-delay: 1.1s; }
+            &:nth-child(3) { animation-delay: 1.2s; }
+            &:nth-child(4) { animation-delay: 1.3s; }
+            &:nth-child(5) { animation-delay: 1.4s; }
+
+            &:hover {
+              background-color: rgba($primary-color, 0.12);
+              transform: translateX(4px);
+              box-shadow: 4px 0 0 rgba($primary-color, 0.5);
+            }
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            td {
+              padding: 16px 20px;
+              vertical-align: middle;
+              font-size: 14px;
+              transition: all 0.3s ease;
+
+              &:first-child {
+                padding-left: 24px;
+              }
+
+              &:last-child {
+                padding-right: 24px;
+              }
+
+              &.title-cell {
+                font-weight: 500;
+                color: $on-surface;
+                
+                &:hover {
+                  color: $primary-color;
+                }
+              }
+
+              &.year-cell {
+                color: $on-surface-variant;
+                font-variant-numeric: tabular-nums;
+              }
+
+              &.genres-cell {
+                color: $on-surface-variant;
+                max-width: 200px;
+                
+                .genre-tag {
+                  display: inline-block;
+                  background-color: rgba($secondary-color, 0.2);
+                  color: $secondary-color;
+                  padding: 4px 8px;
+                  border-radius: 6px;
+                  font-size: 12px;
+                  font-weight: 500;
+                  margin-right: 4px;
+                  margin-bottom: 4px;
+                  transition: all 0.3s ease;
+                  transform: scale(0.9);
+                  animation: bounceIn 0.4s ease-out forwards;
+
+                  &:nth-child(1) { animation-delay: 0.1s; }
+                  &:nth-child(2) { animation-delay: 0.2s; }
+                  &:nth-child(3) { animation-delay: 0.3s; }
+
+                  &:hover {
+                    background-color: rgba($secondary-color, 0.3);
+                    transform: scale(1.05);
+                  }
+                }
+              }
+
+              &.rating-cell {
+                font-weight: 500;
+                color: $secondary-color;
+                font-variant-numeric: tabular-nums;
+
+                .rating-badge {
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 4px;
+                  background-color: rgba($secondary-color, 0.2);
+                  padding: 6px 12px;
+                  border-radius: 20px;
+                  font-size: 13px;
+                  font-weight: 500;
+                  transition: all 0.3s ease;
+                  
+                  &:hover {
+                    background-color: rgba($secondary-color, 0.3);
+                    transform: scale(1.1);
+                    animation: pulse 1s infinite;
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
 
-  .section-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: white;
-    margin-bottom: 1rem;
-  }
-
-  .trending-section {
-    .trending-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1.5rem;
-
-      .media-card {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 1rem;
-        padding: 1rem;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        color: white;
-
-        .overlay {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-
-          h3 {
-            font-size: 1rem;
-            font-weight: 600;
-          }
-
-          p {
-            font-size: 0.85rem;
-            color: gray;
-          }
-
-          .rating {
-            margin-top: auto;
-            font-size: 0.9rem;
-            color: yellow;
-            font-weight: bold;
-          }
-        }
-
-        &:hover {
-          transform: scale(1.03);
-          transition: all 0.3s ease;
-        }
-      }
-    }
-  }
-
+  // Chart Wrappers
   .chart-wrapper {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    background-color: $surface-bg;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px $shadow;
+    border: 1px solid $outline;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideInUp 0.8s ease-out forwards;
+
+    &:nth-child(2) { animation-delay: 0.1s; }
+    &:nth-child(3) { animation-delay: 0.2s; }
+    &:nth-child(4) { animation-delay: 0.3s; }
+
+    .section-title {
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out 0.3s forwards;
+    }
+
+    &.top-rated-chart {
+      background: linear-gradient(135deg, 
+        rgba($primary-color, 0.1) 0%, 
+        rgba($secondary-color, 0.05) 50%, 
+        $surface-bg 100%);
+      border: 2px solid rgba($primary-color, 0.3);
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+          transparent, 
+          rgba($primary-color, 0.1), 
+          transparent);
+        animation: shimmer 3s infinite;
+      }
+
+      .section-title {
+        background: linear-gradient(45deg, $primary-color, $secondary-color);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 600;
+        position: relative;
+        z-index: 2;
+      }
+    }
+
+    // Override ngx-charts styles for dark theme with animations
+    ::ng-deep {
+      .ngx-charts {
+        opacity: 0;
+        animation: chartFadeIn 1s ease-out 0.5s forwards;
+
+        .grid-panel {
+          .tick {
+            text {
+              fill: $on-surface-variant;
+              font-family: $font-family;
+              transition: fill 0.3s ease;
+            }
+          }
+
+          .gridline-path {
+            stroke: $outline;
+            stroke-dasharray: 0;
+            animation: drawGrid 1.5s ease-out 0.6s forwards;
+          }
+        }
+
+        .x.axis .tick text,
+        .y.axis .tick text {
+          fill: $on-surface-variant;
+          font-family: $font-family;
+          opacity: 0;
+          animation: fadeInText 0.5s ease-out 1s forwards;
+        }
+
+        .axis-label {
+          fill: $on-surface-variant;
+          font-family: $font-family;
+          font-weight: 500;
+          opacity: 0;
+          animation: fadeInText 0.5s ease-out 1.2s forwards;
+        }
+
+        // Bar Chart Animations
+        .bar-vertical {
+          .bar {
+            transform-origin: bottom;
+            animation: barGrowUp 1s ease-out forwards;
+
+            &:nth-child(1) { animation-delay: 0.7s; }
+            &:nth-child(2) { animation-delay: 0.8s; }
+            &:nth-child(3) { animation-delay: 0.9s; }
+            &:nth-child(4) { animation-delay: 1.0s; }
+            &:nth-child(5) { animation-delay: 1.1s; }
+
+            &:hover {
+              filter: brightness(1.2);
+              transform: scale(1.02);
+              transition: all 0.3s ease;
+            }
+          }
+        }
+
+        // Pie Chart Animations
+        .pie-chart {
+          .pie-arc {
+            transform-origin: center;
+            animation: pieSliceIn 0.8s ease-out forwards;
+
+            &:nth-child(1) { animation-delay: 0.8s; }
+            &:nth-child(2) { animation-delay: 0.9s; }
+            &:nth-child(3) { animation-delay: 1.0s; }
+            &:nth-child(4) { animation-delay: 1.1s; }
+            &:nth-child(5) { animation-delay: 1.2s; }
+
+            &:hover {
+              transform: scale(1.05);
+              transition: transform 0.3s ease;
+              filter: brightness(1.1);
+            }
+          }
+
+          .pie-label {
+            fill: $on-surface;
+            font-family: $font-family;
+            font-weight: 500;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 1.5s forwards;
+          }
+        }
+
+        .legend {
+          opacity: 0;
+          animation: fadeIn 0.6s ease-out 1.3s forwards;
+
+          .legend-labels {
+            .legend-label {
+              transition: all 0.3s ease;
+              cursor: pointer;
+
+              &:hover {
+                transform: translateX(5px);
+
+                .legend-label-text {
+                  fill: $on-surface;
+                }
+              }
+
+              .legend-label-text {
+                fill: $on-surface-variant;
+                font-family: $font-family;
+                transition: fill 0.3s ease;
+              }
+            }
+          }
+        }
+
+        // Tooltip animations
+        .tooltip {
+          opacity: 0;
+          transform: scale(0.8);
+          transition: all 0.2s ease;
+
+          &.active {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      }
+    }
   }
 }
 
+// Responsive Design
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 16px;
+
+    .stat-cards {
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+
+      .stat-card {
+        animation-delay: 0.1s;
+      }
+    }
+
+    .section-title {
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .trending-section {
+      .trending-table {
+        overflow-x: auto;
+
+        table {
+          min-width: 600px;
+
+          tbody tr {
+            animation: slideInLeft 0.5s ease-out forwards;
+            
+            &:nth-child(1) { animation-delay: 0.3s; }
+            &:nth-child(2) { animation-delay: 0.4s; }
+            &:nth-child(3) { animation-delay: 0.5s; }
+            &:nth-child(4) { animation-delay: 0.6s; }
+            &:nth-child(5) { animation-delay: 0.7s; }
+          }
+        }
+      }
+    }
+
+    .chart-wrapper {
+      padding: 16px;
+      margin-bottom: 24px;
+
+      ::ng-deep .ngx-charts {
+        .bar-vertical,
+        .pie-chart {
+          width: 100% !important;
+          height: 300px !important;
+        }
+      }
+    }
+  }
+}
+
+// Dark scrollbar
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: $surface-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $outline;
+  border-radius: 4px;
+
+  &:hover {
+    background: $on-surface-variant;
+  }
+}
+
+// Keyframe Animations
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes chartFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes barGrowUp {
+  from {
+    transform: scaleY(0);
+    opacity: 0.7;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pieSliceIn {
+  from {
+    transform: scale(0) rotate(-90deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes drawGrid {
+  from {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

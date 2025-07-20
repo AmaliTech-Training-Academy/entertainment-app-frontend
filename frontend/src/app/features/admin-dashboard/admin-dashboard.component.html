@@ -15,20 +15,37 @@
   <!-- Trending Media Section -->
   <div class="trending-section">
     <h2 class="section-title">🔥 Trending Media</h2>
-    <div class="trending-grid">
-      <div class="media-card" *ngFor="let item of trending">
-        <!-- <img [src]="item.thumbnailUrl" [alt]="item.title" /> -->
-        <div class="overlay">
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.releaseYear }} • {{ item.genres.join(', ') }}</p>
-          <span class="rating">⭐ {{ item.averageRating }}</span>
-        </div>
-      </div>
+    <div class="trending-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Year</th>
+            <th>Genres</th>
+            <th>Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of trending">
+            <td class="title-cell">{{ item.title }}</td>
+            <td class="year-cell">{{ item.releaseYear }}</td>
+            <td class="genres-cell">
+              <span class="genre-tag" *ngFor="let genre of item.genres">{{ genre }}</span>
+            </td>
+            <td class="rating-cell">
+              <div class="rating-badge">
+                <span>⭐</span>
+                <span>{{ item.averageRating }}</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
   <!-- Top Rated Chart -->
-  <div class="chart-wrapper">
+  <div class="chart-wrapper top-rated-chart">
     <h2 class="section-title">⭐ Top Rated Trending</h2>
     <ngx-charts-bar-vertical
       [view]="[700, 400]"
