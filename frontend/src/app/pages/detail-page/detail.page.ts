@@ -122,7 +122,7 @@ export class DetailPage implements OnInit {
         this.title = '';
         this.synopsis = '';
         this.thumbnailUrl = '';
-        this.trailerUrl = null;
+        // this.trailerUrl = null;
       },
     });
   }
