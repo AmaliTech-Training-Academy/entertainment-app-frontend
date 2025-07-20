@@ -417,6 +417,12 @@ jobs:
             echo "WARNING: Plan file $ENVIRONMENT.tfplan not created"
           fi
 
+          # Verify plan file exists and print its presence
+          echo "DEBUG: Checking for plan file in terraform/ directory before upload..."
+          ls -la "$ENVIRONMENT.tfplan" || echo "WARNING: Plan file $ENVIRONMENT.tfplan not found in terraform/ directory!"
+          
+          echo "DEBUG: plan_changes output from plan step: ${{ steps.plan.outputs.plan_changes }}" # Debug output
+
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
         if: steps.plan.outputs.plan_changes == 'true'
@@ -576,7 +582,7 @@ jobs:
           echo "--- After Download Artifact ---"
           ls -R
           echo "-------------------------------"
-          
+
       - name: Determine Deployment Strategy
         id: strategy
         working-directory: terraform
@@ -658,7 +664,7 @@ jobs:
               terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
               ;;
             "update")
-              if [[ "${{ needs.plan.outputs.plan_changes }}" == "true" && -f "../terraform/$ENVIRONMENT.tfplan" ]]; then
+              if [[ "${{ needs.plan.outputs.plan_changes }}" == "true" && -f "$ENVIRONMENT.tfplan" ]]; then
                 echo " Applying planned changes"
                 terraform apply -auto-approve "$ENVIRONMENT.tfplan"
               elif [[ "${{ needs.plan.outputs.plan_changes }}" == "false" ]]; then
