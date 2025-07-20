@@ -11,7 +11,7 @@ import { PaginatedResponse, AdminUser, UserRoleUpdateResponse } from '../../../m
 export class AdminService {
   // private readonly BASE_URL =
   //   'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1';
-  private BASE_URL = 'https://d101mapcha7bof.cloudfront.net';
+  private BASE_URL = 'https://d101mapcha7bof.cloudfront.net/api/v1';
 
   constructor(private http: HttpClient) {}
 
