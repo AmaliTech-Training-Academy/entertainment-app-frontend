@@ -16,7 +16,6 @@ import { TrendingCarouselComponent } from '../../components/trending-carousel/tr
   imports: [
     CommonModule,
     HeroCarouselComponent,
-
     SubscriptionFormComponent,
     AccordionComponent,
     TrendingCarouselComponent,

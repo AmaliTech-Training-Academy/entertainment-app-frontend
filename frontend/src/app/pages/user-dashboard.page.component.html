@@ -82,20 +82,19 @@
       </div>
     </div>
 
-    <section class="trending-section app-container">
+    <!-- <section class="">
       <h2 class="trending-section__title">Trending Movies</h2>
-      <div class="trending-section__carousel">
-        <div class="trending-section__list">
-          <app-trending-movie-card
-            *ngFor="let movie of trendingMovies; let i = index"
-            [image]="movie.image"
-            [alt]="movie.title"
-            [rank]="i + 1"
-          ></app-trending-movie-card>
-        </div>
+      <div class="trending-section__list">
+        <app-trending-movie-card
+          *ngFor="let movie of trendingMovies; let i = index"
+          [image]="movie.image"
+          [alt]="movie.title"
+          [rank]="i + 1"
+        ></app-trending-movie-card>
       </div>
-    </section>
+    </section> -->
 
+    <!--  -->
     <div class="table-section">
       <h2>Favorite Movies</h2>
       <div class="favorite-list favorite-list--grid">
@@ -104,6 +103,18 @@
           [movie]="movie"
           class="favorite-list__item"
         ></app-movie-favorite-card>
+      </div>
+    </div>
+
+    <div class="table-section">
+      <h2>Trending Movies</h2>
+      <div class="trending-list">
+        <app-trending-movie-card
+          *ngFor="let movie of trendingMovies; let i = index"
+          [image]="movie.image"
+          [alt]="movie.title"
+          [rank]="i + 1"
+        ></app-trending-movie-card>
       </div>
     </div>
   </div>
