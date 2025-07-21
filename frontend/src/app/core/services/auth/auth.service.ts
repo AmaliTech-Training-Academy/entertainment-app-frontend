@@ -33,8 +33,8 @@ export interface RegisterPayload {
 })
 export class AuthService {
   // private baseUrl = environment.apiUrl;
-  // private baseUrl = 'https://d101mapcha7bof.cloudfront.net';
-  private baseUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com';
+  private baseUrl = 'https://d101mapcha7bof.cloudfront.net';
+  // private baseUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com';
   private http = inject(HttpClient);
   private router = inject(Router);
 
