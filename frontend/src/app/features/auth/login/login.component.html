@@ -39,7 +39,7 @@
           mat-raised-button
           type="submit"
           class="login-button mat-mdc-raised-button"
-          [disabled]="!loginForm.valid"
+          [disabled]="!loginForm.valid || isLoading"
         >
           Login To Your Account
         </button>
