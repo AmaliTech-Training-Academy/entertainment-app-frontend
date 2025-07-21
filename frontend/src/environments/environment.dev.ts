@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000',
+  apiBaseUrl:
+    'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/media',
 };

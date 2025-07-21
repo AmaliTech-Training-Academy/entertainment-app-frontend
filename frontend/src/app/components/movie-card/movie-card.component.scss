@@ -99,6 +99,9 @@
   .separator {
     opacity: 0.7;
     color: map.get($primary-colors, 100);
+    font-size: map.get(map.get($headings, h5), font-size);
+    font-weight: map.get(map.get($body, b2), font-weight);
+    margin: 0 map.get($spacing, 3);
   }
 
   .genres-container {
