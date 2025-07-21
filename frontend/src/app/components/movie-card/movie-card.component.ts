@@ -31,6 +31,6 @@ export class MovieCardComponent {
   }
 
   navigateToMovie() {
-    this.router.navigate([`media/detail/${this.movie.id}`]);
+    this.router.navigate([`media/detail/${this.movie.mediaId}`]);
   }
 }
