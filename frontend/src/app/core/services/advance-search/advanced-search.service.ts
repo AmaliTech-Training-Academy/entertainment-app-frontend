@@ -67,20 +67,17 @@ export interface MovieFilters {
   providedIn: 'root',
 })
 export class AdvancedSearchService {
-  
-    private apiUrl = 'https://d101mapcha7bof.cloudfront.net';
-  // private readonly apiUrl =
-  //   'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com';
-  private listingsUrl = `${this.apiUrl}/api/v1/media/listings` 
-  
+  private readonly apiUrl = 'https://d101mapcha7bof.cloudfront.net';
+  private listingsUrl = `${this.apiUrl}/api/v1/media/listings`;
+
   // private readonly TRENDING_URL = `${environment.apiBaseUrl}/trending-now`;
-  private readonly TRENDING_URL = `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/media/trending-now`;
+  private readonly TRENDING_URL = `${this.apiUrl}/api/v1/media/trending-now`;
 
   // private readonly SEARCH_URL = `${environment.apiBaseUrl}/advanced-search`;
-  private readonly SEARCH_URL = `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/media/advanced-search`;
+  private readonly SEARCH_URL = `${this.apiUrl}/api/v1/media/advanced-search`;
 
   // private readonly TITLE_SEARCH_URL = `${environment.apiBaseUrl}/search`;
-  private readonly TITLE_SEARCH_URL = `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/media/search`;
+  private readonly TITLE_SEARCH_URL = `${this.apiUrl}/api/v1/media/search`;
 
   constructor(private http: HttpClient) {}
 

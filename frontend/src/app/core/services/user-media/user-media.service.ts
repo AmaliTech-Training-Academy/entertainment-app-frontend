@@ -6,8 +6,10 @@ import { Movie } from '../advance-search/advanced-search.service';
 
 @Injectable({ providedIn: 'root' })
 export class UserMediaService {
+
   private apiUrl = 'https://d101mapcha7bof.cloudfront.net';
   // private apiUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1';
+
 
   constructor(private http: HttpClient) {}
 

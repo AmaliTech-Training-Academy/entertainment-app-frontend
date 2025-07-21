@@ -22,4 +22,18 @@ export class MediaDetailsService {
       .get<MediaDetailsResponse>(`${this.apiUrl}/api/v1/media/detail/${mediaId}`)
       .pipe(catchError((error) => this.errorHandler.handleHttpError(error)));
   }
+
+  addToFavorites(userId: number, mediaId: number): Observable<any> {
+    return this.http.post(
+      `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/users/${userId}/favorites/media/${mediaId}`,
+      {},
+    );
+  }
+
+  // removeFromFavorites(userId: number, mediaId: number): Observable<any> {
+  //   return this.http.post(
+  //     `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/users/${userId}/favorites/media/${mediaId}`,
+  //     {},
+  //   );
+  // }
 }
