@@ -5,6 +5,30 @@
   padding: 16px;
 }
 
+.video-container {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 32px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.no-video-message {
+  width: 100%;
+  max-width: 1100px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1a;
+  color: #888;
+  font-size: 1.2rem;
+  border-radius: 12px;
+  margin-bottom: 32px;
+  border: 2px dashed #333;
+}
+
 .back-to-details-btn {
   margin-bottom: 16px;
   padding: 8px 20px;

@@ -1,20 +1,23 @@
 <div class="media-player-container">
-  <!-- <button class="back-to-details-btn" (click)="goToDetails()">Back to Details</button> -->
-  <vg-player *ngIf="trailerUrl">
+  <!-- Video Player Section -->
+  <div class="video-container" *ngIf="trailerUrl; else noVideo">
     <video
-      #media
-      [vgMedia]="media"
-      id="singleVideo"
+      #videoPlayer
+      [src]="trailerUrl"
       controls
-      preload="auto"
+      autoplay
       width="100%"
       height="auto"
+      style="max-width: 100%; border-radius: 12px; background: #000"
+      (ended)="onVideoEnded()"
+      (error)="onVideoError()"
     >
-      <source [src]="trailerUrl" type="video/mp4" />
+      Your browser does not support the video tag.
     </video>
-    <vg-controls></vg-controls>
-  </vg-player>
-  <div *ngIf="!trailerUrl" class="video-error">Trailer not available</div>
+  </div>
+  <ng-template #noVideo>
+    <div class="no-video-message">No video available.</div>
+  </ng-template>
 
   <div class="trending-section">
     <h2 class="trending-title">Trending Now</h2>
