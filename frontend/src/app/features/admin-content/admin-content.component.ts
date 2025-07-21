@@ -4,6 +4,7 @@ import { MediaItem } from '../../models/media.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-content',
@@ -24,12 +25,13 @@ export class AdminContentComponent implements OnInit, OnDestroy {
   showUploadForm = false;
   selectedMediaItem: MediaItem | null = null;
 
-  
-
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.loadMedia();
@@ -108,7 +110,6 @@ export class AdminContentComponent implements OnInit, OnDestroy {
     });
   }
 
-
   changePage(page: number): void {
     if (page >= 0 && page < this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
@@ -158,8 +159,6 @@ export class AdminContentComponent implements OnInit, OnDestroy {
     return item.title && item.releaseYear ? `${item.title}-${item.releaseYear}` : index;
   }
 
-
-
   refreshData(): void {
     this.loadMedia();
   }
@@ -167,5 +166,9 @@ export class AdminContentComponent implements OnInit, OnDestroy {
   // Method to check if we have results
   hasResults(): boolean {
     return this.media.length > 0;
+  }
+
+  uploadNewMovie() {
+    this.router.navigate(['admin/media/new']);
   }
 }

@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AuthService } from './auth.service';
+import { SearchCacheService } from './search-cache.service';
 
-describe('AuthService', () => {
-  let service: AuthService;
+describe('SearchCacheService', () => {
+  let service: SearchCacheService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(AuthService);
+    service = TestBed.inject(SearchCacheService);
   });
 
   it('should be created', () => {

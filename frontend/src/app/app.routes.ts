@@ -95,15 +95,23 @@ export const routes: Routes = [
             (m) => m.AdminDashboardComponent,
           ),
       },
-       {
-         path: 'users',
-         loadComponent: () => import('./features/admin-user/admin-user.component').then((m) => m.AdminUserComponent),
-       },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/admin-user/admin-user.component').then((m) => m.AdminUserComponent),
+      },
       {
         path: 'content',
         loadComponent: () =>
           import('./features/admin-content/admin-content.component').then(
             (m) => m.AdminContentComponent,
+          ),
+      },
+      {
+        path: 'media/new',
+        loadComponent: () =>
+          import('./pages/add-movie.page/add-movie.page.component').then(
+            (m) => m.AddMoviePageComponent,
           ),
       },
       {

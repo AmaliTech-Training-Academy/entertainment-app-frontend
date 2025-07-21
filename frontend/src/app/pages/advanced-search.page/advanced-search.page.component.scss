@@ -335,3 +335,20 @@
 .movies-grid:empty + .empty-state {
   display: flex;
 }
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: 200px;
+
+  mat-progress-spinner {
+    ::ng-deep circle {
+      stroke: map.get($secondary-colors, 200);
+    }
+
+    // Optional: Add glow effect
+    filter: drop-shadow(0 0 6px map.get($secondary-colors, 100));
+  }
+}

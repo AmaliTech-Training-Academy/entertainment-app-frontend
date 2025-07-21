@@ -1,0 +1,240 @@
+<!-- Add loading indicator -->
+<div *ngIf="isLoading" class="loading-overlay">
+  <mat-spinner diameter="50"></mat-spinner>
+  <p>Submitting media...</p>
+</div>
+
+<!-- Update submit button -->
+<button type="submit" [disabled]="mediaForm.invalid || isLoading">
+  <span *ngIf="!isLoading">Submit</span>
+  <span *ngIf="isLoading">Submitting...</span>
+</button>
+<form [formGroup]="mediaForm" (ngSubmit)="onSubmit()" class="media-form">
+  <mat-icon (click)="goBack()" class="back-button">arrow_back</mat-icon>
+  <div class="form-header">
+    <h2>Create New Media</h2>
+  </div>
+
+  <div class="form-grid">
+    <!-- Media Type -->
+    <div class="form-group">
+      <label for="mediaType">Media Type *</label>
+      <select
+        id="mediaType"
+        formControlName="mediaType"
+        [class.invalid]="
+          mediaForm!.get('mediaType')?.invalid && mediaForm!.get('mediaType')?.touched
+        "
+      >
+        <option value="" disabled selected>Select media type</option>
+        <option *ngFor="let type of mediaTypes" [value]="type">
+          {{ type!.toString() | titlecase }}
+        </option>
+      </select>
+      <div
+        *ngIf="mediaForm!.get('mediaType')?.invalid && mediaForm!.get('mediaType')?.touched"
+        class="error-message"
+      >
+        Media type is required
+      </div>
+    </div>
+
+    <!-- Title -->
+    <div class="form-group">
+      <label for="title">Title *</label>
+      <input
+        id="title"
+        type="text"
+        formControlName="title"
+        [class.invalid]="mediaForm!.get('title')?.invalid && mediaForm!.get('title')?.touched"
+      />
+      <div
+        *ngIf="mediaForm!.get('title')?.errors?.['required'] && mediaForm!.get('title')?.touched"
+        class="error-message"
+      >
+        Title is required
+      </div>
+      <div
+        *ngIf="mediaForm!.get('title')?.errors?.['maxlength'] && mediaForm!.get('title')?.touched"
+        class="error-message"
+      >
+        Title must be less than 255 characters
+      </div>
+    </div>
+
+    <!-- Release Date -->
+    <div class="form-group">
+      <label for="releaseDate">Release Date *</label>
+      <input
+        id="releaseDate"
+        type="date"
+        formControlName="releaseDate"
+        [max]="maxDate"
+        [class.invalid]="
+          mediaForm!.get('releaseDate')?.invalid && mediaForm!.get('releaseDate')?.touched
+        "
+      />
+      <div
+        *ngIf="mediaForm!.get('releaseDate')?.invalid && mediaForm!.get('releaseDate')?.touched"
+        class="error-message"
+      >
+        Release date is required
+      </div>
+    </div>
+
+    <!-- Duration -->
+    <div class="form-group">
+      <label for="duration">Duration (minutes) *</label>
+      <input
+        id="duration"
+        type="number"
+        formControlName="duration"
+        min="0"
+        [class.invalid]="mediaForm!.get('duration')?.invalid && mediaForm!.get('duration')?.touched"
+      />
+      <div
+        *ngIf="
+          mediaForm!.get('duration')?.errors?.['required'] && mediaForm!.get('duration')?.touched
+        "
+        class="error-message"
+      >
+        Duration is required
+      </div>
+      <div
+        *ngIf="mediaForm!.get('duration')?.errors?.['min'] && mediaForm!.get('duration')?.touched"
+        class="error-message"
+      >
+        Duration must be positive or zero
+      </div>
+    </div>
+
+    <!-- Language -->
+    <div class="form-group">
+      <label for="language">Language *</label>
+      <input
+        id="language"
+        type="text"
+        formControlName="language"
+        [class.invalid]="mediaForm!.get('language')?.invalid && mediaForm!.get('language')?.touched"
+      />
+      <div
+        *ngIf="
+          mediaForm!.get('language')?.errors?.['required'] && mediaForm!.get('language')?.touched
+        "
+        class="error-message"
+      >
+        Language is required
+      </div>
+      <div
+        *ngIf="
+          mediaForm!.get('language')?.errors?.['maxlength'] && mediaForm!.get('language')?.touched
+        "
+        class="error-message"
+      >
+        Language must be less than 50 characters
+      </div>
+    </div>
+
+    <!-- Synopsis -->
+    <div class="form-group full-width">
+      <label for="synopsis">Synopsis</label>
+      <textarea
+        id="synopsis"
+        formControlName="synopsis"
+        rows="4"
+        [class.invalid]="
+          mediaForm!.get('synopsis')?.errors?.['maxlength'] && mediaForm!.get('synopsis')?.touched
+        "
+      ></textarea>
+      <div class="character-count">{{ mediaForm!.get('synopsis')?.value?.length || 0 }}/2000</div>
+      <div
+        *ngIf="
+          mediaForm!.get('synopsis')?.errors?.['maxlength'] && mediaForm!.get('synopsis')?.touched
+        "
+        class="error-message"
+      >
+        Synopsis must be less than 2000 characters
+      </div>
+    </div>
+
+    <!-- Genres -->
+    <div class="form-group full-width">
+      <label>Genres *</label>
+      <div class="genre-options">
+        <button
+          type="button"
+          *ngFor="let genre of genreOptions"
+          [class.selected]="isGenreSelected(genre)"
+          (click)="toggleGenre(genre)"
+        >
+          {{ genre!.toString() | titlecase }}
+        </button>
+      </div>
+      <div
+        *ngIf="mediaForm!.get('genres')?.invalid && mediaForm!.get('genres')?.touched"
+        class="error-message"
+      >
+        At least one genre is required
+      </div>
+    </div>
+
+    <!-- File Uploads -->
+    <div class="form-group">
+      <label for="trailerFile">Trailer File</label>
+      <input
+        id="trailerFile"
+        type="file"
+        (change)="onFileChange($event, 'trailerFile')"
+        accept="video/*"
+      />
+      <div *ngIf="mediaForm!.get('trailerFile')?.value" class="file-info">
+        Selected: {{ mediaForm!.get('trailerFile')?.value?.name }}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="thumbnailFile">Thumbnail File *</label>
+      <input
+        id="thumbnailFile"
+        type="file"
+        (change)="onFileChange($event, 'thumbnailFile')"
+        accept="image/*"
+        required
+      />
+      <div *ngIf="mediaForm!.get('thumbnailFile')?.value" class="file-info">
+        Selected: {{ mediaForm!.get('thumbnailFile')?.value?.name }}
+      </div>
+      <div
+        *ngIf="mediaForm!.get('thumbnailFile')?.invalid && mediaForm!.get('thumbnailFile')?.touched"
+        class="error-message"
+      >
+        Thumbnail is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="mediaFile">Media File *</label>
+      <input
+        id="mediaFile"
+        type="file"
+        (change)="onFileChange($event, 'mediaFile')"
+        accept="video/*"
+        required
+      />
+      <div *ngIf="mediaForm!.get('mediaFile')?.value" class="file-info">
+        Selected: {{ mediaForm!.get('mediaFile')?.value?.name }}
+      </div>
+      <div
+        *ngIf="mediaForm!.get('mediaFile')?.invalid && mediaForm!.get('mediaFile')?.touched"
+        class="error-message"
+      >
+        Media file is required
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" [disabled]="mediaForm!.invalid">Submit</button>
+    <button type="button" (click)="mediaForm!.reset()">Reset</button>
+  </div>
+</form>
