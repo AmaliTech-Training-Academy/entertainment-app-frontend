@@ -1,4 +1,4 @@
-<div class="movie-card">
+<div class="movie-card" (click)="navigateToMovie()">
   <div class="card-container">
     <div class="image-container">
       <img [src]="movie.thumbnailUrl" [alt]="movie.title" class="movie-image" />
@@ -8,7 +8,11 @@
       <div class="title-container">
         <h1 class="movie-title">{{ movie.title }}</h1>
 
-        <button mat-icon-button class="bookmark-button" (click)="toggleBookmark()">
+        <button
+          mat-icon-button
+          class="bookmark-button"
+          (click)="toggleBookmark(); $event.stopPropagation(); $event.preventDefault()"
+        >
           <mat-icon>{{ movie.isBookmarked ? 'bookmark' : 'bookmark_border' }}</mat-icon>
         </button>
       </div>

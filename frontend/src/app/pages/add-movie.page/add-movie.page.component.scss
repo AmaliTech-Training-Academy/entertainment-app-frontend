@@ -1,0 +1,211 @@
+// colors.scss
+$color-white: #ffffff;
+$color-background: #10141e;
+$color-error: #f50404;
+
+.media-form {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: $color-background;
+  color: $color-white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+  .form-header {
+    margin-bottom: 2rem;
+    text-align: center;
+
+    h2 {
+      color: $color-white;
+      font-size: 1.8rem;
+      margin: 0;
+    }
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+
+    .full-width {
+      grid-column: span 2;
+    }
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: $color-white;
+
+      &:after {
+        content: ' *';
+        color: $color-error;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      &.required:after {
+        opacity: 1;
+      }
+    }
+
+    input[type='text'],
+    input[type='number'],
+    input[type='date'],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid lighten($color-background, 15%);
+      border-radius: 4px;
+      background-color: darken($color-background, 2%);
+      color: $color-white;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+
+      &:focus {
+        outline: none;
+        border-color: $color-error;
+        box-shadow: 0 0 0 2px rgba($color-error, 0.2);
+      }
+
+      &.invalid {
+        border-color: $color-error;
+      }
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    input[type='file'] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px dashed lighten($color-background, 15%);
+      border-radius: 4px;
+      background-color: darken($color-background, 2%);
+      color: $color-white;
+    }
+
+    .file-info {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: lighten($color-background, 40%);
+    }
+
+    .character-count {
+      text-align: right;
+      font-size: 0.8rem;
+      color: lighten($color-background, 40%);
+      margin-top: 0.25rem;
+    }
+
+    .error-message {
+      color: $color-error;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    .genre-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+
+      button {
+        padding: 0.5rem 1rem;
+        background-color: darken($color-background, 5%);
+        border: 1px solid lighten($color-background, 15%);
+        border-radius: 20px;
+        color: $color-white;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+          background-color: lighten($color-background, 5%);
+        }
+
+        &.selected {
+          background-color: $color-error;
+          border-color: $color-error;
+          color: white;
+        }
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &[type='submit'] {
+        background-color: $color-error;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background-color: darken($color-error, 10%);
+        }
+
+        &:disabled {
+          background-color: lighten($color-background, 15%);
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
+      }
+
+      &[type='button'] {
+        background-color: transparent;
+        border: 1px solid lighten($color-background, 15%);
+        color: $color-white;
+
+        &:hover {
+          background-color: lighten($color-background, 5%);
+        }
+      }
+    }
+  }
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  color: white;
+
+  mat-spinner {
+    margin-bottom: 1rem;
+  }
+}
+
+.success-snackbar {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.error-snackbar {
+  background-color: #f44336 !important;
+  color: white !important;
+}

@@ -59,16 +59,21 @@ export interface MovieFilters {
   sort_by?: string;
   sort_direction?: 'asc' | 'desc';
   rating?: string;
-  type?: 'All' | 'MOVIE' | 'TV_SHOW';
+  type?: 'All' | 'Movie' | 'TV_SHOW';
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AdvancedSearchService {
-  private readonly TRENDING_URL = `${environment.apiBaseUrl}/trending-now`;
-  private readonly SEARCH_URL = `${environment.apiBaseUrl}/advanced-search`;
-  private readonly TITLE_SEARCH_URL = `${environment.apiBaseUrl}/search`;
+  // private readonly TRENDING_URL = `${environment.apiBaseUrl}/trending-now`;
+  private readonly TRENDING_URL = `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/media/trending-now`;
+
+  // private readonly SEARCH_URL = `${environment.apiBaseUrl}/advanced-search`;
+  private readonly SEARCH_URL = `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/media/advanced-search`;
+
+  // private readonly TITLE_SEARCH_URL = `${environment.apiBaseUrl}/search`;
+  private readonly TITLE_SEARCH_URL = `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/media/search`;
 
   constructor(private http: HttpClient) {}
 
@@ -122,7 +127,7 @@ export class AdvancedSearchService {
 
     // Filters
     if (filters.genre && filters.genre !== 'All') {
-      params = params.set('genre', filters.genre.toUpperCase());
+      params = params.set('genres', filters.genre.toUpperCase());
     }
     if (filters.year && filters.year !== 'All') {
       params = params.set('releaseYear', filters.year);
@@ -134,7 +139,7 @@ export class AdvancedSearchService {
       params = params.set('rating', filters.rating);
     }
     if (filters.type && filters.type !== 'All') {
-      const mediaType = filters.type === 'MOVIE' ? 'MOVIE' : 'TV_SHOW';
+      const mediaType = filters.type === 'Movie' ? 'MOVIE' : 'TV_SHOW';
       params = params.set('mediaType', mediaType);
     }
 

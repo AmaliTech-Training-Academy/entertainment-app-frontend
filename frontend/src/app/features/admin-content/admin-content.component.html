@@ -1,10 +1,10 @@
 <div class="media-management">
   <h2>Media Management</h2>
-  
+
   <div class="media-controls">
     <div class="controls-row">
-      <button class="upload-btn">Upload New Movie</button>
-      
+      <button class="upload-btn" (click)="uploadNewMovie()">Upload New Movie</button>
+
       <div class="search-container">
         <input
           type="text"
@@ -13,12 +13,12 @@
           class="search-input"
         />
       </div>
-      
+
       <button class="clear-filters-btn" (click)="clearFilters()" *ngIf="searchQuery">
         Clear Search
       </button>
     </div>
-    
+
     <div class="results-info">
       <span>Showing {{ media.length }} of {{ totalElements }} results</span>
     </div>
@@ -52,22 +52,20 @@
           <td class="year-cell">{{ item.releaseYear }}</td>
           <td class="genres-cell">{{ item.genres.join(', ') }}</td>
           <td class="rating-cell">
-            <span class="rating">{{ item.averageRating | number:'1.1-1' }}</span>
+            <span class="rating">{{ item.averageRating | number: '1.1-1' }}</span>
           </td>
           <td class="actions-cell">
             <button class="edit-btn">Edit</button>
             <button class="delete-btn">Delete</button>
           </td>
         </tr>
-        
+
         <!-- Empty state -->
         <tr *ngIf="media.length === 0" class="empty-row">
           <td colspan="7" class="empty-cell">
             <div class="empty-state">
               <p>No media found</p>
-              <p *ngIf="searchQuery" class="empty-subtitle">
-                Try adjusting your search
-              </p>
+              <p *ngIf="searchQuery" class="empty-subtitle">Try adjusting your search</p>
             </div>
           </td>
         </tr>
@@ -77,46 +75,51 @@
 
   <!-- Enhanced Pagination -->
   <div class="pagination" *ngIf="totalPages > 1">
-    <button 
-      class="page-btn" 
-      (click)="changePage(0)" 
+    <button
+      class="page-btn"
+      (click)="changePage(0)"
       [disabled]="currentPage === 0"
-      title="First Page">
+      title="First Page"
+    >
       &#171;
     </button>
-    
-    <button 
-      class="page-btn" 
-      (click)="prevPage()" 
+
+    <button
+      class="page-btn"
+      (click)="prevPage()"
       [disabled]="currentPage === 0"
-      title="Previous Page">
+      title="Previous Page"
+    >
       &#8249;
     </button>
-    
-    <button 
-      *ngFor="let page of getPageNumbers()" 
+
+    <button
+      *ngFor="let page of getPageNumbers()"
       class="page-btn"
       [class.active]="page === currentPage"
-      (click)="changePage(page)">
+      (click)="changePage(page)"
+    >
       {{ page + 1 }}
     </button>
-    
-    <button 
-      class="page-btn" 
-      (click)="nextPage()" 
+
+    <button
+      class="page-btn"
+      (click)="nextPage()"
       [disabled]="currentPage + 1 >= totalPages"
-      title="Next Page">
+      title="Next Page"
+    >
       &#8250;
     </button>
-    
-    <button 
-      class="page-btn" 
-      (click)="changePage(totalPages - 1)" 
+
+    <button
+      class="page-btn"
+      (click)="changePage(totalPages - 1)"
       [disabled]="currentPage + 1 >= totalPages"
-      title="Last Page">
+      title="Last Page"
+    >
       &#187;
     </button>
-    
+
     <div class="page-info">
       <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
     </div>

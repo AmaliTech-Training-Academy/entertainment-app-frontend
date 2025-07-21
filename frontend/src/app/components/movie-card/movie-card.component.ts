@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { Movie } from '../../core/services/advance-search/advanced-search.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-movie-card',
@@ -10,6 +11,7 @@ import { Movie } from '../../core/services/advance-search/advanced-search.servic
   styleUrl: './movie-card.component.scss',
 })
 export class MovieCardComponent {
+  constructor(private router: Router) {}
   // @Input() movie!: Movie;
   @Input() movie!: any;
 
@@ -19,5 +21,9 @@ export class MovieCardComponent {
 
   getTypeIcon(type: string): string {
     return type === 'MOVIE' ? 'movie' : 'live_tv';
+  }
+
+  navigateToMovie() {
+    this.router.navigate([`media/detail/${this.movie.id}`]);
   }
 }
