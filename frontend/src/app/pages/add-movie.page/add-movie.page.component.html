@@ -111,12 +111,16 @@
     <!-- Language -->
     <div class="form-group">
       <label for="language">Language *</label>
-      <input
+      <select
         id="language"
-        type="text"
+        type="select"
         formControlName="language"
         [class.invalid]="mediaForm!.get('language')?.invalid && mediaForm!.get('language')?.touched"
-      />
+      >
+        <option *ngFor="let language of languageOptions" [value]="language">
+          {{ language }}
+        </option>
+      </select>
       <div
         *ngIf="
           mediaForm!.get('language')?.errors?.['required'] && mediaForm!.get('language')?.touched
@@ -124,14 +128,6 @@
         class="error-message"
       >
         Language is required
-      </div>
-      <div
-        *ngIf="
-          mediaForm!.get('language')?.errors?.['maxlength'] && mediaForm!.get('language')?.touched
-        "
-        class="error-message"
-      >
-        Language must be less than 50 characters
       </div>
     </div>
 
