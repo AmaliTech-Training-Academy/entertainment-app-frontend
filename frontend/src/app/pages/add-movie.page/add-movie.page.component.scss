@@ -209,3 +209,11 @@ $color-error: #f50404;
   background-color: #f44336 !important;
   color: white !important;
 }
+
+.back-button {
+  cursor: pointer;
+
+  &:hover {
+    color: $color-error;
+  }
+}

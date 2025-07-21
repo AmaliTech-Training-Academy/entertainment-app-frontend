@@ -9,8 +9,10 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AddMediaService } from '../../core/services/add-media/add-media.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { CommonModule, TitleCasePipe } from '@angular/common';
+import { CommonModule, Location, TitleCasePipe } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { f } from '../../../../node_modules/@angular/material/icon-module.d-COXCrhrh';
+import { MatIcon } from '@angular/material/icon';
 
 enum mediaTypeEnum {
   MOVIE = 'MOVIE',
@@ -32,7 +34,7 @@ enum mediaGenreEnum {
 
 @Component({
   selector: 'app-add-movie.page',
-  imports: [TitleCasePipe, CommonModule, ReactiveFormsModule, MatProgressSpinnerModule],
+  imports: [TitleCasePipe, CommonModule, ReactiveFormsModule, MatProgressSpinnerModule, MatIcon],
   templateUrl: './add-movie.page.component.html',
   styleUrls: ['./add-movie.page.component.scss'],
 })
@@ -47,6 +49,7 @@ export class AddMoviePageComponent {
     private fb: FormBuilder,
     private mediaService: AddMediaService,
     private snackBar: MatSnackBar,
+    private location: Location,
   ) {
     this.initializeForm();
   }
@@ -166,5 +169,9 @@ export class AddMoviePageComponent {
     }
 
     return formData;
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

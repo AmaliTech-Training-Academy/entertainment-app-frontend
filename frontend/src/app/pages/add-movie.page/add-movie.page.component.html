@@ -10,6 +10,7 @@
   <span *ngIf="isLoading">Submitting...</span>
 </button>
 <form [formGroup]="mediaForm" (ngSubmit)="onSubmit()" class="media-form">
+  <mat-icon (click)="goBack()" class="back-button">arrow_back</mat-icon>
   <div class="form-header">
     <h2>Create New Media</h2>
   </div>
