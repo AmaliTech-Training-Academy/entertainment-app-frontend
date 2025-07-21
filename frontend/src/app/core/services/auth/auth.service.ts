@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
 
 export interface AuthResponseData {
   id: number;
@@ -35,6 +36,7 @@ export class AuthService {
   // private baseUrl = 'https://d101mapcha7bof.cloudfront.net';
   private baseUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com';
   private http = inject(HttpClient);
+  private router = inject(Router);
 
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/api/v1/auth/login`, { email, password });
@@ -46,5 +48,14 @@ export class AuthService {
 
   refreshToken(refreshToken: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/api/v1/auth/refresh`, { refreshToken });
+  }
+
+  logout() {
+    // Clear cookies by setting their expiry to the past
+    document.cookie = 'auth_token=; Max-Age=0; path=/;';
+    document.cookie = 'auth_user=; Max-Age=0; path=/;';
+    // ...clear any other cookies you use...
+    // Redirect to home
+    this.router.navigate(['/']);
   }
 }

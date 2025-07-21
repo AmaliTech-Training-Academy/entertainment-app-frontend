@@ -1,74 +1,76 @@
-<div class="for-you-section">
-  <h2>Trending Now</h2>
-  <div class="slider">
-    <ng-container *ngIf="trendingLoading; else trendingList">
-      <p>Loading trending movies...</p>
-    </ng-container>
-    <ng-template #trendingList>
-      <ng-container *ngIf="trendingMovies.length; else trendingEmpty">
-        <app-trending-movie-card
-          *ngFor="let movie of trendingMovies; let i = index"
-          [movie]="movie"
-          [image]="movie.thumbnailUrl || 'assets/images/movie.png'"
-          [alt]="movie.title"
-          [mediaId]="movie.mediaId"
-          [rank]="i + 1"
-        >
-        </app-trending-movie-card>
+<div class="ty">
+  <div class="for-you-section">
+    <h2>Trending Now</h2>
+    <div class="slider">
+      <ng-container *ngIf="trendingLoading; else trendingList">
+        <p>Loading trending movies...</p>
       </ng-container>
-      <ng-template #trendingEmpty>
-        <p>No trending movies found.</p>
+      <ng-template #trendingList>
+        <ng-container *ngIf="trendingMovies.length; else trendingEmpty">
+          <app-trending-movie-card
+            *ngFor="let movie of trendingMovies; let i = index"
+            [movie]="movie"
+            [image]="movie.thumbnailUrl || 'assets/images/movie.png'"
+            [alt]="movie.title"
+            [mediaId]="movie.mediaId"
+            [rank]="i + 1"
+          >
+          </app-trending-movie-card>
+        </ng-container>
+        <ng-template #trendingEmpty>
+          <p>No trending movies found.</p>
+        </ng-template>
       </ng-template>
-    </ng-template>
+    </div>
   </div>
-</div>
 
-<div class="for-you-section">
-  <h2>Your Favorites</h2>
-  <div class="slider">
-    <ng-container *ngIf="favoritesLoading; else favoritesList">
-      <p>Loading your favorites...</p>
-    </ng-container>
-    <ng-template #favoritesList>
-      <ng-container *ngIf="favoriteMovies.length; else favoritesEmpty">
-        <app-trending-movie-card
-          *ngFor="let movie of favoriteMovies; let i = index"
-          [movie]="movie"
-          [image]="movie.thumbnailUrl || 'assets/images/movie.png'"
-          [alt]="movie.title"
-          [mediaId]="movie.mediaId"
-          [rank]="i + 1"
-        >
-        </app-trending-movie-card>
+  <div class="for-you-section">
+    <h2>Your Favorites</h2>
+    <div class="slider">
+      <ng-container *ngIf="favoritesLoading; else favoritesList">
+        <p>Loading your favorites...</p>
       </ng-container>
-      <ng-template #favoritesEmpty>
-        <p>No favorites found.</p>
+      <ng-template #favoritesList>
+        <ng-container *ngIf="favoriteMovies.length; else favoritesEmpty">
+          <app-trending-movie-card
+            *ngFor="let movie of favoriteMovies; let i = index"
+            [movie]="movie"
+            [image]="movie.thumbnailUrl || 'assets/images/movie.png'"
+            [alt]="movie.title"
+            [mediaId]="movie.mediaId"
+            [rank]="i + 1"
+          >
+          </app-trending-movie-card>
+        </ng-container>
+        <ng-template #favoritesEmpty>
+          <p>No favorites found.</p>
+        </ng-template>
       </ng-template>
-    </ng-template>
+    </div>
   </div>
-</div>
 
-<div class="for-you-section">
-  <h2>Recommended For You</h2>
-  <div class="slider">
-    <ng-container *ngIf="recommendationsLoading; else recommendationsList">
-      <p>Loading recommendations...</p>
-    </ng-container>
-    <ng-template #recommendationsList>
-      <ng-container *ngIf="recommendedMovies.length; else recommendationsEmpty">
-        <app-trending-movie-card
-          *ngFor="let movie of recommendedMovies; let i = index"
-          [movie]="movie"
-          [image]="movie.thumbnailUrl || 'assets/images/movie.png'"
-          [alt]="movie.title"
-          [mediaId]="movie.mediaId"
-          [rank]="i + 1"
-        >
-        </app-trending-movie-card>
+  <div class="for-you-section">
+    <h2>Recommended For You</h2>
+    <div class="slider">
+      <ng-container *ngIf="recommendationsLoading; else recommendationsList">
+        <p>Loading recommendations...</p>
       </ng-container>
-      <ng-template #recommendationsEmpty>
-        <p>No recommendations found.</p>
+      <ng-template #recommendationsList>
+        <ng-container *ngIf="recommendedMovies.length; else recommendationsEmpty">
+          <app-trending-movie-card
+            *ngFor="let movie of recommendedMovies; let i = index"
+            [movie]="movie"
+            [image]="movie.thumbnailUrl || 'assets/images/movie.png'"
+            [alt]="movie.title"
+            [mediaId]="movie.mediaId"
+            [rank]="i + 1"
+          >
+          </app-trending-movie-card>
+        </ng-container>
+        <ng-template #recommendationsEmpty>
+          <p>No recommendations found.</p>
+        </ng-template>
       </ng-template>
-    </ng-template>
+    </div>
   </div>
 </div>

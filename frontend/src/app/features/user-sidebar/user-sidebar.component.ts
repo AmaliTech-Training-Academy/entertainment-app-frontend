@@ -16,10 +16,7 @@ export class UserSidebarComponent {
   topItems = [
     { label: 'Dashboard', route: '/user/dashboard', icon: 'dashboard' },
     { label: 'Movies', route: '/user/movies', icon: 'film' },
-    { label: 'TV Shows', route: '/user/tv-shows', icon: 'tv' },
     { label: 'My List', route: '/user/my-list', icon: 'heart' },
-    { label: 'Profile', route: '/user/profile', icon: 'user' },
-    { label: 'Logout', route: '/', icon: 'logout' },
   ];
 
   onItemClick(item: any) {
