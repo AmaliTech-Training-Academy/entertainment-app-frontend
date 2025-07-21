@@ -7,9 +7,8 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root',
 })
 export class AddMediaService {
-  private apiUrl = `${environment.apiBaseUrl}/media`;
-  // private apiUrl =
-  //   'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/media';
+  // private apiUrl = `${environment.apiBaseUrl}/media`;
+  private apiUrl = 'https://d101mapcha7bof.cloudfront.net/media';
 
   constructor(private http: HttpClient) {}
 
