@@ -60,6 +60,7 @@ export class DetailPage implements OnInit {
   synopsis = '';
   thumbnailUrl = '';
   imgError = false;
+  trailerUrl: string | null = null;
 
   private route = inject(ActivatedRoute);
   private commentService = inject(CommentService);

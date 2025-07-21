@@ -36,6 +36,12 @@ interface TrendingResponse {
   success: boolean;
 }
 
+interface TitleSearchResponse {
+  data: Movie[] | null;
+  status: number;
+  success: boolean;
+}
+
 export interface MoviesApiResponse {
   results: Movie[];
   page: number;
@@ -62,24 +68,57 @@ export interface MovieFilters {
 export class AdvancedSearchService {
   private readonly TRENDING_URL = `${environment.apiBaseUrl}/trending-now`;
   private readonly SEARCH_URL = `${environment.apiBaseUrl}/advanced-search`;
+  private readonly TITLE_SEARCH_URL = `${environment.apiBaseUrl}/search`;
+
   constructor(private http: HttpClient) {}
 
   searchMovies(filters: MovieFilters): Observable<MoviesApiResponse> {
-    // Determine which endpoint to use
-    const useAdvancedSearch = !!filters.query || this.hasActiveFilters(filters);
-    const url = useAdvancedSearch ? this.SEARCH_URL : this.TRENDING_URL;
+    const { url, params } = this.determineRequestConfig(filters);
 
-    // Build query parameters
+    console.log('Making request to:', url);
+    console.log('With params:', params.toString());
+
+    return this.http
+      .get<TitleSearchResponse | AdvancedSearchResponse | TrendingResponse>(url, { params })
+      .pipe(
+        tap((response) => console.log('Raw API response:', response)),
+        map((response) => this.normalizeResponse(response, filters, url)),
+        catchError((error) => {
+          console.error('API Error:', error);
+          return of(this.getEmptyResponse());
+        }),
+      );
+  }
+
+  private determineRequestConfig(filters: MovieFilters): { url: string; params: HttpParams } {
     let params = new HttpParams();
+    let url: string;
 
+    // Case 1: Title search (only title parameter, no pagination)
+    if (filters.query) {
+      url = this.TITLE_SEARCH_URL;
+      params = params.set('title', filters.query);
+      return { url, params };
+    }
+
+    // Case 2: Filter search (all other filters)
+    if (this.hasActiveFilters(filters)) {
+      url = this.SEARCH_URL;
+      params = this.buildFilterParams(params, filters);
+      return { url, params };
+    }
+
+    // Case 3: Initial load (trending with pagination)
+    url = this.TRENDING_URL;
+    params = params.set('page', (filters.page || 0).toString());
+    params = params.set('size', (filters.itemsPerPage || 10).toString());
+    return { url, params };
+  }
+
+  private buildFilterParams(params: HttpParams, filters: MovieFilters): HttpParams {
     // Pagination parameters
     params = params.set('page', (filters.page || 0).toString());
     params = params.set('size', (filters.itemsPerPage || 10).toString());
-
-    // Search query
-    if (filters.query) {
-      params = params.set('query', filters.query);
-    }
 
     // Filters
     if (filters.genre && filters.genre !== 'All') {
@@ -94,13 +133,9 @@ export class AdvancedSearchService {
     if (filters.rating && filters.rating !== 'All') {
       params = params.set('rating', filters.rating);
     }
-    if (filters.type && filters.type !== 'All' && filters.type !== 'MOVIE') {
-      const transformedType = 'TV_SHOW';
-      params = params.set('mediaType', transformedType);
-    }
-
-    if (filters.type && filters.type !== 'All' && filters.type === 'MOVIE') {
-      params = params.set('mediaType', filters.type.toUpperCase());
+    if (filters.type && filters.type !== 'All') {
+      const mediaType = filters.type === 'MOVIE' ? 'MOVIE' : 'TV_SHOW';
+      params = params.set('mediaType', mediaType);
     }
 
     // Sorting
@@ -109,45 +144,50 @@ export class AdvancedSearchService {
       params = params.set('sortDir', filters.sort_direction || 'asc');
     }
 
-    console.log('Making request to:', url);
-    console.log('With params:', params.toString());
-
-    return this.http.get<any>(url, { params }).pipe(
-      tap((response) => console.log('Raw API response:', response)),
-      map((response) => this.normalizeResponse(response, filters, useAdvancedSearch)),
-      catchError((error) => {
-        console.error('API Error:', error);
-        return of(this.getEmptyResponse());
-      }),
-    );
+    return params;
   }
 
   private normalizeResponse(
-    response: any,
+    response: TitleSearchResponse | AdvancedSearchResponse | TrendingResponse,
     filters: MovieFilters,
-    isAdvancedSearch: boolean,
+    url: string,
   ): MoviesApiResponse {
-    if (isAdvancedSearch) {
-      // Advanced search response format
+    // Title search response
+    if (url === this.TITLE_SEARCH_URL) {
+      const titleResponse = response as TitleSearchResponse;
       return {
-        results: response.data?.content || [],
-        page: (response.data?.pageable?.pageNumber ?? 0) + 1,
-        total_pages: response.data?.totalPages ?? 1,
-        total_results: response.data?.totalElements ?? 0,
-      };
-    } else {
-      // Trending response format (client-side pagination)
-      const itemsPerPage = filters.itemsPerPage || 10;
-      const currentPage = filters.page ?? 0;
-      const startIndex = currentPage * itemsPerPage;
-
-      return {
-        results: response.data?.slice(startIndex, startIndex + itemsPerPage) || [],
-        page: currentPage + 1,
-        total_pages: Math.ceil((response.data?.length || 0) / itemsPerPage),
-        total_results: response.data?.length || 0,
+        results: titleResponse.data || [],
+        page: 1,
+        total_pages: 1,
+        total_results: titleResponse.data?.length || 0,
       };
     }
+
+    // Advanced search response
+    if (url === this.SEARCH_URL) {
+      const advancedResponse = response as AdvancedSearchResponse;
+      const content = advancedResponse.data?.content || [];
+      return {
+        results: content,
+        page: (advancedResponse.data?.pageable?.pageNumber ?? 0) + 1,
+        total_pages: advancedResponse.data?.totalPages ?? 1,
+        total_results: advancedResponse.data?.totalElements ?? 0,
+      };
+    }
+
+    // Trending response (client-side pagination)
+    const trendingResponse = response as TrendingResponse;
+    const itemsPerPage = filters.itemsPerPage || 10;
+    const currentPage = filters.page ?? 0;
+    const startIndex = currentPage * itemsPerPage;
+    const allResults = trendingResponse.data || [];
+
+    return {
+      results: allResults.slice(startIndex, startIndex + itemsPerPage),
+      page: currentPage + 1,
+      total_pages: Math.ceil(allResults.length / itemsPerPage),
+      total_results: allResults.length,
+    };
   }
 
   private hasActiveFilters(filters: MovieFilters): boolean {
