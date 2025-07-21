@@ -7,68 +7,20 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { FormsModule } from '@angular/forms';
-import {
-  AdvancedSearchComponent as AdvancedSearch,
-  AdvancedSearchComponent,
-} from '../../components/advanced-search/advanced-search.component';
+import { AdvancedSearchComponent } from '../../components/advanced-search/advanced-search.component';
 import { MovieCardComponent } from '../../components/movie-card/movie-card.component';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
 import {
   AdvancedSearchService,
   Movie,
+  MoviesApiResponse,
 } from '../../core/services/advance-search/advanced-search.service';
-
-type DisplayMovie = {
-  title: string;
-  year: string;
-  type: string;
-  rating: string;
-  genres: string[];
-  imageUrl: string;
-  isBookmarked: boolean;
-};
-function isDefaultFilters(filters: any, query: string) {
-  return (
-    !query &&
-    (!filters.type || filters.type === 'All') &&
-    (!filters.genre || filters.genre === 'All') &&
-    (!filters.rating || filters.rating === 'All') &&
-    (!filters.year || filters.year === 'All') &&
-    (!filters.language || filters.language === 'All')
-  );
-}
-
-function isOnlySearch(query: string, filters: any) {
-  return (
-    query &&
-    (!filters.type || filters.type === 'All') &&
-    (!filters.genre || filters.genre === 'All') &&
-    (!filters.rating || filters.rating === 'All') &&
-    (!filters.year || filters.year === 'All') &&
-    (!filters.language || filters.language === 'All')
-  );
-}
-
-function mapToBackendEnums(filters: any) {
-  let mediaType =
-    filters.type && filters.type !== 'All'
-      ? filters.type === 'Movie'
-        ? 'MOVIE'
-        : filters.type === 'Series'
-          ? 'TV_SHOW'
-          : filters.type
-      : undefined;
-  let genres =
-    filters.genre && filters.genre !== 'All'
-      ? [filters.genre.toUpperCase().replace(' ', '_')]
-      : undefined;
-  let sortBy = 'SORT_BY_TITLE';
-  let sortDir = 'asc';
-  return { mediaType, genres, sortBy, sortDir };
-}
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SearchCacheService } from '../../core/services/advance-search/search-cache.service';
 
 @Component({
   selector: 'app-advanced-search.page',
+  standalone: true,
   imports: [
     CommonModule,
     RouterModule,
@@ -78,186 +30,151 @@ function mapToBackendEnums(filters: any) {
     MatSelectModule,
     MatCardModule,
     FormsModule,
-    AdvancedSearch,
+    AdvancedSearchComponent,
     MovieCardComponent,
     PaginationComponent,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './advanced-search.page.component.html',
-  styleUrl: './advanced-search.page.component.scss',
+  styleUrls: ['./advanced-search.page.component.scss'],
 })
 export class AdvancedSearchPageComponent implements OnInit {
-  @ViewChild(AdvancedSearchComponent)
-  advancedSearchComponent?: AdvancedSearchComponent;
+  @ViewChild(AdvancedSearchComponent) advancedSearchComponent!: AdvancedSearchComponent;
+  filteredMovies: Movie[] = [];
+  isLoading = false;
+  currentPage = 1;
+  totalPages = 1;
+  totalItems = 0;
+  itemsPerPage = 10;
+  searchQuery = '';
 
-  constructor(private advancedSearchService: AdvancedSearchService) {}
-
-  filteredMovies: DisplayMovie[] = [];
-  allMovies: DisplayMovie[] = [];
-  loading = false;
+  constructor(
+    private advSearchService: AdvancedSearchService,
+    private cacheService: SearchCacheService,
+  ) {}
 
   ngOnInit(): void {
-    this.loading = true;
-    this.advancedSearchService.getAllMovies().subscribe({
-      next: (movies) => {
-        this.allMovies = movies.map((movie) => ({
-          title: movie.title,
-          year: movie.releaseYear ? movie.releaseYear.toString() : 'N/A',
-          type: movie.mediaType || 'Movie',
-          rating: movie.averageRating ? movie.averageRating.toString() : 'N/A',
-          genres: movie.genres || [],
-          imageUrl: movie.thumbnailUrl || '../../../assets/images/movie.png',
-          isBookmarked: false,
-        }));
-        this.filteredMovies = [...this.allMovies];
-        this.totalPages = 1;
-        this.loading = false;
+    this.fetchMovies({
+      page: 0, // API uses 0-based index
+      itemsPerPage: this.itemsPerPage,
+    });
+  }
+
+  private fetchInitialMovies(): void {
+    this.fetchMovies({
+      page: 0,
+      itemsPerPage: this.itemsPerPage,
+    });
+  }
+
+  private generateCacheKey(filters: any): string {
+    return JSON.stringify({
+      query: filters.query,
+      genre: filters.genre,
+      year: filters.year,
+      language: filters.language,
+      rating: filters.rating,
+      type: filters.type,
+      sort_by: filters.sort_by,
+      sort_direction: filters.sort_direction,
+      page: filters.page,
+      itemsPerPage: filters.itemsPerPage,
+    });
+  }
+
+  fetchMovies(filters: any): void {
+    this.isLoading = true;
+    const cacheKey = this.generateCacheKey(filters);
+    const cachedData = this.cacheService.get(cacheKey);
+
+
+    console.log('Fetching with filters:', filters);
+
+    if (cachedData) {
+      this.handleMovieResponse(cachedData);
+      return;
+    }
+
+
+    this.advSearchService.searchMovies(filters).subscribe({
+      next: (response) => {
+        console.log('API Response:', response);
+        this.cacheService.set(cacheKey, response);
+        this.handleMovieResponse(response);
       },
       error: (err) => {
-        console.error('Failed to fetch movies', err);
-        this.loading = false;
+        console.error('Failed to fetch movies:', err);
+        this.isLoading = false;
+        this.filteredMovies = [];
       },
     });
   }
-  search_filter_state = false;
-  searchQuery = '';
-  currentPage = 1;
-  pageSize = 10;
-  totalPages = 1;
 
-  types = ['All', 'Movie', 'TV_Show'];
-  genres = ['All', 'Action', 'Comedy', 'Drama', 'Adventure', 'Triller'];
-  ratings = ['All', '9.0', '8.5', '8.0', '7.5', '7.0', '6.5', '6.0', '5.5'];
-  years = ['All', '2024', '2023', '2022', '2021', '2020'];
-  languages = ['All', 'English', 'French', 'Spanish'];
+  private handleMovieResponse(response: MoviesApiResponse): void {
+    this.filteredMovies = response.results;
+    this.currentPage = response.page;
+    this.totalPages = response.total_pages;
+    this.totalItems = response.total_results;
+    this.isLoading = false;
 
-  selectedType = 'All';
-  selectedGenre = 'All';
-  selectedRating = 'All';
-  selectedYear = 'All';
-  selectedLanguage = 'All';
-
-  onPageChange(page: number) {
-    this.currentPage = page;
-    this.onSearch({
-      query: this.searchQuery,
-      filters: {
-        type: this.selectedType,
-        genre: this.selectedGenre,
-        rating: this.selectedRating,
-        year: this.selectedYear,
-        language: this.selectedLanguage,
-      },
+    console.log('Updated state:', {
+      movies: this.filteredMovies.length,
+      currentPage: this.currentPage,
+      totalPages: this.totalPages,
+      totalItems: this.totalItems,
     });
+  }
+
+  onPageChange(newPage: number): void {
+    console.log('Page changed to:', newPage);
+    this.currentPage = newPage;
+    this.fetchMovies({
+      ...this.getCurrentFilters(),
+      page: newPage - 1, // Convert to 0-based index
+      itemsPerPage: this.itemsPerPage,
+    });
+
   }
 
   isSearchActive(): boolean {
-    return (
-      this.search_filter_state ||
-      this.searchQuery !== '' ||
-      this.selectedType !== 'All' ||
-      this.selectedGenre !== 'All' ||
-      this.selectedRating !== 'All' ||
-      this.selectedYear !== 'All' ||
-      this.selectedLanguage !== 'All'
-    );
+    return this.advancedSearchComponent?.hasActiveFilters() || false;
   }
 
-  onSearch(event: { query: string; filters: any }) {
-    this.search_filter_state = true;
+  onSearch(event: { query: string; filters: any }): void {
+    this.isLoading = true;
     this.searchQuery = event.query;
-    // Only search input used
-    if (isOnlySearch(event.query, event.filters)) {
-      this.loading = true;
-      this.advancedSearchService.searchByTitle(event.query).subscribe({
-        next: (response) => {
-          const movies = response.data || [];
-          this.filteredMovies = movies.map((movie: any) => ({
-            title: movie.title,
-            year: movie.releaseYear ? movie.releaseYear.toString() : 'N/A',
-            type: movie.mediaType || 'Movie',
-            rating: movie.averageRating ? movie.averageRating.toString() : 'N/A',
-            genres: movie.genres || [],
-            imageUrl: movie.thumbnailUrl || '../../../assets/images/movie.png',
-            isBookmarked: false,
-          }));
-          this.totalPages = 1;
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error('Failed to fetch search results', err);
-          this.loading = false;
-        },
-      });
-    } else if (!isDefaultFilters(event.filters, event.query)) {
-      // Any filter active
-      this.loading = true;
-      const enums = mapToBackendEnums(event.filters);
-      const params: any = {
-        ...enums,
-        language: event.filters.language !== 'All' ? event.filters.language : undefined,
-        rating: event.filters.rating !== 'All' ? Number(event.filters.rating) : undefined,
-        releaseYear: event.filters.year !== 'All' ? Number(event.filters.year) : undefined,
-        page: this.currentPage - 1,
-        size: this.pageSize,
-      };
-      this.advancedSearchService.searchMoviesAdvanced(params).subscribe({
-        next: (response) => {
-          const movies = response.data?.content || [];
-          this.filteredMovies = movies.map((movie: any) => ({
-            title: movie.title,
-            year: movie.releaseDate ? movie.releaseDate.substring(0, 4) : 'N/A',
-            type: movie.mediaType || 'Movie',
-            rating: 'N/A',
-            genres: movie.genreNames || [],
-            imageUrl: movie.thumbnailUrl || '../../../assets/images/movie.png',
-            isBookmarked: false,
-          }));
-          this.totalPages = response.data?.totalPages || 1;
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error('Failed to fetch search results', err);
-          this.loading = false;
-        },
-      });
-    } else {
-      this.loading = true;
-      this.advancedSearchService.getAllMovies().subscribe({
-        next: (movies) => {
-          this.allMovies = movies.map((movie) => ({
-            title: movie.title,
-            year: movie.releaseDate ? movie.releaseDate.substring(0, 4) : 'N/A',
-            type: movie.mediaType || 'Movie',
-            rating: 'N/A',
-            genres: movie.genreNames || [],
-            imageUrl: movie.thumbnailUrl || '../../../assets/images/movie.png',
-            isBookmarked: false,
-          }));
-          this.filteredMovies = [...this.allMovies];
-          this.totalPages = 1;
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error('Failed to fetch movies', err);
-          this.loading = false;
-        },
-      });
-    }
+    this.currentPage = 0; // Reset to first page on new search
+
+    const filters = {
+      ...event.filters,
+      query: event.query,
+      page: 0,
+      itemsPerPage: this.itemsPerPage,
+    };
+
+    this.fetchMovies(filters);
   }
 
-  resetFilters() {
-    this.filteredMovies = [...this.allMovies];
-    this.search_filter_state = false;
-    this.searchQuery = '';
-
-    this.selectedType = 'All';
-    this.selectedGenre = 'All';
-    this.selectedRating = 'All';
-    this.selectedYear = 'All';
-    this.selectedLanguage = 'All';
-
-    if (this.advancedSearchComponent) {
-      this.advancedSearchComponent.resetFilters();
+  private getCurrentFilters(): any {
+    if (!this.advancedSearchComponent) {
+      return {
+        page: this.currentPage,
+        itemsPerPage: this.itemsPerPage,
+      };
     }
+
+    return {
+      ...this.advancedSearchComponent.selectedFilters,
+      query: this.searchQuery,
+      page: this.currentPage,
+      itemsPerPage: this.itemsPerPage,
+    };
+  }
+
+  resetFilters(): void {
+    this.searchQuery = '';
+    this.currentPage = 1;
+    this.advancedSearchComponent.resetFilters();
+    this.fetchInitialMovies();
   }
 }

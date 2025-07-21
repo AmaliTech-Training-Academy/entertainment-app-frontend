@@ -59,6 +59,7 @@ export class DetailPage implements OnInit {
   title = '';
   synopsis = '';
   thumbnailUrl = '';
+  imgError = false;
   trailerUrl: string | null = null;
 
   private route = inject(ActivatedRoute);
@@ -103,16 +104,25 @@ export class DetailPage implements OnInit {
     console.log('Fetching media details for mediaId:', this.mediaId);
     this.mediaDetailsService.getMediaDetailsById(this.mediaId).subscribe({
       next: (res) => {
-        const data: MediaDetails = res.data;
-        this.screenshots = data.screenshots || [];
-        this.topCast = data.castMembers || [];
-        this.reviews = data.reviews || [];
-        this.comments = data.comments || [];
-        this.title = data.title;
-        this.synopsis = data.synopsis;
-        this.thumbnailUrl = data.thumbnailUrl;
-        this.trailerUrl = data.trailerUrl;
-        console.log('Trailer URL in details page:', this.trailerUrl);
+        console.log(res);
+        const data: MediaDetails | null = res.data;
+        if (data) {
+          this.screenshots = data.screenshots || [];
+          this.topCast = data.castMembers || [];
+          this.reviews = data.reviews || [];
+          this.comments = data.comments || [];
+          this.title = data.title;
+          this.synopsis = data.synopsis;
+          this.thumbnailUrl = data.thumbnailUrl;
+        } else {
+          this.screenshots = [];
+          this.topCast = [];
+          this.reviews = [];
+          this.comments = [];
+          this.title = '';
+          this.synopsis = '';
+          this.thumbnailUrl = '';
+        }
       },
       error: () => {
         this.screenshots = [];
@@ -176,10 +186,14 @@ export class DetailPage implements OnInit {
     return typeof val === 'number' ? val : 0;
   }
 
-  goToTrailer() {
-    if (this.mediaId && this.trailerUrl) {
-      document.cookie = `trailerUrl=${encodeURIComponent(this.trailerUrl)}; path=/;`;
-      this.router.navigate(['/media', this.mediaId, 'player']);
-    }
+  formatName(name: string): string {
+    return name.replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
   }
 }

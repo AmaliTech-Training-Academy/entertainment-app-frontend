@@ -10,12 +10,20 @@ import { Movie } from '../../core/services/advance-search/advanced-search.servic
   styleUrl: './movie-card.component.scss',
 })
 export class MovieCardComponent {
-  @Input() movie: any;
+
+  constructor(private router: Router) {}
+  // @Input() movie!: Movie;
+  @Input() movie!: any;
+
   toggleBookmark() {
     this.movie.isBookmarked = !this.movie.isBookmarked;
   }
 
   getTypeIcon(type: string): string {
-    return type === 'Movie' ? 'movie' : 'tv';
+    return type === 'MOVIE' ? 'movie' : 'live_tv';
+  }
+
+  navigateToMovie() {
+    this.router.navigate([`media/detail/${this.movie.id}`]);
   }
 }

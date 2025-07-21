@@ -8,4 +8,5 @@ import { Component, Input } from '@angular/core';
 })
 export class ScreenShotComponent {
   @Input() imageUrl: string = '';
+  imgError = false;
 }

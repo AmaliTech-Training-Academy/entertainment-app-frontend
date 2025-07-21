@@ -1,42 +1,62 @@
 <div class="detail-page-container">
-  <div class="detail-header-section">
-    <img [src]="thumbnailUrl" alt="Show Poster" class="detail-header-image" />
-    <div class="detail-header-text">
-      <h1 class="detail-header-title">{{ title }}</h1>
-      <h6 class="detail-header-subtitle">Plot Summary</h6>
-      <p class="detail-header-content">{{ synopsis }}</p>
-      <a 
-        (click)="goToTrailer()"
-        class="watch-trailer-link"
-        *ngIf="mediaId"
-      >
-        Watch Trailer
-      </a>
+  <div class="details-grids">
+    <div class="detail-header-section">
+      <div class="details-img">
+        <img
+          [src]="imgError || !thumbnailUrl ? 'assets/images/search.svg' : thumbnailUrl"
+          alt="Show Poster"
+          class="detail-header-image"
+          (error)="imgError = true"
+        />
+        <!-- <img
+          src="https://images.unsplash.com/photo-1752350434950-50e8df9c268e?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          alt="Show Poster"
+          class="detail-header-image"
+        /> -->
+      </div>
+      <div class="detail-header-text">
+        <div class="">
+          <h1 class="detail-header-title">{{ title }}</h1>
+          <h6 class="detail-header-subtitle">Plot Summary</h6>
+          <p class="detail-header-content">{{ synopsis }}</p>
+        </div>
+        <a [routerLink]="['/media', mediaId, 'player']" class="watch-trailer-link" *ngIf="mediaId">
+          Watch Trailer
+        </a>
+      </div>
     </div>
-  </div>
 
-  <div class="movie-screenshot-section">
-    <h2 class="screenshots-section-title">Movies Screenshot</h2>
-    <div class="screenshots-list">
-      <app-screen-shot
-        *ngFor="let screenshot of screenshots"
-        [imageUrl]="screenshot.imageUrl"
-      ></app-screen-shot>
+    <div class="movie-screenshot-section">
+      <h2 class="screenshots-section-title">Movies Screenshot</h2>
+      <div *ngIf="screenshots.length > 0; else noScreenshots" class="screenshots-list">
+        <app-screen-shot
+          *ngFor="let screenshot of screenshots"
+          [imageUrl]="screenshot.imageUrl"
+        ></app-screen-shot>
+      </div>
+      <ng-template #noScreenshots>
+        <div class="no-screenshots-text" style="padding: 2rem; text-align: center">
+          No screenshots available
+        </div>
+      </ng-template>
     </div>
   </div>
 
   <div class="detail-content-section">
     <div class="comments-section">
       <h4>{{ comments.length }} comments</h4>
-      <div class="comments-list">
+      <div *ngIf="comments.length > 0; else noComments" class="comments-list">
         <app-comment-card
           *ngFor="let comment of comments"
           [imageUrl]="'assets/images/profile.jpg'"
-          [name]="comment.userName || 'User'"
-          [dateTime]="comment.createdAt || ''"
+          [name]="formatName(comment.userName || 'User')"
+          [dateTime]="formatDate(comment.createdAt || '')"
           [description]="comment.content"
         ></app-comment-card>
       </div>
+      <ng-template #noComments>
+        <div class="no-comments-text" style="padding: 2rem; text-align: center">No comments yet</div>
+      </ng-template>
 
       <ng-container *ngIf="!isLoggedIn; else commentInput">
         <button class="custom-leave-comment-btn" (click)="login()">Login to leave a comment</button>
@@ -76,22 +96,30 @@
       </div>
       <div class="top-cast-section">
         <h4>Top cast</h4>
-        <div class="top-cast-list">
+        <div *ngIf="topCast.length > 0; else noTopCast" class="top-cast-list">
           <app-top-cast-card
             *ngFor="let cast of topCast"
             [imageUrl]="asString(cast['avatar'])"
             [name]="asString(cast['name'])"
           ></app-top-cast-card>
         </div>
+        <ng-template #noTopCast>
+          <div class="no-top-cast-text" style="padding: 2rem; text-align: start">Top casts not added yet</div>
+        </ng-template>
       </div>
       <div class="reviews-section">
         <h4>Movie Reviews</h4>
-        <app-rating-card
-          *ngFor="let review of reviews"
-          [reviewer]="asString(review['reviewer'])"
-          [rating]="asNumber(review['rating'])"
-          [content]="asString(review['text'])"
-        ></app-rating-card>
+        <div *ngIf="reviews.length > 0; else noReviews">
+          <app-rating-card
+            *ngFor="let review of reviews"
+            [reviewer]="asString(review['reviewer'])"
+            [rating]="asNumber(review['rating'])"
+            [content]="asString(review['text'])"
+          ></app-rating-card>
+        </div>
+        <ng-template #noReviews>
+          <div class="no-reviews-text" style="padding: 2rem; text-align: start">No reviews yet</div>
+        </ng-template>
       </div>
     </div>
   </div>

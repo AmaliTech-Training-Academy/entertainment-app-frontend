@@ -47,8 +47,8 @@ export interface SearchMoviesResponse {
 
 @Injectable({ providedIn: 'root' })
 export class TrendingMoviesService {
-  private apiUrl = 'https://d101mapcha7bof.cloudfront.net/api';
-  // private apiUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api';
+  // private apiUrl = 'https://d101mapcha7bof.cloudfront.net/api';
+  private apiUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api';
 
   private http = inject(HttpClient);
 
