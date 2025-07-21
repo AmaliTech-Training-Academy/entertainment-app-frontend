@@ -29,7 +29,9 @@ import { AuthService } from '../../../core/services/auth/auth.service';
 export class LoginComponent implements OnInit {
   loginForm: any;
   loginError = '';
+  isLoading = false;
   // Sample user
+
   private readonly sampleUser = {
     email: 'test@example.com',
     password: 'password123',
@@ -73,6 +75,7 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit() {
+    this.isLoading = true;
     this.loginError = '';
     if (this.loginForm.valid) {
       const { email, password } = this.loginForm.value;
@@ -89,10 +92,17 @@ export class LoginComponent implements OnInit {
           if (Object.keys(user).length > 0) {
             document.cookie = `auth_user=${encodeURIComponent(JSON.stringify(user))}; path=/;`;
           }
+          this.isLoading = false;
+          this.snackBar.open('Login successful!', 'Close', {
+            duration: 10000,
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar'],
+          });
           this.router.navigate(['/']);
         },
         error: (err) => {
           console.log('Login error:', err);
+          this.isLoading = false;
           this.loginError = err?.error?.message || 'Invalid email or password.';
         },
       });
