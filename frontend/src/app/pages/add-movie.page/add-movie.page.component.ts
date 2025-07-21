@@ -32,6 +32,19 @@ enum mediaGenreEnum {
   DOCUMENTARY = 'DOCUMENTARY',
 }
 
+enum languagesEnum {
+  ENGLISH = 'ENGLISH',
+  SPANISH = 'SPANISH',
+  FRENCH = 'FRENCH',
+  GERMAN = 'GERMAN',
+  ITALIAN = 'ITALIAN',
+  PORTUGUESE = 'PORTUGUESE',
+  JAPANESE = 'JAPANESE',
+  KOREAN = 'KOREAN',
+  CHINESE = 'CHINESE',
+  HINDI = 'HINDI',
+}
+
 @Component({
   selector: 'app-add-movie.page',
   imports: [TitleCasePipe, CommonModule, ReactiveFormsModule, MatProgressSpinnerModule, MatIcon],
@@ -44,7 +57,8 @@ export class AddMoviePageComponent {
   mediaTypes = Object.values(mediaTypeEnum);
   genreOptions = Object.values(mediaGenreEnum);
   maxDate = new Date().toISOString().split('T')[0];
-
+  languageEnum = languagesEnum;
+  languageOptions = Object.values(languagesEnum);
   constructor(
     private fb: FormBuilder,
     private mediaService: AddMediaService,
@@ -61,7 +75,7 @@ export class AddMoviePageComponent {
       synopsis: ['', Validators.maxLength(2000)],
       releaseDate: [null, Validators.required],
       duration: [null, [Validators.required, Validators.min(0)]],
-      language: ['', [Validators.required, Validators.maxLength(50)]],
+      language: ['', [Validators.required]],
       genres: [[], [this.atLeastOneGenreValidator]],
       trailerFile: [null],
       thumbnailFile: [null, Validators.required],
