@@ -7,8 +7,8 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root',
 })
 export class MediaPlayerService {
-  //  private apiUrl = 'https://d101mapcha7bof.cloudfront.net';
-  private apiUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com';
+   private apiUrl = 'https://d101mapcha7bof.cloudfront.net';
+  // private apiUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com';
 
   constructor(private http: HttpClient) {}
 
