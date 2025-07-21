@@ -87,12 +87,14 @@ export class AdvancedSearchPageComponent implements OnInit {
     const cacheKey = this.generateCacheKey(filters);
     const cachedData = this.cacheService.get(cacheKey);
 
+
     console.log('Fetching with filters:', filters);
 
     if (cachedData) {
       this.handleMovieResponse(cachedData);
       return;
     }
+
 
     this.advSearchService.searchMovies(filters).subscribe({
       next: (response) => {
@@ -131,6 +133,7 @@ export class AdvancedSearchPageComponent implements OnInit {
       page: newPage - 1, // Convert to 0-based index
       itemsPerPage: this.itemsPerPage,
     });
+
   }
 
   isSearchActive(): boolean {

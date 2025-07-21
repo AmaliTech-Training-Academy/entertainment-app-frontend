@@ -17,10 +17,9 @@ export class MediaDetailsService {
     private errorHandler: ErrorHandlerService,
   ) {}
 
-   getMediaDetailsById(mediaId: number): Observable<MediaDetailsResponse> {
-    return this.http.get<MediaDetailsResponse>(`${this.apiUrl}/api/v1/media/detail/${mediaId}`)
-      .pipe(
-        catchError((error) => this.errorHandler.handleHttpError(error))
-      );
+  getMediaDetailsById(mediaId: number): Observable<MediaDetailsResponse> {
+    return this.http
+      .get<MediaDetailsResponse>(`${this.apiUrl}/api/v1/media/detail/${mediaId}`)
+      .pipe(catchError((error) => this.errorHandler.handleHttpError(error)));
   }
 }

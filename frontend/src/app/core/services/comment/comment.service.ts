@@ -27,11 +27,8 @@ export class CommentService {
   ) {}
 
   postComment(mediaId: number, comment: CommentPost): Observable<CommentApiResponse> {
-    return this.http.post<CommentApiResponse>(
-      `${this.apiUrl}/api/v1/comments/media/${mediaId}`,
-      comment
-    ).pipe(
-      catchError((error) => this.errorHandler.handleHttpError(error))
-    );
+    return this.http
+      .post<CommentApiResponse>(`${this.apiUrl}/api/v1/comments/media/${mediaId}`, comment)
+      .pipe(catchError((error) => this.errorHandler.handleHttpError(error)));
   }
 }

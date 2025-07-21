@@ -5,6 +5,7 @@ import { environment } from '../../../../environments/environment';
 
 export interface Movie {
   mediaId: number;
+
   mediaType: 'MOVIE' | 'TV_SHOW';
   title: string;
   releaseYear: number | null;
@@ -66,6 +67,12 @@ export interface MovieFilters {
   providedIn: 'root',
 })
 export class AdvancedSearchService {
+  
+    private apiUrl = 'https://d101mapcha7bof.cloudfront.net';
+  // private readonly apiUrl =
+  //   'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com';
+  private listingsUrl = `${this.apiUrl}/api/v1/media/listings` 
+  
   // private readonly TRENDING_URL = `${environment.apiBaseUrl}/trending-now`;
   private readonly TRENDING_URL = `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/media/trending-now`;
 
@@ -76,6 +83,12 @@ export class AdvancedSearchService {
   private readonly TITLE_SEARCH_URL = `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/media/search`;
 
   constructor(private http: HttpClient) {}
+
+  getAllMovies(): Observable<Movie[]> {
+    return this.http
+      .get<any>(this.listingsUrl)
+      .pipe(map((response) => response.data.content as Movie[]));
+  }
 
   searchMovies(filters: MovieFilters): Observable<MoviesApiResponse> {
     const { url, params } = this.determineRequestConfig(filters);
