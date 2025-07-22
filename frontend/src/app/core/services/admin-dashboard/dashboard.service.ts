@@ -15,16 +15,20 @@ export class DashboardService {
   constructor(private http: HttpClient) {}
 
   getMetrics(): Observable<AdminMetricsResponse> {
-    return this.http.get<AdminMetricsResponse>(`${environment.apiUrl}/api/v1/admin/metrics`);
+    return this.http.get<AdminMetricsResponse>(
+      `https://d101mapcha7bof.cloudfront.net/api/v1/admin/metrics`,
+    );
   }
 
   getTrendingMedia(): Observable<TrendingMediaResponse> {
-    return this.http.get<TrendingMediaResponse>(`${environment.apiUrl}/api/v1/media/trending-now`);
+    return this.http.get<TrendingMediaResponse>(
+      `https://d101mapcha7bof.cloudfront.net/api/v1/media/trending-now`,
+    );
   }
 
   getMediaListings(): Observable<{ data: { content: MediaListing[] } }> {
     return this.http.get<{ data: { content: MediaListing[] } }>(
-      `${environment.apiUrl}/api/v1/media/listings`,
+      `https://d101mapcha7bof.cloudfront.net/api/v1/media/listings`,
     );
   }
 }

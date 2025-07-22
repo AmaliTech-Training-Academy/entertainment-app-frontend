@@ -18,13 +18,15 @@ export class MediaDetailsService {
 
   getMediaDetailsById(mediaId: number): Observable<MediaDetailsResponse> {
     return this.http
-      .get<MediaDetailsResponse>(`${this.apiUrl}/api/v1/media/detail/${mediaId}`)
+      .get<MediaDetailsResponse>(
+        `https://d101mapcha7bof.cloudfront.net/api/v1/media/detail/${mediaId}`,
+      )
       .pipe(catchError((error) => this.errorHandler.handleHttpError(error)));
   }
 
   addToFavorites(userId: number, mediaId: number): Observable<any> {
     return this.http.post(
-      `${environment.apiUrl}/api/v1/users/${userId}/favorites/media/${mediaId}`,
+      `https://d101mapcha7bof.cloudfront.net/api/v1/users/${userId}/favorites/media/${mediaId}`,
       {},
     );
   }

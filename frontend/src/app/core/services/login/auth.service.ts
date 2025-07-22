@@ -9,10 +9,10 @@ import { environment } from '../../../../environments/environment';
 export class AuthService {
   constructor(private http: HttpClient) {}
   login(email: string, password: string): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/api/v1/auth/login`, { email, password });
+    return this.http.post(`https://d101mapcha7bof.cloudfront.net/api/v1/auth/login`, { email, password });
   }
 
   refreshToken(refreshToken: string): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/api/v1/auth/refresh`, { refreshToken });
+    return this.http.post(`https://d101mapcha7bof.cloudfront.net/api/v1/auth/refresh`, { refreshToken });
   }
 }

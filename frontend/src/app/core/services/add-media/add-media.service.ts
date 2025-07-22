@@ -7,7 +7,7 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root',
 })
 export class AddMediaService {
-  private apiUrl = `${environment.apiUrl}/api/v1/media`;
+  private apiUrl = `https://d101mapcha7bof.cloudfront.net/api/v1/media`;
 
   constructor(private http: HttpClient) {}
 

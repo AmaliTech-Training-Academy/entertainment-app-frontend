@@ -7,13 +7,15 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root',
 })
 export class MediaPlayerService {
-   private apiUrl = environment.apiUrl;
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
   getTrailerUrl(contentId: number): Observable<string> {
     return this.http
-      .get(`${this.apiUrl}/api/v1/media/${contentId}/trailer`, { responseType: 'text' })
+      .get(`https://d101mapcha7bof.cloudfront.net/api/v1/media/${contentId}/trailer`, {
+        responseType: 'text',
+      })
       .pipe(
         catchError((error: HttpErrorResponse) => {
           console.error('Error fetching trailer URL:', error);

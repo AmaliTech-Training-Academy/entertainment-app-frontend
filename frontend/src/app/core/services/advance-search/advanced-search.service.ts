@@ -68,11 +68,11 @@ export interface MovieFilters {
 })
 export class AdvancedSearchService {
   private readonly apiUrl = environment.apiUrl;
-  private listingsUrl = `${this.apiUrl}/api/v1/media/listings`;
+  private listingsUrl = `https://d101mapcha7bof.cloudfront.net/api/v1/media/listings`;
 
-  private readonly TRENDING_URL = `${this.apiUrl}/api/v1/media/trending-now`;
-  private readonly SEARCH_URL = `${this.apiUrl}/api/v1/media/advanced-search`;
-  private readonly TITLE_SEARCH_URL = `${this.apiUrl}/api/v1/media/search`;
+  private readonly TRENDING_URL = `https://d101mapcha7bof.cloudfront.net/api/v1/media/trending-now`;
+  private readonly SEARCH_URL = `https://d101mapcha7bof.cloudfront.net/api/v1/media/advanced-search`;
+  private readonly TITLE_SEARCH_URL = `https://d101mapcha7bof.cloudfront.net/api/v1/media/search`;
 
   constructor(private http: HttpClient) {}
 

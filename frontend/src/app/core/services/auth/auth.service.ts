@@ -37,18 +37,18 @@ export class AuthService {
   private router = inject(Router);
 
   login(email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/v1/auth/login`, {
+    return this.http.post<AuthResponse>(`https://d101mapcha7bof.cloudfront.net/api/v1/auth/login`, {
       email,
       password,
     });
   }
 
   register(payload: RegisterPayload): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/v1/auth/register`, payload);
+    return this.http.post<AuthResponse>(`https://d101mapcha7bof.cloudfront.net/api/v1/auth/register`, payload);
   }
 
   refreshToken(refreshToken: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/v1/auth/refresh`, {
+    return this.http.post<AuthResponse>(`https://d101mapcha7bof.cloudfront.net/api/v1/auth/refresh`, {
       refreshToken,
     });
   }

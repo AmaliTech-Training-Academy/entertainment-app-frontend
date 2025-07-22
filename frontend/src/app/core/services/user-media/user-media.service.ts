@@ -13,7 +13,7 @@ export class UserMediaService {
 
   getFavorites(userId: string): Observable<Movie[]> {
     return this.http
-      .get<any>(`${this.apiUrl}/api/v1/users/${userId}/favorites`)
+      .get<any>(`https://d101mapcha7bof.cloudfront.net/api/v1/users/${userId}/favorites`)
       .pipe(
         map((response) =>
           response.data && response.data.content ? (response.data.content as Movie[]) : [],
@@ -23,7 +23,7 @@ export class UserMediaService {
 
   getRecommendations(userId: string): Observable<Movie[]> {
     return this.http
-      .get<any>(`${this.apiUrl}/api/v1/media/${userId}/recommendations`)
+      .get<any>(`https://d101mapcha7bof.cloudfront.net/api/v1/media/${userId}/recommendations`)
       .pipe(map((response) => (response.data ? (response.data as Movie[]) : [])));
   }
 }

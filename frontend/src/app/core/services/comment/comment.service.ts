@@ -25,7 +25,10 @@ export class CommentService {
 
   postComment(mediaId: number, comment: CommentPost): Observable<CommentApiResponse> {
     return this.http
-      .post<CommentApiResponse>(`${environment.apiUrl}/api/v1/comments/media/${mediaId}`, comment)
+      .post<CommentApiResponse>(
+        `https://d101mapcha7bof.cloudfront.net/api/v1/comments/media/${mediaId}`,
+        comment,
+      )
       .pipe(catchError((error) => this.errorHandler.handleHttpError(error)));
   }
 }
