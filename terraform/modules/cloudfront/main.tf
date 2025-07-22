@@ -111,7 +111,7 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
   }
 }
 
-# Origin request policy for API calls - FINAL FIX: Only CloudFront-allowed headers
+# Origin request policy for API calls - Only CloudFront-allowed headers
 resource "aws_cloudfront_origin_request_policy" "api_origin" {
   name    = "${var.environment}-api-origin-request-policy"
   comment = "Origin request policy for API calls - ${var.environment}"
@@ -138,8 +138,7 @@ resource "aws_cloudfront_origin_request_policy" "api_origin" {
   }
 }
 
-
-# Response headers policy - HSTS removed for HTTP compatibility
+# Response headers policy - Updated CSP for S3 media access
 resource "aws_cloudfront_response_headers_policy" "security" {
   name    = "${var.environment}-security-headers"
   comment = "Security headers for CineVerse frontend - ${var.environment}"
@@ -163,8 +162,6 @@ resource "aws_cloudfront_response_headers_policy" "security" {
   }
 
   security_headers_config {
-    # HSTS removed - conflicts with allow-all HTTP policy
-    
     content_type_options {
       override = true
     }
@@ -178,12 +175,15 @@ resource "aws_cloudfront_response_headers_policy" "security" {
       referrer_policy = "strict-origin-when-cross-origin"
       override        = true
     }
+    
     content_security_policy {
-      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://${var.alb_domain_name} https://${var.alb_domain_name}; media-src 'self';"
+      content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: *.amazonaws.com; connect-src 'self' http://${var.alb_domain_name} https://${var.alb_domain_name} https://*.s3.amazonaws.com https://*.s3.*.amazonaws.com; media-src 'self' https://*.s3.amazonaws.com https://*.s3.*.amazonaws.com;"
       override = true
     }
   }
 }
+
+
 
 # CloudFront distribution
 resource "aws_cloudfront_distribution" "website" {
