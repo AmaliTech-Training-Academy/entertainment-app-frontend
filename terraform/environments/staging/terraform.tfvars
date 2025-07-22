@@ -1,10 +1,8 @@
-environment        = "staging"
-aws_region         = "eu-west-1"
-project_name       = "cineverse"
-domain_name        = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"  # Example staging domain
-enable_waf         = true
-enable_monitoring  = true
-api_endpoint       = "http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"  # Staging API
-# Or use ALB domain directly: "https://dev-api-alb-123456789.eu-west-1.elb.amazonaws.com"
-# api_endpoint = "https://staging-api-alb-123.eu-west-1.elb.amazonaws.com"
+environment       = "staging"
+aws_region        = "eu-west-1"
+project_name      = "cineverse"
+alb_domain_name   = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
+enable_waf        = true
+enable_monitoring = true
+
 use_existing_resources = true

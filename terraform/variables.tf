@@ -25,10 +25,13 @@ variable "app_name" {
   default     = "entertainment-app-frontend"
 }
 
-variable "domain_name" {
-  description = "Domain name for the application"
+variable "alb_domain_name" {
+  description = "ALB domain name for backend API (without protocol)"
   type        = string
-  default     = ""
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9][a-zA-Z0-9-._]*[a-zA-Z0-9]$", var.alb_domain_name))
+    error_message = "ALB domain name must be a valid domain name without protocol (http/https)."
+  }
 }
 
 variable "enable_waf" {
@@ -41,12 +44,6 @@ variable "enable_monitoring" {
   description = "Enable CloudWatch monitoring and alarms"
   type        = bool
   default     = true
-}
-
-variable "api_endpoint" {
-  description = "Backend API endpoint URL"
-  type        = string
-  default     = "http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
 }
 
 variable "tags" {

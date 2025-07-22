@@ -73,10 +73,9 @@ module "cloudfront" {
   origin_access_control_id = module.s3_website.origin_access_control_id
   price_class              = local.env_config[var.environment].cloudfront_price_class
   waf_web_acl_id           = var.enable_waf ? module.waf[0].web_acl_id : ""
-  api_endpoint             = var.api_endpoint
-  alb_domain_name          = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
-
-  # api_endpoint             = var.domain_name != "" ? "https://api.${var.domain_name}" : var.api_endpoint
+  alb_domain_name          = var.alb_domain_name  # ✅ Using ALB domain for API backend
+  domain_aliases           = []  # No custom domains
+  use_default_certificate  = true  # Always use CloudFront default certificate
 
   tags = local.common_tags
 

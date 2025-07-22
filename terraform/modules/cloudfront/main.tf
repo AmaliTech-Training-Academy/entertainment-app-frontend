@@ -50,6 +50,41 @@ resource "aws_cloudfront_cache_policy" "static_assets" {
   }
 }
 
+# Cache policy for API calls - no aggressive caching
+resource "aws_cloudfront_cache_policy" "api_no_cache" {
+  name        = "${var.environment}-api-no-cache-policy"
+  comment     = "No cache policy for API calls - ${var.environment}"
+  default_ttl = 0
+  max_ttl     = 1
+  min_ttl     = 0
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    query_strings_config {
+      query_string_behavior = "all"
+    }
+
+    headers_config {
+      header_behavior = "whitelist"
+      headers {
+        items = [
+          "Authorization",
+          "Content-Type",
+          "Accept",
+          "Origin",
+          "Referer"
+        ]
+      }
+    }
+
+    cookies_config {
+      cookie_behavior = "all"
+    }
+  }
+}
+
 # Origin request policy for S3
 resource "aws_cloudfront_origin_request_policy" "s3_origin" {
   name    = "${var.environment}-s3-origin-request-policy"
@@ -72,6 +107,38 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
 
   query_strings_config {
     query_string_behavior = "none"
+  }
+}
+
+# Origin request policy for API calls
+resource "aws_cloudfront_origin_request_policy" "api_origin" {
+  name    = "${var.environment}-api-origin-request-policy"
+  comment = "Origin request policy for API calls - ${var.environment}"
+
+  cookies_config {
+    cookie_behavior = "all"
+  }
+
+  headers_config {
+    header_behavior = "whitelist"
+    headers {
+      items = [
+        "Authorization",
+        "Content-Type",
+        "Accept",
+        "Origin",
+        "Referer",
+        "User-Agent",
+        "X-Requested-With",
+        "X-Forwarded-For",
+        "X-Forwarded-Proto",
+        "Host"
+      ]
+    }
+  }
+
+  query_strings_config {
+    query_string_behavior = "all"
   }
 }
 
@@ -118,10 +185,6 @@ resource "aws_cloudfront_response_headers_policy" "security" {
       content_security_policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://${var.alb_domain_name} https://${var.alb_domain_name}; media-src 'self';"
       override = true
     }
-
-    
-
-    
   }
 }
 
@@ -181,7 +244,7 @@ resource "aws_cloudfront_distribution" "website" {
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
 
-  # API behavior - allows both HTTP and HTTPS
+  # API behavior - allows both HTTP and HTTPS with proper forwarding
   ordered_cache_behavior {
     path_pattern               = "/api/*"
     allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
@@ -189,8 +252,8 @@ resource "aws_cloudfront_distribution" "website" {
     target_origin_id           = "API-ALB"
     compress                   = true
     viewer_protocol_policy     = "allow-all"  # Changed from "https-only"
-    cache_policy_id            = aws_cloudfront_cache_policy.spa.id
-    origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
+    cache_policy_id            = aws_cloudfront_cache_policy.api_no_cache.id  # ✅ Fixed: Use API-specific cache policy
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.api_origin.id  # ✅ Fixed: Use API-specific origin policy
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
 

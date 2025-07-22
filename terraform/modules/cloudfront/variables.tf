@@ -48,18 +48,13 @@ variable "waf_web_acl_id" {
   default     = ""
 }
 
-# NEW: Dedicated variable for ALB domain
 variable "alb_domain_name" {
-  description = "ALB domain name for API origin"
+  description = "ALB domain name for API origin (without protocol)"
   type        = string
-  default     = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
-}
-
-# UPDATED: Remove default since it should match alb_domain_name
-variable "api_endpoint" {
-  description = "Backend API endpoint for CSP headers (should match alb_domain_name with protocol)"
-  type        = string
-  default     = ""
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9][a-zA-Z0-9-._]*[a-zA-Z0-9]$", var.alb_domain_name))
+    error_message = "ALB domain name must be a valid domain name without protocol (http/https)."
+  }
 }
 
 variable "tags" {

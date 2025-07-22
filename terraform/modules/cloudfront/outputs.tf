@@ -18,10 +18,15 @@ output "distribution_hosted_zone_id" {
   value       = aws_cloudfront_distribution.website.hosted_zone_id
 }
 
-# CloudFront policy outputs - using direct resource references
-output "origin_request_policy_id" {
-  description = "CloudFront origin request policy ID"
+# CloudFront policy outputs - updated to include new policies
+output "s3_origin_request_policy_id" {
+  description = "S3 origin request policy ID"
   value       = aws_cloudfront_origin_request_policy.s3_origin.id
+}
+
+output "api_origin_request_policy_id" {
+  description = "API origin request policy ID"
+  value       = aws_cloudfront_origin_request_policy.api_origin.id
 }
 
 output "spa_cache_policy_id" {
@@ -32,6 +37,11 @@ output "spa_cache_policy_id" {
 output "static_assets_cache_policy_id" {
   description = "Static assets cache policy ID"
   value       = aws_cloudfront_cache_policy.static_assets.id
+}
+
+output "api_no_cache_policy_id" {
+  description = "API no-cache policy ID"
+  value       = aws_cloudfront_cache_policy.api_no_cache.id
 }
 
 output "security_response_headers_policy_id" {
