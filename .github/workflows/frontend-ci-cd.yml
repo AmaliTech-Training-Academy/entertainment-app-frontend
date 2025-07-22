@@ -121,107 +121,66 @@ jobs:
           name: security-reports-${{ github.sha }}
           path: frontend/npm-audit-report.json
           retention-days: 30
+# =============================================================================
+# Build and Test
+# =============================================================================
+build:
+  name: Build & Test
+  runs-on: self-hosted
+  needs: [setup]
+  if: always()
+  steps:
+    - uses: actions/checkout@v4
 
-  # =============================================================================
-  # Build and Test
-  # =============================================================================
-  build:
-    name: Build & Test
-    runs-on: self-hosted
-    needs: [setup]
-    if: always()
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
 
-      - name: Install Dependencies
-        working-directory: frontend
-        run: npm ci
+    - name: Install Dependencies
+      working-directory: frontend
+      run: npm ci
 
-      - name: Create Environment Files
-        working-directory: frontend/src/environments
-        run: |
-          ENV="${{ needs.setup.outputs.environment }}"
-          
-          # Create base environment file
-          cat > environment.ts << 'EOF'
-          export const environment = {
-            production: false,
-            apiUrl: 'http://localhost:3000/api'
-          };
-          EOF
-          
-          # Create environment-specific files
-          case "$ENV" in
-            "dev")
-              cat > environment.dev.ts << 'EOF'
-          export const environment = {
-            production: false,
-            apiUrl: 'https://api-dev.cineverse.com/api'
-          };
-          EOF
-              ;;
-            "staging")
-              cat > environment.staging.ts << 'EOF'
-          export const environment = {
-            production: false,
-            apiUrl: 'https://api-staging.cineverse.com/api'
-          };
-          EOF
-              ;;
-            "prod")
-              cat > environment.prod.ts << 'EOF'
-          export const environment = {
-            production: true,
-            apiUrl: 'https://api.cineverse.com/api'
-          };
-          EOF
-              ;;
-          esac
+    - name: Build Application
+      working-directory: frontend
+      run: |
+        ENV="${{ needs.setup.outputs.environment }}"
+        echo "Building for environment: $ENV"
 
-      - name: Build Application
-        working-directory: frontend
-        run: |
-          ENV="${{ needs.setup.outputs.environment }}"
-          echo "Building for environment: $ENV"
-          
-          case "$ENV" in
-            "dev")     npm run build -- --configuration=development ;;
-            "staging") npm run build -- --configuration=staging ;;
-            "prod")    npm run build -- --configuration=production ;;
-            *)         echo "Unknown environment: $ENV" && exit 1 ;;
-          esac
-          
-          echo "Build completed successfully"
-          
-          # Verify build output
-          if [ -d "dist/${{ env.APP_NAME }}" ]; then
-            echo "Build output found in dist/${{ env.APP_NAME }}"
-            ls -la "dist/${{ env.APP_NAME }}"
-          else
-            echo "Build output not found"
-            ls -la dist/
-            exit 1
-          fi
+        case "$ENV" in
+          "dev")     npm run build -- --configuration=development ;;
+          "staging") npm run build -- --configuration=staging ;;
+          "prod")    npm run build -- --configuration=production ;;
+          *)         echo "Unknown environment: $ENV" && exit 1 ;;
+        esac
 
-      - name: Run Tests
-        working-directory: frontend
-        run: |
-          npm test -- --watch=false --browsers=ChromeHeadless
-        continue-on-error: true
+        echo "Build completed successfully"
 
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-build-${{ needs.setup.outputs.environment }}
-          path: frontend/dist/${{ env.APP_NAME }}
-          retention-days: 7
+        # Verify build output
+        if [ -d "dist/${{ env.APP_NAME }}" ]; then
+          echo "Build output found in dist/${{ env.APP_NAME }}"
+          ls -la "dist/${{ env.APP_NAME }}"
+        else
+          echo "Build output not found"
+          ls -la dist/
+          exit 1
+        fi
+
+    - name: Run Tests
+      working-directory: frontend
+      run: |
+        npm test -- --watch=false --browsers=ChromeHeadless
+      continue-on-error: true
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-build-${{ needs.setup.outputs.environment }}
+        path: frontend/dist/${{ env.APP_NAME }}
+        retention-days: 7
+
 
   # =============================================================================
   # Infrastructure Planning
