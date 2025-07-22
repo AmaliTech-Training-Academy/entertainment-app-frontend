@@ -33,20 +33,24 @@ export interface RegisterPayload {
   providedIn: 'root',
 })
 export class AuthService {
-  private baseUrl = environment.apiUrl;
   private http = inject(HttpClient);
   private router = inject(Router);
 
   login(email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/api/v1/auth/login`, { email, password });
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/v1/auth/login`, {
+      email,
+      password,
+    });
   }
 
   register(payload: RegisterPayload): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/api/v1/auth/register`, payload);
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/v1/auth/register`, payload);
   }
 
   refreshToken(refreshToken: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/api/v1/auth/refresh`, { refreshToken });
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/v1/auth/refresh`, {
+      refreshToken,
+    });
   }
 
   logout() {

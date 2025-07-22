@@ -18,8 +18,6 @@ interface CommentApiResponse {
   providedIn: 'root',
 })
 export class CommentService {
-  private apiUrl = environment.apiUrl;
-
   constructor(
     private http: HttpClient,
     private errorHandler: ErrorHandlerService,
@@ -27,7 +25,7 @@ export class CommentService {
 
   postComment(mediaId: number, comment: CommentPost): Observable<CommentApiResponse> {
     return this.http
-      .post<CommentApiResponse>(`${this.apiUrl}/api/v1/comments/media/${mediaId}`, comment)
+      .post<CommentApiResponse>(`${environment.apiUrl}/api/v1/comments/media/${mediaId}`, comment)
       .pipe(catchError((error) => this.errorHandler.handleHttpError(error)));
   }
 }

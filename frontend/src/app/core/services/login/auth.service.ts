@@ -7,16 +7,12 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root',
 })
 export class AuthService {
-  private baseUrl = environment.apiUrl;
-
-  constructor(private http: HttpClient) {
-    console.log(this.baseUrl);
-  }
+  constructor(private http: HttpClient) {}
   login(email: string, password: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/v1/auth/login`, { email, password });
+    return this.http.post(`${environment.apiUrl}/api/v1/auth/login`, { email, password });
   }
 
   refreshToken(refreshToken: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/v1/auth/refresh`, { refreshToken });
+    return this.http.post(`${environment.apiUrl}/api/v1/auth/refresh`, { refreshToken });
   }
 }
