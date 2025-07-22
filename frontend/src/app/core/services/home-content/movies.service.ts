@@ -52,10 +52,10 @@ export class TrendingMoviesService {
   private http = inject(HttpClient);
 
   getTrendingMovies(): Observable<TrendingMoviesResponse> {
-    return this.http.get<TrendingMoviesResponse>(`${this.apiUrl}/api/v1/media/trending-now`);
+    return this.http.get<TrendingMoviesResponse>(`https://d101mapcha7bof.cloudfront.net/api/v1/media/trending-now`);
   }
 
   searchMovies(params: { [key: string]: any }): Observable<SearchMoviesResponse> {
-    return this.http.get<SearchMoviesResponse>(`${this.apiUrl}/api/v1/media/search`, { params });
+    return this.http.get<SearchMoviesResponse>(`https://d101mapcha7bof.cloudfront.net/api/v1/media/search`, { params });
   }
 }
