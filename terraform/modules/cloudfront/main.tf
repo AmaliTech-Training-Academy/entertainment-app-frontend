@@ -123,7 +123,7 @@ resource "aws_cloudfront_origin_request_policy" "api_origin" {
     header_behavior = "whitelist"
     headers {
       items = [
-        "Authorization",
+        # "Authorization",
         "Content-Type",
         "Accept",
         "Origin",
