@@ -48,7 +48,7 @@ export interface SearchMoviesResponse {
 
 @Injectable({ providedIn: 'root' })
 export class TrendingMoviesService {
-  private apiUrl = environment.apiBaseUrl;
+  private apiUrl = environment.apiUrl;
   private http = inject(HttpClient);
 
   getTrendingMovies(): Observable<TrendingMoviesResponse> {

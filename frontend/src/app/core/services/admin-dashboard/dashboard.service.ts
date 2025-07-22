@@ -15,18 +15,18 @@ export class DashboardService {
   constructor(private http: HttpClient) {}
 
   getMetrics(): Observable<AdminMetricsResponse> {
-    return this.http.get<AdminMetricsResponse>(`${environment.apiBaseUrl}/api/v1/admin/metrics`);
+    return this.http.get<AdminMetricsResponse>(`${environment.apiUrl}/api/v1/admin/metrics`);
   }
 
   getTrendingMedia(): Observable<TrendingMediaResponse> {
     return this.http.get<TrendingMediaResponse>(
-      `${environment.apiBaseUrl}/api/v1/media/trending-now`,
+      `${environment.apiUrl}/api/v1/media/trending-now`,
     );
   }
 
   getMediaListings(): Observable<{ data: { content: MediaListing[] } }> {
     return this.http.get<{ data: { content: MediaListing[] } }>(
-      `${environment.apiBaseUrl}/api/v1/media/listings`,
+      `${environment.apiUrl}/api/v1/media/listings`,
     );
   }
 }

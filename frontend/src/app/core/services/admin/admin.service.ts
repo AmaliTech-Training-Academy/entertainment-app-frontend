@@ -15,7 +15,7 @@ export class AdminService {
   // User management methods
   getAllUsers(): Observable<PaginatedResponse<AdminUser>> {
     return this.http
-      .get<PaginatedResponse<AdminUser>>(`${environment.apiBaseUrl}/api/v1/admin/users`)
+      .get<PaginatedResponse<AdminUser>>(`${environment.apiUrl}/api/v1/admin/users`)
       .pipe(catchError(this.handleError));
   }
 
@@ -23,7 +23,7 @@ export class AdminService {
     const payload = { userId, newRole };
     return this.http
       .put<UserRoleUpdateResponse>(
-        `${environment.apiBaseUrl}/api/v1/admin/users/change-role`,
+        `${environment.apiUrl}/api/v1/admin/users/change-role`,
         payload,
       )
       .pipe(catchError(this.handleError));
@@ -31,13 +31,13 @@ export class AdminService {
 
   toggleBanUser(userId: number): Observable<UserRoleUpdateResponse> {
     return this.http
-      .put<UserRoleUpdateResponse>(`${environment.apiBaseUrl}/api/v1/admin/users/${userId}/ban`, {})
+      .put<UserRoleUpdateResponse>(`${environment.apiUrl}/api/v1/admin/users/${userId}/ban`, {})
       .pipe(catchError(this.handleError));
   }
 
   deleteUser(userId: number): Observable<any> {
     return this.http
-      .delete<any>(`${environment.apiBaseUrl}/api/v1/admin/users/${userId}`)
+      .delete<any>(`${environment.apiUrl}/api/v1/admin/users/${userId}`)
       .pipe(catchError(this.handleError));
   }
 
@@ -50,7 +50,7 @@ export class AdminService {
 
     console.log('Getting paginated media:', { page, size, keyword });
 
-    return this.http.get<any>(`${environment.apiBaseUrl}/api/v1/media/listings`, { params }).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/api/v1/media/listings`, { params }).pipe(
       tap((response) => console.log('Paginated media response:', response)),
       catchError(this.handleError),
     );
@@ -71,7 +71,7 @@ export class AdminService {
 
     console.log('Searching media with query:', { query: trimmedQuery, page, size });
 
-    return this.http.get<any>(`${environment.apiBaseUrl}/api/v1/media/search`, { params }).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/api/v1/media/search`, { params }).pipe(
       tap((response) => console.log('Search response:', response)),
       catchError((error) => {
         console.error('Search error:', error);
@@ -88,7 +88,7 @@ export class AdminService {
     console.log('Searching by title:', { title, page, size });
 
     return this.http
-      .get<any>(`${environment.apiBaseUrl}/api/v1/media/search-by-title`, { params })
+      .get<any>(`${environment.apiUrl}/api/v1/media/search-by-title`, { params })
       .pipe(
         tap((response) => console.log('Search by title response:', response)),
         catchError(this.handleError),
@@ -122,7 +122,7 @@ export class AdminService {
     console.log('Advanced search criteria:', searchCriteria);
 
     return this.http
-      .get<any>(`${environment.apiBaseUrl}/api/v1/media/advanced-search`, { params })
+      .get<any>(`${environment.apiUrl}/api/v1/media/advanced-search`, { params })
       .pipe(
         tap((response) => console.log('Advanced search response:', response)),
         catchError(this.handleError),
@@ -135,7 +135,7 @@ export class AdminService {
 
   getAdminMetrics(): Observable<any> {
     return this.http
-      .get<any>(`${environment.apiBaseUrl}/api/v1/admin/metrics`)
+      .get<any>(`${environment.apiUrl}/api/v1/admin/metrics`)
       .pipe(catchError(this.handleError));
   }
 
@@ -144,7 +144,7 @@ export class AdminService {
    */
   createMedia(mediaData: FormData): Observable<any> {
     return this.http
-      .post<any>(`${environment.apiBaseUrl}/api/v1/media`, mediaData)
+      .post<any>(`${environment.apiUrl}/api/v1/media`, mediaData)
       .pipe(catchError(this.handleError));
   }
 
@@ -153,7 +153,7 @@ export class AdminService {
    */
   deleteMedia(mediaId: number): Observable<any> {
     console.log('Deleting media with ID:', mediaId);
-    return this.http.delete<any>(`${environment.apiBaseUrl}/api/v1/media/${mediaId}`).pipe(
+    return this.http.delete<any>(`${environment.apiUrl}/api/v1/media/${mediaId}`).pipe(
       tap((response) => console.log('Delete response:', response)),
       catchError(this.handleError),
     );

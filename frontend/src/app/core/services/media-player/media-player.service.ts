@@ -7,7 +7,7 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root',
 })
 export class MediaPlayerService {
-   private apiUrl = environment.apiBaseUrl;
+   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

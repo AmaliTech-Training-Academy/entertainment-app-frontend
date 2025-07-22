@@ -67,7 +67,7 @@ export interface MovieFilters {
   providedIn: 'root',
 })
 export class AdvancedSearchService {
-  private readonly apiUrl = environment.apiBaseUrl;
+  private readonly apiUrl = environment.apiUrl;
   private listingsUrl = `${this.apiUrl}/api/v1/media/listings`;
 
   private readonly TRENDING_URL = `${this.apiUrl}/api/v1/media/trending-now`;

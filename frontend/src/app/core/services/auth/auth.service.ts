@@ -33,7 +33,7 @@ export interface RegisterPayload {
   providedIn: 'root',
 })
 export class AuthService {
-  private baseUrl = environment.apiBaseUrl;
+  private baseUrl = environment.apiUrl;
   private http = inject(HttpClient);
   private router = inject(Router);
 

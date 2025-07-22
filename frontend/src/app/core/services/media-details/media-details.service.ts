@@ -9,7 +9,7 @@ import { ErrorHandlerService } from '../error-handler/error-handler.service';
   providedIn: 'root',
 })
 export class MediaDetailsService {
-  private apiUrl = environment.apiBaseUrl;
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private http: HttpClient,
@@ -24,7 +24,7 @@ export class MediaDetailsService {
 
   addToFavorites(userId: number, mediaId: number): Observable<any> {
     return this.http.post(
-      `${environment.apiBaseUrl}/api/v1/users/${userId}/favorites/media/${mediaId}`,
+      `${environment.apiUrl}/api/v1/users/${userId}/favorites/media/${mediaId}`,
       {},
     );
   }
