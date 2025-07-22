@@ -121,66 +121,66 @@ jobs:
           name: security-reports-${{ github.sha }}
           path: frontend/npm-audit-report.json
           retention-days: 30
-# =============================================================================
-# Build and Test
-# =============================================================================
-build:
-  name: Build & Test
-  runs-on: self-hosted
-  needs: [setup]
-  if: always()
-  steps:
-    - uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
+  # =============================================================================
+  # Build and Test
+  # =============================================================================
+  build:
+    name: Build & Test
+    runs-on: self-hosted
+    needs: [setup]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Install Dependencies
-      working-directory: frontend
-      run: npm ci
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-    - name: Build Application
-      working-directory: frontend
-      run: |
-        ENV="${{ needs.setup.outputs.environment }}"
-        echo "Building for environment: $ENV"
+      - name: Install Dependencies
+        working-directory: frontend
+        run: npm ci
 
-        case "$ENV" in
-          "dev")     npm run build -- --configuration=development ;;
-          "staging") npm run build -- --configuration=staging ;;
-          "prod")    npm run build -- --configuration=production ;;
-          *)         echo "Unknown environment: $ENV" && exit 1 ;;
-        esac
+      - name: Build Application
+        working-directory: frontend
+        run: |
+          ENV="${{ needs.setup.outputs.environment }}"
+          echo "Building for environment: $ENV"
 
-        echo "Build completed successfully"
+          case "$ENV" in
+            "dev")     npm run build -- --configuration=development ;;
+            "staging") npm run build -- --configuration=staging ;;
+            "prod")    npm run build -- --configuration=production ;;
+            *)         echo "Unknown environment: $ENV" && exit 1 ;;
+          esac
 
-        # Verify build output
-        if [ -d "dist/${{ env.APP_NAME }}" ]; then
-          echo "Build output found in dist/${{ env.APP_NAME }}"
-          ls -la "dist/${{ env.APP_NAME }}"
-        else
-          echo "Build output not found"
-          ls -la dist/
-          exit 1
-        fi
+          echo "Build completed successfully"
 
-    - name: Run Tests
-      working-directory: frontend
-      run: |
-        npm test -- --watch=false --browsers=ChromeHeadless
-      continue-on-error: true
+          # Verify build output
+          if [ -d "dist/${{ env.APP_NAME }}" ]; then
+            echo "Build output found in dist/${{ env.APP_NAME }}"
+            ls -la "dist/${{ env.APP_NAME }}"
+          else
+            echo "Build output not found"
+            ls -la dist/
+            exit 1
+          fi
 
-    - name: Upload Build Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: frontend-build-${{ needs.setup.outputs.environment }}
-        path: frontend/dist/${{ env.APP_NAME }}
-        retention-days: 7
+      - name: Run Tests
+        working-directory: frontend
+        run: |
+          npm test -- --watch=false --browsers=ChromeHeadless
+        continue-on-error: true
 
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build-${{ needs.setup.outputs.environment }}
+          path: frontend/dist/${{ env.APP_NAME }}
+          retention-days: 7
 
   # =============================================================================
   # Infrastructure Planning
