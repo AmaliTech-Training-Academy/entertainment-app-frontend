@@ -6,7 +6,7 @@ import { MoviesApiResponse } from './advanced-search.service';
 })
 export class SearchCacheService {
   private cache = new Map<string, { data: MoviesApiResponse; timestamp: number }>();
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache duration
+  private readonly CACHE_DURATION = 5 * 60 * 1000;
 
   get(key: string): MoviesApiResponse | null {
     const cachedItem = this.cache.get(key);

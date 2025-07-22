@@ -3,19 +3,17 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Movie } from '../advance-search/advanced-search.service';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class UserMediaService {
-
-  private apiUrl = 'https://d101mapcha7bof.cloudfront.net';
-  // private apiUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1';
-
+  private apiUrl = environment;
 
   constructor(private http: HttpClient) {}
 
   getFavorites(userId: string): Observable<Movie[]> {
     return this.http
-      .get<any>(`${this.apiUrl}/users/${userId}/favorites`)
+      .get<any>(`${this.apiUrl}/api/v1/users/${userId}/favorites`)
       .pipe(
         map((response) =>
           response.data && response.data.content ? (response.data.content as Movie[]) : [],
@@ -25,7 +23,7 @@ export class UserMediaService {
 
   getRecommendations(userId: string): Observable<Movie[]> {
     return this.http
-      .get<any>(`${this.apiUrl}/media/${userId}/recommendations`)
+      .get<any>(`${this.apiUrl}/api/v1/media/${userId}/recommendations`)
       .pipe(map((response) => (response.data ? (response.data as Movie[]) : [])));
   }
 }

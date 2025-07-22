@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export interface TrendingMovie {
   mediaId: number;
@@ -47,16 +48,14 @@ export interface SearchMoviesResponse {
 
 @Injectable({ providedIn: 'root' })
 export class TrendingMoviesService {
-  private apiUrl = 'https://d101mapcha7bof.cloudfront.net/api';
-  // private apiUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api';
-
+  private apiUrl = environment.apiBaseUrl;
   private http = inject(HttpClient);
 
   getTrendingMovies(): Observable<TrendingMoviesResponse> {
-    return this.http.get<TrendingMoviesResponse>(`${this.apiUrl}/v1/media/trending-now`);
+    return this.http.get<TrendingMoviesResponse>(`${this.apiUrl}/api/v1/media/trending-now`);
   }
 
   searchMovies(params: { [key: string]: any }): Observable<SearchMoviesResponse> {
-    return this.http.get<SearchMoviesResponse>(`${this.apiUrl}/v1/media/search`, { params });
+    return this.http.get<SearchMoviesResponse>(`${this.apiUrl}/api/v1/media/search`, { params });
   }
 }

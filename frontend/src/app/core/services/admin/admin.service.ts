@@ -4,40 +4,40 @@ import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { PaginatedResponse, AdminUser, UserRoleUpdateResponse } from '../../../models/admin-users';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AdminService {
-  private readonly BASE_URL =
-    'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1';
-  // private BASE_URL = 'https://d101mapcha7bof.cloudfront.net/api/v1';
-
   constructor(private http: HttpClient) {}
 
   // User management methods
   getAllUsers(): Observable<PaginatedResponse<AdminUser>> {
     return this.http
-      .get<PaginatedResponse<AdminUser>>(`${this.BASE_URL}/admin/users`)
+      .get<PaginatedResponse<AdminUser>>(`${environment.apiBaseUrl}/api/v1/admin/users`)
       .pipe(catchError(this.handleError));
   }
 
   changeUserRole(userId: number, newRole: string): Observable<UserRoleUpdateResponse> {
     const payload = { userId, newRole };
     return this.http
-      .put<UserRoleUpdateResponse>(`${this.BASE_URL}/admin/users/change-role`, payload)
+      .put<UserRoleUpdateResponse>(
+        `${environment.apiBaseUrl}/api/v1/admin/users/change-role`,
+        payload,
+      )
       .pipe(catchError(this.handleError));
   }
 
   toggleBanUser(userId: number): Observable<UserRoleUpdateResponse> {
     return this.http
-      .put<UserRoleUpdateResponse>(`${this.BASE_URL}/admin/users/${userId}/ban`, {})
+      .put<UserRoleUpdateResponse>(`${environment.apiBaseUrl}/api/v1/admin/users/${userId}/ban`, {})
       .pipe(catchError(this.handleError));
   }
 
   deleteUser(userId: number): Observable<any> {
     return this.http
-      .delete<any>(`${this.BASE_URL}/admin/users/${userId}`)
+      .delete<any>(`${environment.apiBaseUrl}/api/v1/admin/users/${userId}`)
       .pipe(catchError(this.handleError));
   }
 
@@ -50,7 +50,7 @@ export class AdminService {
 
     console.log('Getting paginated media:', { page, size, keyword });
 
-    return this.http.get<any>(`${this.BASE_URL}/media/listings`, { params }).pipe(
+    return this.http.get<any>(`${environment.apiBaseUrl}/api/v1/media/listings`, { params }).pipe(
       tap((response) => console.log('Paginated media response:', response)),
       catchError(this.handleError),
     );
@@ -71,7 +71,7 @@ export class AdminService {
 
     console.log('Searching media with query:', { query: trimmedQuery, page, size });
 
-    return this.http.get<any>(`${this.BASE_URL}/media/search`, { params }).pipe(
+    return this.http.get<any>(`${environment.apiBaseUrl}/api/v1/media/search`, { params }).pipe(
       tap((response) => console.log('Search response:', response)),
       catchError((error) => {
         console.error('Search error:', error);
@@ -87,10 +87,12 @@ export class AdminService {
 
     console.log('Searching by title:', { title, page, size });
 
-    return this.http.get<any>(`${this.BASE_URL}/media/search-by-title`, { params }).pipe(
-      tap((response) => console.log('Search by title response:', response)),
-      catchError(this.handleError),
-    );
+    return this.http
+      .get<any>(`${environment.apiBaseUrl}/api/v1/media/search-by-title`, { params })
+      .pipe(
+        tap((response) => console.log('Search by title response:', response)),
+        catchError(this.handleError),
+      );
   }
 
   advancedSearchMedia(searchCriteria: {
@@ -119,10 +121,12 @@ export class AdminService {
 
     console.log('Advanced search criteria:', searchCriteria);
 
-    return this.http.get<any>(`${this.BASE_URL}/media/advanced-search`, { params }).pipe(
-      tap((response) => console.log('Advanced search response:', response)),
-      catchError(this.handleError),
-    );
+    return this.http
+      .get<any>(`${environment.apiBaseUrl}/api/v1/media/advanced-search`, { params })
+      .pipe(
+        tap((response) => console.log('Advanced search response:', response)),
+        catchError(this.handleError),
+      );
   }
 
   searchUsingListings(query: string, page: number = 0, size: number = 10): Observable<any> {
@@ -130,7 +134,9 @@ export class AdminService {
   }
 
   getAdminMetrics(): Observable<any> {
-    return this.http.get<any>(`${this.BASE_URL}/admin/metrics`).pipe(catchError(this.handleError));
+    return this.http
+      .get<any>(`${environment.apiBaseUrl}/api/v1/admin/metrics`)
+      .pipe(catchError(this.handleError));
   }
 
   /**
@@ -138,7 +144,7 @@ export class AdminService {
    */
   createMedia(mediaData: FormData): Observable<any> {
     return this.http
-      .post<any>(`${this.BASE_URL}/media`, mediaData)
+      .post<any>(`${environment.apiBaseUrl}/api/v1/media`, mediaData)
       .pipe(catchError(this.handleError));
   }
 
@@ -147,7 +153,7 @@ export class AdminService {
    */
   deleteMedia(mediaId: number): Observable<any> {
     console.log('Deleting media with ID:', mediaId);
-    return this.http.delete<any>(`${this.BASE_URL}/media/${mediaId}`).pipe(
+    return this.http.delete<any>(`${environment.apiBaseUrl}/api/v1/media/${mediaId}`).pipe(
       tap((response) => console.log('Delete response:', response)),
       catchError(this.handleError),
     );

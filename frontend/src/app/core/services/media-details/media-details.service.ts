@@ -9,8 +9,7 @@ import { ErrorHandlerService } from '../error-handler/error-handler.service';
   providedIn: 'root',
 })
 export class MediaDetailsService {
-  private apiUrl = 'https://d101mapcha7bof.cloudfront.net';
-  // private apiUrl = 'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com';
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(
     private http: HttpClient,
@@ -25,15 +24,8 @@ export class MediaDetailsService {
 
   addToFavorites(userId: number, mediaId: number): Observable<any> {
     return this.http.post(
-      `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/users/${userId}/favorites/media/${mediaId}`,
+      `${environment.apiBaseUrl}/api/v1/users/${userId}/favorites/media/${mediaId}`,
       {},
     );
   }
-
-  // removeFromFavorites(userId: number, mediaId: number): Observable<any> {
-  //   return this.http.post(
-  //     `http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com/api/v1/users/${userId}/favorites/media/${mediaId}`,
-  //     {},
-  //   );
-  // }
 }

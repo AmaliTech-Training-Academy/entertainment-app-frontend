@@ -18,9 +18,7 @@ interface CommentApiResponse {
   providedIn: 'root',
 })
 export class CommentService {
-  private apiUrl = 'https://d101mapcha7bof.cloudfront.net';
-  // private readonly apiUrl =
-  //  'http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com';
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(
     private http: HttpClient,
