@@ -19,9 +19,7 @@ export class DashboardService {
   }
 
   getTrendingMedia(): Observable<TrendingMediaResponse> {
-    return this.http.get<TrendingMediaResponse>(
-      `${environment.apiUrl}/api/v1/media/trending-now`,
-    );
+    return this.http.get<TrendingMediaResponse>(`${environment.apiUrl}/api/v1/media/trending-now`);
   }
 
   getMediaListings(): Observable<{ data: { content: MediaListing[] } }> {
