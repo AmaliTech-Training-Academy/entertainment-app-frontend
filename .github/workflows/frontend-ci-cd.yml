@@ -36,7 +36,7 @@ jobs:
           echo "Branch: $BRANCH"
           echo "Event: $EVENT_NAME"
           
-          # Set environment based on branch
+          # Set environment based on branch mapping
           if [[ "$BRANCH" == "prod" ]]; then
             echo "environment=prod" >> $GITHUB_OUTPUT
             echo "is_production=true" >> $GITHUB_OUTPUT
@@ -54,7 +54,7 @@ jobs:
             ENV_NAME="dev"
           fi
           
-          # Only deploy on push to main branches
+          # Only deploy on push events to protected branches
           if [[ "$EVENT_NAME" == "push" && "$BRANCH" =~ ^(dev|staging|prod)$ ]]; then
             echo "should_deploy=true" >> $GITHUB_OUTPUT
             echo "Deployment enabled for push to $BRANCH"
@@ -65,7 +65,7 @@ jobs:
             SHOULD_DEPLOY="false"
           fi
           
-          # FIXED: Use variables instead of complex command substitution
+          # Output final configuration summary
           echo ""
           echo "Final Configuration:"
           echo "Environment: $ENV_NAME"
@@ -94,6 +94,7 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      # Run npm audit to check for known vulnerabilities
       - name: NPM Security Audit
         working-directory: frontend
         run: |
@@ -101,6 +102,7 @@ jobs:
           npm audit --audit-level=moderate
         continue-on-error: true
 
+      # Scan Terraform files for security issues
       - name: Terraform Security Scan
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
@@ -108,12 +110,14 @@ jobs:
           format: sarif
           soft_fail: true
 
+      # Scan for exposed secrets in code
       - name: Secret Detection
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
+      # Store security reports for review
       - name: Upload Security Reports
         uses: actions/upload-artifact@v4
         if: always()
@@ -144,12 +148,14 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      # Build Angular application with environment-specific configuration
       - name: Build Application
         working-directory: frontend
         run: |
           ENV="${{ needs.setup.outputs.environment }}"
           echo "Building for environment: $ENV"
 
+          # Select build configuration based on environment
           case "$ENV" in
             "dev")     npm run build -- --configuration=development ;;
             "staging") npm run build -- --configuration=staging ;;
@@ -159,22 +165,24 @@ jobs:
 
           echo "Build completed successfully"
 
-          # Verify build output
+          # Verify build output exists
           if [ -d "dist/${{ env.APP_NAME }}" ]; then
             echo "Build output found in dist/${{ env.APP_NAME }}"
             ls -la "dist/${{ env.APP_NAME }}"
           else
-            echo "Build output not found"
+            echo "Build output not found in expected location"
             ls -la dist/
             exit 1
           fi
 
+      # Run unit tests in headless mode
       - name: Run Tests
         working-directory: frontend
         run: |
           npm test -- --watch=false --browsers=ChromeHeadless
         continue-on-error: true
 
+      # Store build artifacts for deployment
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -195,7 +203,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Debug Environment
+      - name: Debug Environment Configuration
         run: |
           echo "Plan Job Environment Debug:"
           echo "ENVIRONMENT (from env): $ENVIRONMENT"
@@ -216,13 +224,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # Create environment-specific Terraform configuration files
       - name: Create Environment Configuration
         working-directory: terraform
         run: |
           echo "Creating configuration for environment: $ENVIRONMENT"
           mkdir -p environments/$ENVIRONMENT
           
-          # Create backend configuration
+          # Create backend configuration for state management
           cat > environments/$ENVIRONMENT/backend.hcl << EOF
           bucket         = "cineverse-terraform-state-$ENVIRONMENT"
           key            = "frontend/terraform.tfstate"
@@ -231,33 +240,16 @@ jobs:
           dynamodb_table = "cineverse-terraform-locks"
           EOF
           
-          # Determine WAF setting based on environment
-          if [[ "$ENVIRONMENT" == "dev" ]]; then
-            WAF_ENABLED="false"
-            DOMAIN_NAME='""'
-          else
-            WAF_ENABLED="true"
-            DOMAIN_NAME='"'$ENVIRONMENT'.cineverse.com"'
-          fi
-          
-          echo "WAF Enabled: $WAF_ENABLED"
-          echo "Domain Name: $DOMAIN_NAME"
-          
-          # Create terraform variables
+          # Create terraform variables file with corrected variable names
           cat > environments/$ENVIRONMENT/terraform.tfvars << EOF
-          environment      = "$ENVIRONMENT"
-          project_name     = "cineverse"
-          aws_region       = "${{ env.AWS_REGION }}"
-          enable_waf       = $WAF_ENABLED
-          enable_monitoring = true
+          environment         = "$ENVIRONMENT"
+          project_name        = "cineverse"
+          aws_region          = "${{ env.AWS_REGION }}"
+          alb_domain_name     = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
+          enable_waf          = $([ "$ENVIRONMENT" = "dev" ] && echo "false" || echo "true")
+          enable_monitoring   = true
           
-          # Domain configuration
-          domain_name = $DOMAIN_NAME
-          
-          # API endpoint
-          api_endpoint = "http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
-          
-          # Tags
+          # Resource tags for cost tracking and management
           tags = {
             Environment = "$ENVIRONMENT"
             Project     = "CineVerse"
@@ -281,10 +273,13 @@ jobs:
         run: |
           echo "Initializing Terraform for environment: $ENVIRONMENT"
           
+          # Initialize with backend configuration
           terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl"
+          
+          # Validate configuration syntax
           terraform validate
           
-          # Show current state summary
+          # Show current state summary for debugging
           RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l)
           echo "Current state contains $RESOURCE_COUNT resources"
           
@@ -296,32 +291,64 @@ jobs:
             fi
           fi
 
-      - name: Force Unlock Terraform State
+      # Handle Terraform state locks intelligently
+      - name: Handle Terraform State Lock
         working-directory: terraform
         run: |
-          echo "Checking for existing state locks..."
+          echo "Checking for state locks..."
           
-          # Try to force unlock if there's a stuck lock
-          if ! terraform plan -var-file="environments/$ENVIRONMENT/terraform.tfvars" -detailed-exitcode >/dev/null 2>&1; then
-            echo "State appears to be locked. Attempting to force unlock..."
+          # Try a quick plan with timeout to detect locks
+          timeout 30s terraform plan -var-file="environments/$ENVIRONMENT/terraform.tfvars" -detailed-exitcode >/dev/null 2>&1
+          PLAN_RESULT=$?
+          
+          if [[ $PLAN_RESULT -eq 124 ]]; then
+            echo "WARNING: Terraform plan timed out - likely due to state lock"
+            echo "Checking DynamoDB for active locks..."
             
-            # Get the lock ID from the error (if any)
-            LOCK_ID="9cca48a0-697d-9cdc-48c3-a99d9c0d4cb0"
+            # Query DynamoDB directly for lock information
+            LOCK_INFO=$(aws dynamodb scan \
+              --table-name "cineverse-terraform-locks" \
+              --filter-expression "attribute_exists(LockID)" \
+              --region "${{ env.AWS_REGION }}" \
+              --output json 2>/dev/null || echo '{"Items":[]}')
             
-            if [[ -n "$LOCK_ID" ]]; then
-              echo "Force unlocking with ID: $LOCK_ID"
-              terraform force-unlock -force "$LOCK_ID" || echo "Force unlock failed or not needed"
+            LOCK_COUNT=$(echo "$LOCK_INFO" | jq '.Items | length')
+            
+            if [[ $LOCK_COUNT -gt 0 ]]; then
+              echo "Found $LOCK_COUNT active lock(s) in DynamoDB"
+              echo "Lock details:"
+              echo "$LOCK_INFO" | jq -r '.Items[].LockID.S // "Unknown"'
+              
+              # Extract the actual lock ID from DynamoDB
+              ACTUAL_LOCK_ID=$(echo "$LOCK_INFO" | jq -r '.Items[0].LockID.S // empty')
+              
+              if [[ -n "$ACTUAL_LOCK_ID" ]]; then
+                echo "Attempting to force unlock with ID: $ACTUAL_LOCK_ID"
+                terraform force-unlock -force "$ACTUAL_LOCK_ID" || echo "Force unlock failed"
+                
+                # Wait for unlock to propagate
+                sleep 5
+              else
+                echo "Could not extract lock ID from DynamoDB response"
+              fi
+            else
+              echo "No locks found in DynamoDB - the issue might be elsewhere"
             fi
+          elif [[ $PLAN_RESULT -eq 1 ]]; then
+            echo "ERROR: Terraform plan failed with errors (not lock-related)"
+            exit 1
           else
-            echo "No state lock detected"
+            echo "SUCCESS: No state lock detected"
           fi
 
+      # Generate Terraform execution plan
       - name: Terraform Plan
         working-directory: terraform
         run: |
           echo "Creating Terraform plan for environment: $ENVIRONMENT"
           
-          terraform plan \
+          # Add timeout to prevent hanging indefinitely
+          timeout 300s terraform plan \
             -var-file="environments/$ENVIRONMENT/terraform.tfvars" \
             -out="$ENVIRONMENT.tfplan" \
             -detailed-exitcode
@@ -329,19 +356,25 @@ jobs:
           PLAN_EXIT_CODE=$?
           echo "PLAN_EXIT_CODE=$PLAN_EXIT_CODE" >> $GITHUB_ENV
           
+          # Handle different plan exit codes
           case $PLAN_EXIT_CODE in
             0)
-              echo "No changes needed - infrastructure is up to date"
+              echo "SUCCESS: No changes needed - infrastructure is up to date"
               ;;
             1)
-              echo "Terraform plan failed"
+              echo "ERROR: Terraform plan failed"
               exit 1
               ;;
             2)
-              echo "Changes detected - plan created successfully"
+              echo "SUCCESS: Changes detected - plan created successfully"
+              ;;
+            124)
+              echo "ERROR: Terraform plan timed out after 5 minutes"
+              exit 1
               ;;
           esac
 
+      # Store plan for deployment phase
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
         if: env.PLAN_EXIT_CODE == '2'
@@ -376,6 +409,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # Recreate configuration files for deployment phase
       - name: Recreate Environment Configuration
         working-directory: terraform
         run: |
@@ -391,30 +425,16 @@ jobs:
           dynamodb_table = "cineverse-terraform-locks"
           EOF
           
-          # Determine WAF setting based on environment
-          if [[ "$ENVIRONMENT" == "dev" ]]; then
-            WAF_ENABLED="false"
-            DOMAIN_NAME='""'
-          else
-            WAF_ENABLED="true"
-            DOMAIN_NAME='"'$ENVIRONMENT'.cineverse.com"'
-          fi
-          
-          # Recreate terraform variables
+          # Recreate terraform variables with corrected variable names
           cat > environments/$ENVIRONMENT/terraform.tfvars << EOF
-          environment      = "$ENVIRONMENT"
-          project_name     = "cineverse"
-          aws_region       = "${{ env.AWS_REGION }}"
-          enable_waf       = $WAF_ENABLED
-          enable_monitoring = true
+          environment         = "$ENVIRONMENT"
+          project_name        = "cineverse"
+          aws_region          = "${{ env.AWS_REGION }}"
+          alb_domain_name     = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
+          enable_waf          = $([ "$ENVIRONMENT" = "dev" ] && echo "false" || echo "true")
+          enable_monitoring   = true
           
-          # Domain configuration
-          domain_name = $DOMAIN_NAME
-          
-          # API endpoint
-          api_endpoint = "http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
-          
-          # Tags
+          # Resource tags for cost tracking and management
           tags = {
             Environment = "$ENVIRONMENT"
             Project     = "CineVerse"
@@ -430,6 +450,7 @@ jobs:
         working-directory: terraform
         run: terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl"
 
+      # Download the previously created plan
       - name: Download Terraform Plan
         uses: actions/download-artifact@v4
         continue-on-error: true
@@ -437,6 +458,7 @@ jobs:
           name: terraform-plan-${{ env.ENVIRONMENT }}
           path: terraform/
 
+      # Apply infrastructure changes
       - name: Apply Infrastructure Changes
         working-directory: terraform
         run: |
@@ -448,6 +470,7 @@ jobs:
             terraform apply -auto-approve -var-file="environments/$ENVIRONMENT/terraform.tfvars"
           fi
 
+      # Extract infrastructure outputs for deployment
       - name: Get Infrastructure Outputs
         id: outputs
         working-directory: terraform
@@ -458,12 +481,14 @@ jobs:
             echo "cloudfront_domain=$(terraform output -raw cloudfront_domain_name)"
           } >> $GITHUB_OUTPUT
 
+      # Download build artifacts from build phase
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: frontend-build-${{ env.ENVIRONMENT }}
           path: build
 
+      # Deploy application to S3 with proper cache headers
       - name: Deploy to S3
         run: |
           S3_BUCKET="${{ steps.outputs.outputs.s3_bucket }}"
@@ -474,7 +499,7 @@ jobs:
           echo "Build contents:"
           ls -la build/
           
-          # For Angular SSR, the client files are in browser/ subdirectory
+          # Determine deployment path based on Angular build structure
           if [ -d "build/browser" ]; then
             echo "Angular SSR detected - deploying from browser/ directory"
             DEPLOY_PATH="build/browser"
@@ -500,15 +525,15 @@ jobs:
             exit 1
           fi
           
-          # Deploy with appropriate cache headers
+          # Deploy with appropriate cache headers for performance
           echo "Syncing files to S3..."
           
-          # First sync: everything except HTML/JS/CSS with long cache
+          # First sync: Static assets with long cache (1 year)
           aws s3 sync "$DEPLOY_PATH/" s3://$S3_BUCKET/ --delete \
             --cache-control "public, max-age=31536000" \
             --exclude "*.html" --exclude "*.js" --exclude "*.css"
           
-          # Second sync: HTML/JS/CSS with short cache
+          # Second sync: Dynamic files with short cache (no cache)
           aws s3 sync "$DEPLOY_PATH/" s3://$S3_BUCKET/ --delete \
             --cache-control "public, max-age=0, must-revalidate" \
             --include "*.html" --include "*.js" --include "*.css"
@@ -517,14 +542,15 @@ jobs:
           echo "Files uploaded to S3:"
           aws s3 ls s3://$S3_BUCKET/ --recursive | head -20
           
-          # Verify index.html is in root
+          # Verify index.html is in root for SPA routing
           if aws s3 ls s3://$S3_BUCKET/index.html; then
-            echo "✅ index.html successfully uploaded to S3 root"
+            echo "SUCCESS: index.html successfully uploaded to S3 root"
           else
-            echo "❌ index.html not found in S3 root!"
+            echo "ERROR: index.html not found in S3 root!"
             exit 1
           fi
 
+      # Clear CloudFront cache for immediate deployment visibility
       - name: Invalidate CloudFront Cache
         run: |
           CLOUDFRONT_ID="${{ steps.outputs.outputs.cloudfront_id }}"
@@ -538,6 +564,7 @@ jobs:
           
           echo "Cache invalidation created: $INVALIDATION_ID"
 
+      # Verify deployment is accessible
       - name: Verify Deployment
         run: |
           echo "Waiting for deployment to propagate..."
@@ -549,11 +576,12 @@ jobs:
           RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://$DOMAIN)
           
           if [[ "$RESPONSE_CODE" == "200" ]]; then
-            echo "Application is responding correctly (HTTP $RESPONSE_CODE)"
+            echo "SUCCESS: Application is responding correctly (HTTP $RESPONSE_CODE)"
           else
-            echo "Application returned HTTP $RESPONSE_CODE (may need propagation time)"
+            echo "WARNING: Application returned HTTP $RESPONSE_CODE (may need propagation time)"
           fi
 
+      # Create deployment summary for GitHub
       - name: Deployment Summary
         run: |
           cat << EOF >> $GITHUB_STEP_SUMMARY
@@ -570,5 +598,5 @@ jobs:
           ## Resources Status
           All resources managed by Terraform state  
           Infrastructure deployed successfully  
-          Angular SSR build deployed from browser/ directory to S3 root
+          Angular application deployed to S3 and distributed via CloudFront
           EOF
