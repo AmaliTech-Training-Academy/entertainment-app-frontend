@@ -50,7 +50,7 @@ resource "aws_cloudfront_cache_policy" "static_assets" {
   }
 }
 
-# Cache policy for API calls - no aggressive caching
+# Cache policy for API calls - Handle all auth and forwarding headers here
 resource "aws_cloudfront_cache_policy" "api_no_cache" {
   name        = "${var.environment}-api-no-cache-policy"
   comment     = "No cache policy for API calls - ${var.environment}"
@@ -74,7 +74,8 @@ resource "aws_cloudfront_cache_policy" "api_no_cache" {
           "Content-Type",
           "Accept",
           "Origin",
-          "Referer"
+          "Referer",
+          "User-Agent"
         ]
       }
     }
@@ -110,7 +111,7 @@ resource "aws_cloudfront_origin_request_policy" "s3_origin" {
   }
 }
 
-# Origin request policy for API calls
+# Origin request policy for API calls - FINAL FIX: Only CloudFront-allowed headers
 resource "aws_cloudfront_origin_request_policy" "api_origin" {
   name    = "${var.environment}-api-origin-request-policy"
   comment = "Origin request policy for API calls - ${var.environment}"
@@ -123,16 +124,11 @@ resource "aws_cloudfront_origin_request_policy" "api_origin" {
     header_behavior = "whitelist"
     headers {
       items = [
-        # "Authorization",
         "Content-Type",
         "Accept",
         "Origin",
         "Referer",
-        "User-Agent",
-        "X-Requested-With",
-        "X-Forwarded-For",
-        "X-Forwarded-Proto",
-        "Host"
+        "User-Agent"
       ]
     }
   }
@@ -141,6 +137,7 @@ resource "aws_cloudfront_origin_request_policy" "api_origin" {
     query_string_behavior = "all"
   }
 }
+
 
 # Response headers policy - HSTS removed for HTTP compatibility
 resource "aws_cloudfront_response_headers_policy" "security" {
