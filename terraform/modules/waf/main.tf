@@ -163,6 +163,30 @@ resource "aws_wafv2_web_acl_logging_configuration" "main" {
 
   depends_on = [
     aws_wafv2_web_acl.main,
-    aws_cloudwatch_log_group.waf
+    aws_cloudwatch_log_group.waf,
+     aws_cloudwatch_log_resource_policy.waf_logging
   ]
+}
+
+resource "aws_cloudwatch_log_resource_policy" "waf_logging" {
+  count = var.enable_waf ? 1 : 0
+
+  policy_name = "AWS-WAF-Logging-Policy"
+
+  policy_document = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "AWSWAFLoggingPermissions"
+        Effect = "Allow"
+        Principal = {
+          Service = "waf.amazonaws.com"
+        }
+        Action   = "logs:PutLogEvents"
+        Resource = aws_cloudwatch_log_group.waf[0].arn
+      }
+    ]
+  })
+
+  provider = aws.us_east_1
 }
