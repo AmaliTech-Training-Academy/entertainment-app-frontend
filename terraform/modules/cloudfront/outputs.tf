@@ -29,6 +29,11 @@ output "api_origin_request_policy_id" {
   value       = aws_cloudfront_origin_request_policy.api_origin.id
 }
 
+output "media_origin_request_policy_id" {
+  description = "Media origin request policy ID"
+  value       = aws_cloudfront_origin_request_policy.media_origin.id
+}
+
 output "spa_cache_policy_id" {
   description = "SPA cache policy ID"
   value       = aws_cloudfront_cache_policy.spa.id
@@ -44,7 +49,28 @@ output "api_no_cache_policy_id" {
   value       = aws_cloudfront_cache_policy.api_no_cache.id
 }
 
+output "media_cache_policy_id" {
+  description = "Media cache policy ID"
+  value       = aws_cloudfront_cache_policy.media_optimized.id
+}
+
 output "security_response_headers_policy_id" {
   description = "Security response headers policy ID"
   value       = aws_cloudfront_response_headers_policy.security.id
+}
+
+# Media-specific outputs
+output "media_base_url" {
+  description = "Base URL for media files through CloudFront"
+  value       = "https://${aws_cloudfront_distribution.website.domain_name}"
+}
+
+output "trailers_base_url" {
+  description = "Base URL for trailers through CloudFront"
+  value       = "https://${aws_cloudfront_distribution.website.domain_name}/trailers"
+}
+
+output "thumbnails_base_url" {
+  description = "Base URL for thumbnails through CloudFront"
+  value       = "https://${aws_cloudfront_distribution.website.domain_name}/thumbnails"
 }

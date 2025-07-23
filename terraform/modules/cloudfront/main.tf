@@ -86,6 +86,39 @@ resource "aws_cloudfront_cache_policy" "api_no_cache" {
   }
 }
 
+# Cache policy for media files - Optimized for video content
+resource "aws_cloudfront_cache_policy" "media_optimized" {
+  name        = "${var.environment}-media-cache-policy"
+  comment     = "Optimized cache policy for media files - ${var.environment}"
+  default_ttl = 86400    # 24 hours
+  max_ttl     = 31536000 # 1 year
+  min_ttl     = 0
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = false  # Don't compress video files
+    enable_accept_encoding_gzip   = false  # Don't compress video files
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "whitelist"
+      headers {
+        items = [
+          "Origin",
+          "Access-Control-Request-Headers",
+          "Access-Control-Request-Method"
+        ]
+      }
+    }
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+  }
+}
+
 # Origin request policy for S3
 resource "aws_cloudfront_origin_request_policy" "s3_origin" {
   name    = "${var.environment}-s3-origin-request-policy"
@@ -138,6 +171,31 @@ resource "aws_cloudfront_origin_request_policy" "api_origin" {
   }
 }
 
+# Origin request policy for media files
+resource "aws_cloudfront_origin_request_policy" "media_origin" {
+  name    = "${var.environment}-media-origin-request-policy"
+  comment = "Origin request policy for media files - ${var.environment}"
+
+  cookies_config {
+    cookie_behavior = "none"
+  }
+
+  headers_config {
+    header_behavior = "whitelist"
+    headers {
+      items = [
+        "Origin",
+        "Access-Control-Request-Headers",
+        "Access-Control-Request-Method"
+      ]
+    }
+  }
+
+  query_strings_config {
+    query_string_behavior = "none"
+  }
+}
+
 # Response headers policy - Updated CSP for S3 media access
 resource "aws_cloudfront_response_headers_policy" "security" {
   name    = "${var.environment}-security-headers"
@@ -183,9 +241,7 @@ resource "aws_cloudfront_response_headers_policy" "security" {
   }
 }
 
-
-
-# CloudFront distribution
+# CloudFront distribution with media support
 resource "aws_cloudfront_distribution" "website" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -216,41 +272,129 @@ resource "aws_cloudfront_distribution" "website" {
     }
   }
 
-  # Default cache behavior - allows both HTTP and HTTPS
+  # Origin for Media S3 bucket
+  origin {
+    domain_name = var.media_bucket_domain_name
+    origin_id   = "MediaS3-${var.environment}"
+
+    s3_origin_config {
+      origin_access_identity = ""  # Leave empty for public bucket
+    }
+  }
+
+  # Default cache behavior - Frontend SPA
   default_cache_behavior {
     allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "allow-all"  # Changed from "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"
     cache_policy_id            = aws_cloudfront_cache_policy.spa.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
 
-  # Static assets behavior - allows both HTTP and HTTPS
+  # Static assets behavior
   ordered_cache_behavior {
     path_pattern               = "/assets/*"
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.s3_bucket_id}"
     compress                   = true
-    viewer_protocol_policy     = "allow-all"  # Changed from "redirect-to-https"
+    viewer_protocol_policy     = "allow-all"
     cache_policy_id            = aws_cloudfront_cache_policy.static_assets.id
     origin_request_policy_id   = aws_cloudfront_origin_request_policy.s3_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
 
-  # API behavior - allows both HTTP and HTTPS with proper forwarding
+  # API behavior
   ordered_cache_behavior {
     path_pattern               = "/api/*"
     allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "API-ALB"
     compress                   = true
-    viewer_protocol_policy     = "allow-all"  # Changed from "https-only"
-    cache_policy_id            = aws_cloudfront_cache_policy.api_no_cache.id  # ✅ Fixed: Use API-specific cache policy
-    origin_request_policy_id   = aws_cloudfront_origin_request_policy.api_origin.id  # ✅ Fixed: Use API-specific origin policy
+    viewer_protocol_policy     = "allow-all"
+    cache_policy_id            = aws_cloudfront_cache_policy.api_no_cache.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.api_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Trailers behavior
+  ordered_cache_behavior {
+    path_pattern               = "/trailers/*"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "MediaS3-${var.environment}"
+    compress                   = false  # Don't compress video files
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = aws_cloudfront_cache_policy.media_optimized.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.media_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Thumbnails behavior
+  ordered_cache_behavior {
+    path_pattern               = "/thumbnails/*"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "MediaS3-${var.environment}"
+    compress                   = true   # Compress images
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = aws_cloudfront_cache_policy.media_optimized.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.media_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Screenshots behavior
+  ordered_cache_behavior {
+    path_pattern               = "/screenshots/*"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "MediaS3-${var.environment}"
+    compress                   = true   # Compress images
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = aws_cloudfront_cache_policy.media_optimized.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.media_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Episodes behavior
+  ordered_cache_behavior {
+    path_pattern               = "/episodes/*"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "MediaS3-${var.environment}"
+    compress                   = false  # Don't compress video files
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = aws_cloudfront_cache_policy.media_optimized.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.media_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Media folder behavior (if you have content in media/ folder)
+  ordered_cache_behavior {
+    path_pattern               = "/media/*"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "MediaS3-${var.environment}"
+    compress                   = false  # Don't compress video files
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = aws_cloudfront_cache_policy.media_optimized.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.media_origin.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+  }
+
+  # Uploads behavior (if needed for user uploads)
+  ordered_cache_behavior {
+    path_pattern               = "/uploads/*"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "MediaS3-${var.environment}"
+    compress                   = true   # Compress based on content type
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = aws_cloudfront_cache_policy.media_optimized.id
+    origin_request_policy_id   = aws_cloudfront_origin_request_policy.media_origin.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
 
