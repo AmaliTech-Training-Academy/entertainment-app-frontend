@@ -128,65 +128,42 @@ resource "aws_wafv2_web_acl" "main" {
 }
 
 # CloudWatch Log Group for WAF in us-east-1
-resource "aws_cloudwatch_log_group" "waf" {
-  count             = var.enable_waf ? 1 : 0
-  name              = "/aws/wafv2/${var.project_name}-${var.environment}"
-  retention_in_days = var.log_retention_days
+# resource "aws_cloudwatch_log_group" "waf" {
+#   count             = var.enable_waf ? 1 : 0
+#   name              = "/aws/wafv2/${var.project_name}-${var.environment}"
+#   retention_in_days = var.log_retention_days
   
-  provider = aws.us_east_1
+#   provider = aws.us_east_1
   
-  tags = var.tags
+#   tags = var.tags
 
-  # REMOVED: lifecycle block for destruction
-}
+#   # REMOVED: lifecycle block for destruction
+# }
 
 # WAF Logging Configuration
-resource "aws_wafv2_web_acl_logging_configuration" "main" {
-  count = var.enable_waf ? 1 : 0
+# resource "aws_wafv2_web_acl_logging_configuration" "main" {
+#   count = var.enable_waf ? 1 : 0
   
-  resource_arn            = aws_wafv2_web_acl.main[0].arn
-  log_destination_configs = [aws_cloudwatch_log_group.waf[0].arn]
+#   resource_arn            = aws_wafv2_web_acl.main[0].arn
+#   log_destination_configs = [aws_cloudwatch_log_group.waf[0].arn]
 
-  provider = aws.us_east_1
+#   provider = aws.us_east_1
 
-  redacted_fields {
-    single_header {
-      name = "authorization"
-    }
-  }
+#   redacted_fields {
+#     single_header {
+#       name = "authorization"
+#     }
+#   }
 
-  redacted_fields {
-    single_header {
-      name = "cookie"
-    }
-  }
+#   redacted_fields {
+#     single_header {
+#       name = "cookie"
+#     }
+#   }
 
-  depends_on = [
-    aws_wafv2_web_acl.main,
-    aws_cloudwatch_log_group.waf,
-     aws_cloudwatch_log_resource_policy.waf_logging
-  ]
-}
+#   depends_on = [
+#     aws_wafv2_web_acl.main,
+#     aws_cloudwatch_log_group.waf
+#   ]
+# }
 
-resource "aws_cloudwatch_log_resource_policy" "waf_logging" {
-  count = var.enable_waf ? 1 : 0
-
-  policy_name = "AWS-WAF-Logging-Policy"
-
-  policy_document = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid    = "AWSWAFLoggingPermissions"
-        Effect = "Allow"
-        Principal = {
-          Service = "waf.amazonaws.com"
-        }
-        Action   = "logs:PutLogEvents"
-        Resource = aws_cloudwatch_log_group.waf[0].arn
-      }
-    ]
-  })
-
-  provider = aws.us_east_1
-}
