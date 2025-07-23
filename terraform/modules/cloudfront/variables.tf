@@ -57,10 +57,11 @@ variable "alb_domain_name" {
   }
 }
 
+
 variable "media_bucket_domain_name" {
   description = "Domain name of the media S3 bucket"
   type        = string
-  default     = "cineverse-media-bucket-stagin.s3.amazonaws.com"
+  default     = "cineverse-media-bucket-staging.s3.amazonaws.com"
 }
 
 variable "tags" {

@@ -341,25 +341,31 @@ jobs:
             echo "SUCCESS: No state lock detected"
           fi
 
-      # Generate Terraform execution plan
+      # Generate Terraform execution plan with fixed exit code handling
       - name: Terraform Plan
         working-directory: terraform
         run: |
           echo "Creating Terraform plan for environment: $ENVIRONMENT"
           
-          # Add timeout to prevent hanging indefinitely
+          # Run terraform plan with detailed exit code and capture the result
+          set +e  # Don't exit on error so we can capture the exit code
+          
           timeout 300s terraform plan \
             -var-file="environments/$ENVIRONMENT/terraform.tfvars" \
             -out="$ENVIRONMENT.tfplan" \
             -detailed-exitcode
           
           PLAN_EXIT_CODE=$?
+          set -e  # Re-enable exit on error
+          
+          echo "DEBUG: Captured PLAN_EXIT_CODE=$PLAN_EXIT_CODE"
           echo "PLAN_EXIT_CODE=$PLAN_EXIT_CODE" >> $GITHUB_ENV
           
-          # Handle different plan exit codes
+          # Handle different plan exit codes with proper debugging
           case $PLAN_EXIT_CODE in
             0)
               echo "SUCCESS: No changes needed - infrastructure is up to date"
+              echo "No plan file will be uploaded since no changes detected"
               ;;
             1)
               echo "ERROR: Terraform plan failed"
@@ -367,21 +373,65 @@ jobs:
               ;;
             2)
               echo "SUCCESS: Changes detected - plan created successfully"
+              echo "Plan file will be uploaded for deployment"
               ;;
             124)
               echo "ERROR: Terraform plan timed out after 5 minutes"
               exit 1
               ;;
+            *)
+              echo "ERROR: Unexpected terraform plan exit code: $PLAN_EXIT_CODE"
+              exit 1
+              ;;
           esac
+          
+          # Verify plan file exists if changes were detected
+          if [[ $PLAN_EXIT_CODE -eq 2 ]]; then
+            if [[ -f "$ENVIRONMENT.tfplan" ]]; then
+              echo "SUCCESS: Plan file $ENVIRONMENT.tfplan created successfully"
+              ls -la "$ENVIRONMENT.tfplan"
+            else
+              echo "ERROR: Plan file $ENVIRONMENT.tfplan not found despite exit code 2"
+              exit 1
+            fi
+          fi
 
-      # Store plan for deployment phase - only if changes detected
+      # Check plan file existence for upload decision
+      - name: Check Plan File Status
+        id: check-plan-file
+        working-directory: terraform
+        run: |
+          if [[ -f "$ENVIRONMENT.tfplan" ]]; then
+            echo "plan-exists=true" >> $GITHUB_OUTPUT
+            echo "Plan file found - size: $(du -h $ENVIRONMENT.tfplan | cut -f1)"
+          else
+            echo "plan-exists=false" >> $GITHUB_OUTPUT
+            echo "No plan file found"
+          fi
+
+      # Store plan for deployment phase with improved conditions
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
-        if: env.PLAN_EXIT_CODE == '2'
+        if: |
+          (env.PLAN_EXIT_CODE == '2') || 
+          (steps.check-plan-file.outputs.plan-exists == 'true' && env.PLAN_EXIT_CODE != '1')
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
           path: terraform/${{ env.ENVIRONMENT }}.tfplan
           retention-days: 7
+
+      # Debug step to verify upload decision
+      - name: Debug Plan Upload Status
+        run: |
+          echo "DEBUG: PLAN_EXIT_CODE environment variable = '$PLAN_EXIT_CODE'"
+          echo "DEBUG: Will upload plan = $([ "$PLAN_EXIT_CODE" = "2" ] && echo "YES" || echo "NO")"
+          echo "DEBUG: Plan file exists = $([ -f "terraform/$ENVIRONMENT.tfplan" ] && echo "YES" || echo "NO")"
+          
+          # Show recent actions log for debugging
+          echo "DEBUG: Recent GitHub Actions steps status:"
+          echo "- Plan step: Completed"
+          echo "- Check plan file: ${{ steps.check-plan-file.outputs.plan-exists }}"
+          echo "- Upload condition met: $([ "$PLAN_EXIT_CODE" = "2" ] || [ "${{ steps.check-plan-file.outputs.plan-exists }}" = "true" ] && echo "YES" || echo "NO")"
 
   # =============================================================================
   # Deployment
@@ -450,7 +500,7 @@ jobs:
         working-directory: terraform
         run: terraform init -backend-config="environments/$ENVIRONMENT/backend.hcl"
 
-      # Download the previously created plan - handle missing artifacts gracefully
+      # Download the previously created plan with graceful error handling
       - name: Download Terraform Plan
         uses: actions/download-artifact@v4
         continue-on-error: true
@@ -458,13 +508,15 @@ jobs:
           name: terraform-plan-${{ env.ENVIRONMENT }}
           path: terraform/
 
-      # Check if plan file exists and set flag
+      # Check if plan file exists and set deployment strategy
       - name: Check Plan File Existence
         working-directory: terraform
         run: |
           if [[ -f "$ENVIRONMENT.tfplan" ]]; then
             echo "PLAN_FILE_EXISTS=true" >> $GITHUB_ENV
             echo "Plan file found - will apply existing plan"
+            echo "Plan file details:"
+            ls -la "$ENVIRONMENT.tfplan"
           else
             echo "PLAN_FILE_EXISTS=false" >> $GITHUB_ENV
             echo "No plan file found - will create and apply new plan"
