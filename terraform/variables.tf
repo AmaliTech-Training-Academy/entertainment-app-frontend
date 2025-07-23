@@ -93,7 +93,3 @@ variable "enable_rollback_automation" {
   default     = false
 }
 
-variable "cloudfront_distribution_arn" {
-  description = "ARN of the CloudFront distribution to allow in the S3 bucket policy"
-  type        = string
-}

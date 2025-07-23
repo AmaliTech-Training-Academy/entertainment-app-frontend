@@ -52,7 +52,7 @@ variable "waf_web_acl_id" {
 variable "alb_domain_name" {
   description = "ALB domain name for API origin"
   type        = string
-  default     = "cineverse-prod-service-alb-964667856.eu-west-1.elb.amazonaws.com"  # Set this to your production ALB domain
+  default     = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"  # Set this to your production ALB domain
 }
 
 variable "api_endpoint" {

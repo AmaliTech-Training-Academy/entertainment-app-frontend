@@ -64,7 +64,7 @@ module "s3_website" {
   enable_versioning        = local.env_config[var.environment].s3_versioning
   enable_intelligent_tiering = local.env_config[var.environment].s3_intelligent_tiering
   enable_access_logging    = local.env_config[var.environment].enable_access_logging
-  cloudfront_distribution_arn = module.cloudfront.distribution_arn
+  # Remove this line: cloudfront_distribution_arn = module.cloudfront.distribution_arn
 
   tags = local.common_tags
 }

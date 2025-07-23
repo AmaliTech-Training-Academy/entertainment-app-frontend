@@ -4,10 +4,10 @@ aws_region         = "eu-west-1"
 project_name       = "cineverse"
 
 # Domain configuration
-alb_domain_name        = "cineverse-prod-service-alb-964667856.eu-west-1.elb.amazonaws.com"
+alb_domain_name        = "cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
 
 # API configuration
-api_endpoint       = "http://cineverse-prod-service-alb-964667856.eu-west-1.elb.amazonaws.com"
+api_endpoint       = "http://cineverse-service-alb-staging-276074081.eu-west-1.elb.amazonaws.com"
 
 # Security configuration
 enable_waf         = true
