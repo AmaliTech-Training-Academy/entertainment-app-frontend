@@ -248,7 +248,8 @@ resource "aws_cloudfront_distribution" "website" {
   comment             = "CineVerse ${var.environment} Frontend Distribution"
   default_root_object = "index.html"
   price_class         = var.price_class
-  web_acl_id          = var.waf_web_acl_id
+  # web_acl_id          = var.waf_web_acl_id
+  web_acl_id = var.waf_web_acl_id != "" ? var.waf_web_acl_id : null
 
   aliases = var.domain_aliases
 
