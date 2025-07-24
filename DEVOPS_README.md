@@ -12,6 +12,14 @@ CineVerse is a full-stack entertainment web application with Angular frontend. T
 - Automated CI/CD with GitHub Actions
 - Comprehensive monitoring
 
+---
+
+## Live App
+
+The app is deployed and accessible at: [https://d101mapcha7bof.cloudfront.net/](https://d101mapcha7bof.cloudfront.net/)
+
+---
+
 ## Architecture
 
 **Core Components:**
@@ -28,6 +36,10 @@ User → CloudFront → WAF → S3 (Origin)
          CloudWatch (Metrics)
 ```
 
+![CineVerse Frontend Architecture](architecture/cineverse-frontend-architecture.png)
+
+---
+
 ## Environment Configuration
 
 | Feature | Dev | Staging | Prod |
@@ -38,6 +50,8 @@ User → CloudFront → WAF → S3 (Origin)
 | Monitoring Period | 5 min | 5 min | 1 min |
 | CloudTrail | Disabled | Disabled | Enabled |
 | Rate Limiting | 10k/5min | 5k/5min | 2k/5min |
+
+---
 
 ## Prerequisites
 
@@ -50,6 +64,8 @@ User → CloudFront → WAF → S3 (Origin)
 **AWS Permissions:**
 - S3, CloudFront, WAF, CloudWatch, DynamoDB full access
 - IAM read-only access
+
+---
 
 ## Quick Start
 
@@ -82,6 +98,8 @@ terraform output cloudfront_domain_name
 curl -I https://[cloudfront-domain]
 ```
 
+---
+
 ## File Structure
 
 ```
@@ -101,6 +119,8 @@ terraform/
 ├── outputs.tf              # Infrastructure outputs
 └── backend.tf              # Backend template
 ```
+
+---
 
 ## Deployment Process
 
@@ -126,6 +146,8 @@ Push to specific branches triggers automatic deployment:
 - `staging` branch → Staging environment
 - `prod` branch → Production environment
 
+---
+
 ## CI/CD Pipeline
 
 **Workflow Stages:**
@@ -138,6 +160,8 @@ Push to specific branches triggers automatic deployment:
 - Dev: Auto-deploy, no approval required
 - Staging: Auto-deploy, optional approval
 - Prod: Auto-deploy, mandatory approval (configurable)
+
+---
 
 ## Security
 
@@ -159,6 +183,8 @@ X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
 Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'...
 ```
+
+---
 
 ## Monitoring
 
@@ -182,6 +208,8 @@ make plan ENV=prod | grep dashboard_url
 aws cloudwatch get-metric-statistics --namespace AWS/CloudFront
 ```
 
+---
+
 ## Cost Optimization
 
 **Environment-Specific Settings:**
@@ -189,11 +217,16 @@ aws cloudwatch get-metric-statistics --namespace AWS/CloudFront
 - **S3 Intelligent Tiering**: Production only
 - **Lifecycle Policies**: Auto-delete old versions (7-30 days)
 - **Monitoring Frequency**: Reduced for non-production
+- **Resource Tagging**: Helps track and allocate costs to specific parts/resources of our app
+- **ECS + Fargate**: Supports auto-scaling, so resources scale up or down with traffic. Fargate is serverless
+
 
 **Estimated Monthly Costs:**
 - Development: $2-5
 - Staging: $5-15
 - Production: $15-50 (traffic dependent)
+
+---
 
 ## Operations
 
@@ -227,6 +260,8 @@ aws cloudfront create-invalidation --distribution-id [id] --paths "/*"
 aws s3 ls s3://[bucket] --recursive
 aws s3 sync ./dist/ s3://[bucket]/ --delete
 ```
+
+---
 
 ## Troubleshooting
 
@@ -274,6 +309,8 @@ curl -I https://$(cd terraform && terraform output -raw cloudfront_domain_name)
 # Performance test
 curl -w "%{time_total}" -o /dev/null -s [cloudfront-url]
 ```
+
+---
 
 ## Development Workflow
 
